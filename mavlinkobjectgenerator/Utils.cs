@@ -2,44 +2,13 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
-namespace UavObjectGenerator
+namespace MavLinkObjectGenerator
 {
-    public enum FieldDataType{
-        INT8 = 0,
-        INT16,
-        INT32,
-        UINT8,
-        UINT16,
-        UINT32,
-        FLOAT32,
-        ENUM, 
-        CHAR,
-        CHAR_ARRAY
-    };
-
-    public class FieldData
+    public class Utils
     {   
-        // Anything added here should be added as well in the CloneFrom method
-        public string Name { get; set; }
-        public string TypeString { get; set; }
-        public FieldDataType Type { get; set; }
-        public string Description { get; set; }
-
-        public void CloneFrom(FieldData f)
-        {
-            this.Type = f.Type;
-            this.TypeString = f.TypeString;
-            this.Name = f.Name;
-            this.Description = f.Description;
-        }
-
-
-
-
         private static void ParseItemsIntoList(string items, List<string> target)
         {
-            if (items == null || items == "")
-                return;
+            if (items == null || items == "") return;
 
             string[] ss = items.Split(',');
 

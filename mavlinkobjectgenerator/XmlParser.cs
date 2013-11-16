@@ -3,7 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 
-namespace UavObjectGenerator
+namespace MavLinkObjectGenerator
 {
     public class XmlParser
     {
@@ -23,21 +23,27 @@ namespace UavObjectGenerator
             }
         }
 
-        public static void Generate(XmlTextReader reader, TextWriter writer)
+        public void Generate(XmlTextReader reader, TextWriter writer)
         {
-            ObjectData data = GetObjectFromXml(reader);
+            ProtocolData result = new ProtocolData();
+            Parse(reader, result);
 
-            CSharpGenerator.Write(writer, data);
+            return;
+            //CSharpGenerator.Write(writer, data);
         }
 
 
         // __ Impl _______________________________________________________
 
 
-        private static ObjectData GetObjectFromXml(XmlTextReader reader)
+        private void Parse(XmlTextReader reader, ProtocolData result)
         {
-            ObjectData currentObject = null;
+            ProtocolObject currentObject = null;
+            MessageData currentMsg = null;
             FieldData currentField = null;
+            EnumData currentEnum = null;
+            EnumEntry currentEntry = null;
+            EnumEntryParameter currentParam = null;
 
             while (reader.Read())
             {
@@ -45,105 +51,116 @@ namespace UavObjectGenerator
                 {
                     switch (reader.Name)
                     {
-                        case "object":
-                            currentObject = new ObjectData();    
-                            currentObject.Name = reader.GetAttribute("name");
-                            currentObject.IsSettingsInt = GetIntFromBoolString(reader.GetAttribute("settings"));
-                            currentObject.IsSingleInstInt = GetIntFromBoolString(reader.GetAttribute("singleinstance"));
+                        case "include":
+                            ProcessInclude(reader.ReadElementContentAsString(), result);
+                            break;
+                        case "version":
+                            result.Version = reader.ReadElementContentAsInt();
+                            break;
+                        case "message":
+                            if (currentMsg != null) SortFields(currentMsg);
+                            currentMsg = new MessageData();
+                            currentObject = currentMsg;
+                            currentMsg.Name = reader.GetAttribute("name");
+                            currentMsg.Id = GetIntFromString(reader.GetAttribute("id"));
+                            result.Messages.Add(currentMsg.Name, currentMsg);
                             break;
                         case "description": 
-                            currentObject.Description = reader.ReadString();                            
+                            currentObject.Description = reader.ReadString();
                             break;
                         case "field":
                             currentField = new FieldData();
                             currentField.Name = reader.GetAttribute("name");
-                            currentObject.FieldsIndexedByName.Add(currentField.Name, currentField);
-
-                            if (IsClone(reader))
-                            {
-                                currentField.CloneFrom(currentObject.FieldsIndexedByName[reader.GetAttribute("cloneof")]);
-                            }
-                            else
-                            {
-                                currentField.TypeString = reader.GetAttribute("type");
-                                currentField.Type = GetFieldTypeFromString(currentField.TypeString);
-                                currentField.Elements = reader.GetAttribute("elements");
-                                currentField.Units = reader.GetAttribute("units");
-                                currentField.ParseElementNamesFromAttribute(reader.GetAttribute("elementnames"));
-                                currentField.ParseOptionsFromAttribute(reader.GetAttribute("options"));
-                                currentField.ParseDefaultValuesFromAttribute(reader.GetAttribute("defaultvalue"));
-                            }
-                            currentObject.Fields.Add(currentField);
+                            currentField.TypeString = reader.GetAttribute("type");
+                            currentField.Type = GetFieldTypeFromString(currentField.TypeString);
+                            currentField.NumElements = GetFieldTypeNumElements(currentField.TypeString);
+                            currentField.Description = reader.ReadElementContentAsString();
+                            UpdateEnumFields(result, currentField);
+                            currentMsg.Fields.Add(currentField);
                             break;
-                        case "option": 
-                            currentField.Options.Add(reader.ReadString());
+                        case "enum":
+                            currentEnum = new EnumData();
+                            currentObject = currentEnum;
+                            currentEnum.Name = reader.GetAttribute("name");
+                            result.Enumerations.Add(currentEnum.Name, currentEnum);
                             break;
-                        case "elementname": 
-                            currentField.ElementNames.Add(reader.ReadString());
+                        case "entry":
+                            currentEntry = new EnumEntry();
+                            currentObject = currentEntry;
+                            currentEntry.Name = reader.GetAttribute("name");
+                            currentEntry.Value = GetIntFromString(reader.GetAttribute("value"));
+                            currentEnum.EnumEntries.Add(currentEntry);
+                            break;
+                        case "param":
+                            currentParam = new EnumEntryParameter();
+                            currentParam.Index = GetIntFromString(reader.GetAttribute("index"));
+                            currentParam.Description = reader.ReadElementContentAsString();
+                            currentEntry.Parameters.Add(currentParam);
                             break;
                     }
                 }
             }
-
-            ExpandDefaultValues(currentObject);
-            SortFields(currentObject);
-
-            SummaryGenerator.RegisterObjectId(
-                Hasher.CalculateId(currentObject), 
-                string.Format("{0}.{1}", CSharpGenerator.Namespace, currentObject.Name));
-
-            return currentObject;
         }
 
-        private static void ExpandDefaultValues(ObjectData obj)
+        private void ProcessInclude(string includeFileName, ProtocolData result)
         {
-            foreach (FieldData f in obj.Fields)
+            string basePath = Path.GetDirectoryName(mSourceFileName);
+            string targetFileName = (Path.IsPathRooted(includeFileName)) ? 
+                includeFileName : 
+                Path.Combine(basePath, includeFileName);
+
+            using (XmlTextReader reader = new XmlTextReader(targetFileName))
             {
-                f.ExpandDefaultValue();
+                Parse(reader, result);
             }
         }
 
-        private static bool GetBoolFromString(string boolString)
+        private static int GetIntFromString(string intString)
         {
-            if (boolString == "true") return true;
+            int result = -1;
 
-            return false;
-        }
+            int.TryParse(intString, out result);
 
-        private static int GetIntFromBoolString(string boolString)
-        {
-            if (boolString == "true") return 1;
-            if (boolString == "false") return 0;
-
-            return -1;
+            return result;
         }
 
         private static FieldDataType GetFieldTypeFromString(string t)
         {
-            // Needed for hash calculation;
-            switch (t)
+            // Take the basic type, remove array qualifier if present
+            string[] tt = t.Split('[', ']');
+            if (tt.Length == 0) return FieldDataType.NONE;
+
+            switch (tt[0])
             {
                 case "float": return FieldDataType.FLOAT32;
-                case "int8": return FieldDataType.INT8;
-                case "uint8": return FieldDataType.UINT8;
-                case "int16": return FieldDataType.INT16;
-                case "uint16": return FieldDataType.UINT16;
-                case "enum": return FieldDataType.ENUM;
-                case "int32": return FieldDataType.INT32;
-                case "uint32": return FieldDataType.UINT32;
-                default: return FieldDataType.INT32;
+                case "int8_t": return FieldDataType.INT8;
+                case "uint8_t": return FieldDataType.UINT8;
+                case "int16_t": return FieldDataType.INT16;
+                case "uint16_t": return FieldDataType.UINT16;
+                case "int32_t": return FieldDataType.INT32;
+                case "uint32_t": return FieldDataType.UINT32;
+                case "int64_t": return FieldDataType.INT64;
+                case "uint64_t": return FieldDataType.UINT64;
+                case "char": return FieldDataType.CHAR;
+                default:
+                    Console.Error.WriteLine("Unknown type: " + t);
+                    return FieldDataType.NONE;
             }
         }
 
-        private static void SortFields(ObjectData obj)
+        private static int GetFieldTypeNumElements(string t)
+        {
+            string[] tt = t.Split('[', ']');
+            if (tt.Length == 2) return GetIntFromString(tt[1]);
+
+            return 1;
+        }
+
+        private static void SortFields(MessageData obj)
         {
             // Sort by field size first, then by the order the fields already have. 
 
-            /*
-            "int8" << "int16" << "int32" << "uint8" << "uint16" << "uint32" << "float" << "enum";
-            int(1) << int(2)  << int(4)  << int(1)  << int(2)   << int(4)   << int(4)  << int(1);
-            */
-
+            List<FieldData> L8 = new List<FieldData>();
             List<FieldData> L4 = new List<FieldData>();
             List<FieldData> L2 = new List<FieldData>();
             List<FieldData> L1 = new List<FieldData>();
@@ -152,7 +169,7 @@ namespace UavObjectGenerator
             {
                 switch (f.Type)
                 {
-                    case FieldDataType.ENUM:
+                    case FieldDataType.CHAR:
                     case FieldDataType.INT8:
                     case FieldDataType.UINT8:
                         L1.Add(f);
@@ -161,6 +178,10 @@ namespace UavObjectGenerator
                     case FieldDataType.UINT16:
                         L2.Add(f);
                         break;
+                    case FieldDataType.INT64:
+                    case FieldDataType.UINT64:
+                        L8.Add(f);
+                        break;
                     default: 
                         L4.Add(f);
                         break;
@@ -168,6 +189,7 @@ namespace UavObjectGenerator
             }
 
             List<FieldData> result = new List<FieldData>();
+            result.AddRange(L8);
             result.AddRange(L4);
             result.AddRange(L2);
             result.AddRange(L1);
@@ -175,12 +197,19 @@ namespace UavObjectGenerator
             obj.Fields = result;
         }
 
-        private static bool IsClone(XmlReader reader)
+        private static void UpdateEnumFields(ProtocolData data, FieldData field)
         {
-            string cloneOf = reader.GetAttribute("cloneof");
-
-            return (cloneOf != null && cloneOf != "");
+            foreach (string s in data.Enumerations.Keys)
+            {
+                if (field.Description.IndexOf(s) != -1)
+                {
+                    field.IsEnum = true;
+                    field.EnumType = s;
+                    return;
+                }
+            }
         }
+
         
         private string mSourceFileName;
     }

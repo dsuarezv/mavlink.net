@@ -122,7 +122,7 @@ namespace MavLinkObjectGenerator
             return result;
         }
 
-        private static FieldDataType GetFieldTypeFromString(string t)
+        public static FieldDataType GetFieldTypeFromString(string t)
         {
             // Take the basic type, remove array qualifier if present
             string[] tt = t.Split('[', ']');
@@ -205,7 +205,6 @@ namespace MavLinkObjectGenerator
             {
                 if (field.Description.IndexOf(s) != -1)
                 {
-                    field.Type = FieldDataType.ENUM;
                     field.IsEnum = true;
                     field.EnumType = s;
                     return;

@@ -63,6 +63,8 @@ namespace MavLinkObjectGenerator
             {
                 WriteClassHeader(m);
                 WriteProperties(m);
+                WriteSerialize(m);
+                WriteDeserialize(m);
 
                 WritePrivateFields(m);
                 WriteClassFooter(m);
@@ -114,61 +116,59 @@ namespace MavLinkObjectGenerator
         //}
 
 
-        //private static void WriteSerialize(TextWriter w, ProtocolData obj)
-        //{
-        //    WL(w, "        internal override void SerializeBody(BinaryWriter s)");
-        //    WL(w, "        {");
+        private void WriteSerialize(MessageData m)
+        {
+            WL("        internal override void SerializeBody(BinaryWriter s)");
+            WL("        {");
 
-        //    foreach (FieldData f in obj.Fields)
-        //    {
-        //        int numElements = f.NumElements;
+            foreach (FieldData f in m.Fields)
+            {
+                if (f.NumElements <= 1)
+                {
+                    WL("            s.Write({0}{1});", GetSerializeTypeCast(f), GetPrivateFieldName(f));
+                }
+                else
+                {
+                    for (int i = 0; i < f.NumElements; ++i)
+                    {
+                        WL("            s.Write({0}{1}[{2}]); ",
+                           GetSerializeTypeCast(f), GetPrivateFieldName(f), i);
+                    }
+                }
 
-        //        if (numElements <= 1)
-        //        {
-        //            WL(w, "            s.Write({0}{1});", GetSerializeTypeCast(obj, f), GetPrivateFieldName(f));
-        //        }
-        //        else
-        //        {
-        //            for (int i = 0; i < numElements; ++i)
-        //            {
-        //                WL(w, "            s.Write({0}{1}[{2}]);  // {3}", 
-        //                   GetSerializeTypeCast(obj, f), GetPrivateFieldName(f), i, GetElementNameAt(f, i));
-        //            }
-        //        }
+            }
 
-        //    }
+            WL("        }");
+            WL();
+        }
 
-        //    WL(w, "        }\n");
-        //    WL(w);
-        //}
+        private void WriteDeserialize(MessageData m)
+        {
+            WL("        internal override void DeserializeBody(BinaryReader s)");
+            WL("        {");
 
-        //private static void WriteDeserialize(TextWriter w, ProtocolData obj)
-        //{
-        //    WL(w, "        internal override void DeserializeBody(BinaryReader stream)", obj.Name);
-        //    WL(w, "        {");
+            foreach (FieldData f in m.Fields)
+            {
+                int numElements = f.NumElements;
 
-        //    foreach (FieldData f in obj.Fields)
-        //    {
-        //        int numElements = f.NumElements;
+                if (numElements <= 1)
+                {
+                    WL("            this.{0} = {1}s.{2}();",
+                       GetPrivateFieldName(f), GetEnumTypeCast(f), GetReadOperation(f));
+                }
+                else
+                {
+                    for (int i = 0; i < numElements; ++i)
+                    {
+                        WL("            this.{0}[{1}] = {2}s.{3}();",
+                           GetPrivateFieldName(f), i, GetEnumTypeCast(f), GetReadOperation(f));
+                    }
+                }
+            }
 
-        //        if (numElements <= 1)
-        //        {
-        //            WL(w, "            this.{0} = {1}stream.{2}();", 
-        //               GetPrivateFieldName(f), GetEnumTypeCast(obj, f), GetReadOperation(f));
-        //        }
-        //        else
-        //        {
-        //            for (int i = 0; i < numElements; ++i)
-        //            {
-        //                WL(w, "            this.{0}[{1}] = {2}stream.{3}();  // {4}", 
-        //                   GetPrivateFieldName(f), i, GetEnumTypeCast(obj, f), GetReadOperation(f), GetElementNameAt(f, i));
-        //            }
-        //        }
-        //    }
-
-        //    WL(w, "        }\n");
-        //    WL(w);
-        //}
+            WL("        }");
+            WL();
+        }
 
         //private static void WriteToString(TextWriter w, ProtocolData obj)
         //{
@@ -264,16 +264,6 @@ namespace MavLinkObjectGenerator
             return result.ToString();
         }
 
-
-
-        //private static string GetElementNameAt(FieldData f, int index)
-        //{
-        //    if (index < f.ElementNames.Count) return f.ElementNames[index];
-
-        //    return "NO_ELEMENT_NAME";
-        //}
-
-
         private static string GetDefaultValue(FieldData f)
         {
             if (f.NumElements > 1)
@@ -361,58 +351,77 @@ namespace MavLinkObjectGenerator
 
         private static string GetCSharpType(FieldData f)
         {
-            switch (f.Type)
+            if (f.IsEnum) return GetEnumName(f.EnumType);
+
+            return GetBaseCSharpType(f.Type);
+        }
+
+        private static string GetBaseCSharpType(FieldDataType t)
+        {
+            switch (t)
             {
                 case FieldDataType.FLOAT32: return "float";
                 case FieldDataType.INT8: return "SByte";
                 case FieldDataType.UINT8: return "byte";
                 case FieldDataType.INT16: return "Int16";
                 case FieldDataType.UINT16: return "UInt16";
-                case FieldDataType.ENUM: return GetEnumName(f.EnumType);
                 case FieldDataType.INT32: return "Int32";
                 case FieldDataType.UINT32: return "UInt32";
-                case FieldDataType.INT64: return "Int64"; 
+                case FieldDataType.INT64: return "Int64";
                 case FieldDataType.UINT64: return "UInt64";
                 case FieldDataType.CHAR: return "char";
                 default:
-                    Console.WriteLine("ERROR: Unknown field type: " + f.TypeString);
                     return "!!!!";
             }
         }
 
-        //private static string GetSerializeTypeCast(ProtocolData obj, FieldData f)
-        //{
-        //    if (!f.IsEnum)
-        //        return "";
+        private static string GetSerializeTypeCast(FieldData f)
+        {
+            if (!f.IsEnum) return "";
 
-        //    return "(byte)";
-        //}
+            // Field is enum, use the declared type
+            return string.Format("({0})", 
+                GetBaseCSharpType(XmlParser.GetFieldTypeFromString(f.TypeString)));
+        }
 
-        //private static string GetEnumTypeCast(ProtocolData obj, FieldData f)
-        //{
-        //    if (!f.IsEnum)
-        //        return "";
+        private static string GetEnumTypeCast(FieldData f)
+        {
+            if (!f.IsEnum)
+                return "";
 
-        //    return String.Format("({0})", GetEnumName(obj, f, false));
-        //}
+            return String.Format("({0})", GetEnumName(f.EnumType));
+        }
 
-        //private static string GetReadOperation(FieldData f)
-        //{
-        //    switch (f.TypeString)
-        //    {
-        //        case "float":  return "ReadSingle";
-        //        case "int8":   return "ReadSByte";
-        //        case "uint8":  return "ReadByte";
-        //        case "int16":  return "ReadInt16";
-        //        case "uint16": return "ReadUInt16";
-        //        case "int32":  return "ReadInt32";
-        //        case "uint32": return "ReadUInt32";
-        //        case "enum":   return "ReadByte";
-        //        default:
-        //            Console.WriteLine("ERROR: Unknown uavType: " + f.TypeString);
-        //            return "UNKNOWN_UAV_TYPE";
-        //    }
-        //}
+        private static string GetReadOperation(FieldData f)
+        {
+            if (f.IsEnum)
+            {
+                return GetBaseReadOperation(XmlParser.GetFieldTypeFromString(f.TypeString));
+            }
+
+            return GetBaseReadOperation(f.Type);
+        }
+
+        private static string GetBaseReadOperation(FieldDataType t)
+        {
+            switch (t)
+            {
+                case FieldDataType.FLOAT32: return "ReadSingle";
+                case FieldDataType.INT8: return "ReadSByte";
+                case FieldDataType.UINT8: return "ReadByte";
+                case FieldDataType.INT16: return "ReadInt16";
+                case FieldDataType.UINT16: return "ReadUInt16";
+                case FieldDataType.INT32: return "ReadInt32";
+                case FieldDataType.UINT32: return "ReadUInt32";
+                case FieldDataType.INT64: return "ReadInt64";
+                case FieldDataType.UINT64: return "ReadUInt64";
+                case FieldDataType.CHAR: return "ReadChar";
+
+                default:
+                    Console.WriteLine("ERROR: Unknown uavType: " + t);
+                    return "UNKNOWN_UAS_TYPE";
+            }
+        }
 
         private static string GetPrivateFieldName(FieldData f)
         {

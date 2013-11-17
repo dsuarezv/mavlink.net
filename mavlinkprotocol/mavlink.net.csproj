@@ -34,6 +34,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MavLinkPacket.cs" />
+    <Compile Include="MavLinkWalker.cs" />
     <Compile Include="messages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UasMessage.cs" />

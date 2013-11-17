@@ -7,6 +7,11 @@ namespace MavLinkNet
 {
     public class UasMessage
     {
+        public byte MessageId
+        {
+            get { return mMessageId; }
+        }
+
         protected virtual void NotifyUpdated()
         { 
             
@@ -21,5 +26,7 @@ namespace MavLinkNet
         { 
         
         }
+
+        protected byte mMessageId;
     }
 }

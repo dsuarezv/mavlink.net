@@ -30,6 +30,7 @@ namespace MavLinkObjectGenerator
             WriteHeader();
             WriteEnums();
             WriteClasses();
+            WriteSummary();
             WriteFooter();
         }
 
@@ -70,12 +71,37 @@ namespace MavLinkObjectGenerator
             {
                 WriteClassHeader(m);
                 WriteProperties(m);
+                WriteConstructor(m);
                 WriteSerialize(m);
                 WriteDeserialize(m);
                 WriteToString(m);
                 WritePrivateFields(m);
                 WriteClassFooter(m);
             }
+        }
+
+        private void WriteSummary()
+        {
+            WL();
+            WL("    // ___________________________________________________________________________________");
+            WL();
+            WL();
+            WL("    public class UasSummary");
+            WL("    {");
+            WL("        public static UasMessage CreateFromId(byte id)");
+            WL("        {");
+            WL("            switch (id)");
+            WL("            {");
+
+            foreach (MessageData m in mProtocolData.Messages.Values)
+            {
+                WL("               case {0}: return new {1}();", m.Id, GetClassName(m));
+            }
+            WL("               default: return null;");
+            WL("            }");
+            WL("        }");
+            WL("    }");
+            WL();
         }
 
         private void WriteFooter()
@@ -101,11 +127,10 @@ namespace MavLinkObjectGenerator
                 WL("    /// </summary>");
             }
 
-            WL("    public class Uas{0}: UasMessage", Utils.GetPascalStyleString(m.Name));
+            WL("    public class {0}: UasMessage", GetClassName(m));
             WL("    {");
         }
-
-
+       
         private void WriteProperties(MessageData m)
         {
             foreach (FieldData f in m.Fields)
@@ -125,18 +150,14 @@ namespace MavLinkObjectGenerator
             }
         }
 
-
-
-        //private static void WriteConstructor(TextWriter w, ProtocolData obj)
-        //{
-        //    WL(w, "        public {0}()", obj.Name);
-        //    WL(w, "        {");
-        //    WL(w, "            IsSingleInstance = {0};", (obj.IsSingleInstInt == 1) ? "true" : "false");
-        //    WL(w, "            ObjectId = 0x{0:x8};", Hasher.CalculateId(obj));
-        //    WL(w, "        }");
-        //    WL(w);
-        //}
-
+        private void WriteConstructor(MessageData m)
+        {
+            WL("        public {0}()", GetClassName(m));
+            WL("        {");
+            WL("            mMessageId = {0};", m.Id);
+            WL("        }");
+            WL();
+        }
 
         private void WriteSerialize(MessageData m)
         {
@@ -241,6 +262,11 @@ namespace MavLinkObjectGenerator
 
         // __ Helpers _____________________________________________________________
 
+
+        private static string GetClassName(MessageData m)
+        {
+            return string.Format("Uas{0}", Utils.GetPascalStyleString(m.Name));
+        }
 
         private static string GetEnumName(string enumName)
         {

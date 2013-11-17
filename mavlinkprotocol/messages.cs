@@ -813,6 +813,11 @@ namespace MavLinkNet
             set { mMavlinkVersion = value; NotifyUpdated(); }
         }
 
+        public UasHeartbeat()
+        {
+            mMessageId = 0;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mCustomMode);
@@ -969,6 +974,11 @@ namespace MavLinkNet
             set { mBatteryRemaining = value; NotifyUpdated(); }
         }
 
+        public UasSysStatus()
+        {
+            mMessageId = 1;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write((UInt32)mOnboardControlSensorsPresent);
@@ -1065,6 +1075,11 @@ namespace MavLinkNet
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        public UasSystemTime()
+        {
+            mMessageId = 2;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUnixUsec);
@@ -1131,6 +1146,11 @@ namespace MavLinkNet
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        public UasPing()
+        {
+            mMessageId = 4;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1207,6 +1227,11 @@ namespace MavLinkNet
         public char[] Passkey {
             get { return mPasskey; }
             set { mPasskey = value; NotifyUpdated(); }
+        }
+
+        public UasChangeOperatorControl()
+        {
+            mMessageId = 5;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1350,6 +1375,11 @@ namespace MavLinkNet
             set { mAck = value; NotifyUpdated(); }
         }
 
+        public UasChangeOperatorControlAck()
+        {
+            mMessageId = 6;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mGcsSystemId);
@@ -1396,6 +1426,11 @@ namespace MavLinkNet
         public char[] Key {
             get { return mKey; }
             set { mKey = value; NotifyUpdated(); }
+        }
+
+        public UasAuthKey()
+        {
+            mMessageId = 7;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1548,6 +1583,11 @@ namespace MavLinkNet
             set { mBaseMode = value; NotifyUpdated(); }
         }
 
+        public UasSetMode()
+        {
+            mMessageId = 11;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mCustomMode);
@@ -1618,6 +1658,11 @@ namespace MavLinkNet
         public char[] ParamId {
             get { return mParamId; }
             set { mParamId = value; NotifyUpdated(); }
+        }
+
+        public UasParamRequestRead()
+        {
+            mMessageId = 20;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1726,6 +1771,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasParamRequestList()
+        {
+            mMessageId = 21;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTargetSystem);
@@ -1800,6 +1850,11 @@ namespace MavLinkNet
         public MavParamType ParamType {
             get { return mParamType; }
             set { mParamType = value; NotifyUpdated(); }
+        }
+
+        public UasParamValue()
+        {
+            mMessageId = 22;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1934,6 +1989,11 @@ namespace MavLinkNet
         public MavParamType ParamType {
             get { return mParamType; }
             set { mParamType = value; NotifyUpdated(); }
+        }
+
+        public UasParamSet()
+        {
+            mMessageId = 23;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2110,6 +2170,11 @@ namespace MavLinkNet
             set { mSatellitesVisible = value; NotifyUpdated(); }
         }
 
+        public UasGpsRawInt()
+        {
+            mMessageId = 24;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -2224,6 +2289,11 @@ namespace MavLinkNet
         public byte[] SatelliteSnr {
             get { return mSatelliteSnr; }
             set { mSatelliteSnr = value; NotifyUpdated(); }
+        }
+
+        public UasGpsStatus()
+        {
+            mMessageId = 25;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2648,6 +2718,11 @@ namespace MavLinkNet
             set { mZmag = value; NotifyUpdated(); }
         }
 
+        public UasScaledImu()
+        {
+            mMessageId = 26;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -2796,6 +2871,11 @@ namespace MavLinkNet
             set { mZmag = value; NotifyUpdated(); }
         }
 
+        public UasRawImu()
+        {
+            mMessageId = 27;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -2904,6 +2984,11 @@ namespace MavLinkNet
             set { mTemperature = value; NotifyUpdated(); }
         }
 
+        public UasRawPressure()
+        {
+            mMessageId = 28;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -2982,6 +3067,11 @@ namespace MavLinkNet
         public Int16 Temperature {
             get { return mTemperature; }
             set { mTemperature = value; NotifyUpdated(); }
+        }
+
+        public UasScaledPressure()
+        {
+            mMessageId = 29;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3082,6 +3172,11 @@ namespace MavLinkNet
         public float Yawspeed {
             get { return mYawspeed; }
             set { mYawspeed = value; NotifyUpdated(); }
+        }
+
+        public UasAttitude()
+        {
+            mMessageId = 30;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3204,6 +3299,11 @@ namespace MavLinkNet
             set { mYawspeed = value; NotifyUpdated(); }
         }
 
+        public UasAttitudeQuaternion()
+        {
+            mMessageId = 31;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -3318,6 +3418,11 @@ namespace MavLinkNet
         public float Vz {
             get { return mVz; }
             set { mVz = value; NotifyUpdated(); }
+        }
+
+        public UasLocalPositionNed()
+        {
+            mMessageId = 32;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3446,6 +3551,11 @@ namespace MavLinkNet
         public UInt16 Hdg {
             get { return mHdg; }
             set { mHdg = value; NotifyUpdated(); }
+        }
+
+        public UasGlobalPositionInt()
+        {
+            mMessageId = 33;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3598,6 +3708,11 @@ namespace MavLinkNet
         public byte Rssi {
             get { return mRssi; }
             set { mRssi = value; NotifyUpdated(); }
+        }
+
+        public UasRcChannelsScaled()
+        {
+            mMessageId = 34;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3760,6 +3875,11 @@ namespace MavLinkNet
             set { mRssi = value; NotifyUpdated(); }
         }
 
+        public UasRcChannelsRaw()
+        {
+            mMessageId = 35;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -3912,6 +4032,11 @@ namespace MavLinkNet
             set { mPort = value; NotifyUpdated(); }
         }
 
+        public UasServoOutputRaw()
+        {
+            mMessageId = 36;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -4012,6 +4137,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasMissionRequestPartialList()
+        {
+            mMessageId = 37;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mStartIndex);
@@ -4086,6 +4216,11 @@ namespace MavLinkNet
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        public UasMissionWritePartialList()
+        {
+            mMessageId = 38;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4244,6 +4379,11 @@ namespace MavLinkNet
             set { mAutocontinue = value; NotifyUpdated(); }
         }
 
+        public UasMissionItem()
+        {
+            mMessageId = 39;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mParam1);
@@ -4352,6 +4492,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasMissionRequest()
+        {
+            mMessageId = 40;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mSeq);
@@ -4416,6 +4561,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasMissionSetCurrent()
+        {
+            mMessageId = 41;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mSeq);
@@ -4464,6 +4614,11 @@ namespace MavLinkNet
             set { mSeq = value; NotifyUpdated(); }
         }
 
+        public UasMissionCurrent()
+        {
+            mMessageId = 42;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mSeq);
@@ -4510,6 +4665,11 @@ namespace MavLinkNet
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        public UasMissionRequestList()
+        {
+            mMessageId = 43;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4572,6 +4732,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasMissionCount()
+        {
+            mMessageId = 44;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mCount);
@@ -4628,6 +4793,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasMissionClearAll()
+        {
+            mMessageId = 45;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTargetSystem);
@@ -4670,6 +4840,11 @@ namespace MavLinkNet
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
+        }
+
+        public UasMissionItemReached()
+        {
+            mMessageId = 46;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4726,6 +4901,11 @@ namespace MavLinkNet
         public MavMissionResult Type {
             get { return mType; }
             set { mType = value; NotifyUpdated(); }
+        }
+
+        public UasMissionAck()
+        {
+            mMessageId = 47;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4800,6 +4980,11 @@ namespace MavLinkNet
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        public UasSetGpsGlobalOrigin()
+        {
+            mMessageId = 48;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mLatitude);
@@ -4866,6 +5051,11 @@ namespace MavLinkNet
         public Int32 Altitude {
             get { return mAltitude; }
             set { mAltitude = value; NotifyUpdated(); }
+        }
+
+        public UasGpsGlobalOrigin()
+        {
+            mMessageId = 49;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4964,6 +5154,11 @@ namespace MavLinkNet
             set { mCoordinateFrame = value; NotifyUpdated(); }
         }
 
+        public UasSetLocalPositionSetpoint()
+        {
+            mMessageId = 50;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mX);
@@ -5060,6 +5255,11 @@ namespace MavLinkNet
             set { mCoordinateFrame = value; NotifyUpdated(); }
         }
 
+        public UasLocalPositionSetpoint()
+        {
+            mMessageId = 51;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mX);
@@ -5148,6 +5348,11 @@ namespace MavLinkNet
             set { mCoordinateFrame = value; NotifyUpdated(); }
         }
 
+        public UasGlobalPositionSetpointInt()
+        {
+            mMessageId = 52;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mLatitude);
@@ -5234,6 +5439,11 @@ namespace MavLinkNet
         public MavFrame CoordinateFrame {
             get { return mCoordinateFrame; }
             set { mCoordinateFrame = value; NotifyUpdated(); }
+        }
+
+        public UasSetGlobalPositionSetpointInt()
+        {
+            mMessageId = 53;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5356,6 +5566,11 @@ namespace MavLinkNet
             set { mFrame = value; NotifyUpdated(); }
         }
 
+        public UasSafetySetAllowedArea()
+        {
+            mMessageId = 54;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mP1x);
@@ -5476,6 +5691,11 @@ namespace MavLinkNet
             set { mFrame = value; NotifyUpdated(); }
         }
 
+        public UasSafetyAllowedArea()
+        {
+            mMessageId = 55;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mP1x);
@@ -5580,6 +5800,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasSetRollPitchYawThrust()
+        {
+            mMessageId = 56;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mRoll);
@@ -5680,6 +5905,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasSetRollPitchYawSpeedThrust()
+        {
+            mMessageId = 57;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mRollSpeed);
@@ -5772,6 +6002,11 @@ namespace MavLinkNet
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        public UasRollPitchYawThrustSetpoint()
+        {
+            mMessageId = 58;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -5860,6 +6095,11 @@ namespace MavLinkNet
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        public UasRollPitchYawSpeedThrustSetpoint()
+        {
+            mMessageId = 59;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -5946,6 +6186,11 @@ namespace MavLinkNet
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        public UasSetQuadMotorsSetpoint()
+        {
+            mMessageId = 60;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6042,6 +6287,11 @@ namespace MavLinkNet
         public byte Mode {
             get { return mMode; }
             set { mMode = value; NotifyUpdated(); }
+        }
+
+        public UasSetQuadSwarmRollPitchYawThrust()
+        {
+            mMessageId = 61;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6200,6 +6450,11 @@ namespace MavLinkNet
             set { mWpDist = value; NotifyUpdated(); }
         }
 
+        public UasNavControllerOutput()
+        {
+            mMessageId = 62;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mNavRoll);
@@ -6330,6 +6585,11 @@ namespace MavLinkNet
         public byte[] LedGreen {
             get { return mLedGreen; }
             set { mLedGreen = value; NotifyUpdated(); }
+        }
+
+        public UasSetQuadSwarmLedRollPitchYawThrust()
+        {
+            mMessageId = 63;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6538,6 +6798,11 @@ namespace MavLinkNet
             set { mVzerr = value; NotifyUpdated(); }
         }
 
+        public UasStateCorrection()
+        {
+            mMessageId = 64;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mXerr);
@@ -6639,6 +6904,11 @@ namespace MavLinkNet
             set { mStartStop = value; NotifyUpdated(); }
         }
 
+        public UasRequestDataStream()
+        {
+            mMessageId = 66;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mReqMessageRate);
@@ -6706,6 +6976,11 @@ namespace MavLinkNet
         public byte OnOff {
             get { return mOnOff; }
             set { mOnOff = value; NotifyUpdated(); }
+        }
+
+        public UasDataStream()
+        {
+            mMessageId = 67;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6794,6 +7069,11 @@ namespace MavLinkNet
         public byte Target {
             get { return mTarget; }
             set { mTarget = value; NotifyUpdated(); }
+        }
+
+        public UasManualControl()
+        {
+            mMessageId = 69;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6928,6 +7208,11 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        public UasRcChannelsOverride()
+        {
+            mMessageId = 70;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mChan1Raw);
@@ -7042,6 +7327,11 @@ namespace MavLinkNet
         public UInt16 Throttle {
             get { return mThrottle; }
             set { mThrottle = value; NotifyUpdated(); }
+        }
+
+        public UasVfrHud()
+        {
+            mMessageId = 74;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7184,6 +7474,11 @@ namespace MavLinkNet
             set { mConfirmation = value; NotifyUpdated(); }
         }
 
+        public UasCommandLong()
+        {
+            mMessageId = 76;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write((float)mParam1);
@@ -7272,6 +7567,11 @@ namespace MavLinkNet
             set { mResult = value; NotifyUpdated(); }
         }
 
+        public UasCommandAck()
+        {
+            mMessageId = 77;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write((UInt16)mCommand);
@@ -7346,6 +7646,11 @@ namespace MavLinkNet
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
+        }
+
+        public UasRollPitchYawRatesThrustSetpoint()
+        {
+            mMessageId = 80;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7450,6 +7755,11 @@ namespace MavLinkNet
         public byte ManualOverrideSwitch {
             get { return mManualOverrideSwitch; }
             set { mManualOverrideSwitch = value; NotifyUpdated(); }
+        }
+
+        public UasManualSetpoint()
+        {
+            mMessageId = 81;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7562,6 +7872,11 @@ namespace MavLinkNet
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
+        }
+
+        public UasLocalPositionNedSystemGlobalOffset()
+        {
+            mMessageId = 89;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7748,6 +8063,11 @@ namespace MavLinkNet
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        public UasHilState()
+        {
+            mMessageId = 90;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -7926,6 +8246,11 @@ namespace MavLinkNet
         public byte NavMode {
             get { return mNavMode; }
             set { mNavMode = value; NotifyUpdated(); }
+        }
+
+        public UasHilControls()
+        {
+            mMessageId = 91;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8112,6 +8437,11 @@ namespace MavLinkNet
             set { mRssi = value; NotifyUpdated(); }
         }
 
+        public UasHilRcInputsRaw()
+        {
+            mMessageId = 92;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -8260,6 +8590,11 @@ namespace MavLinkNet
             set { mQuality = value; NotifyUpdated(); }
         }
 
+        public UasOpticalFlow()
+        {
+            mMessageId = 100;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -8373,6 +8708,11 @@ namespace MavLinkNet
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        public UasGlobalVisionPositionEstimate()
+        {
+            mMessageId = 101;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mUsec);
@@ -8482,6 +8822,11 @@ namespace MavLinkNet
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        public UasVisionPositionEstimate()
+        {
+            mMessageId = 102;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mUsec);
@@ -8565,6 +8910,11 @@ namespace MavLinkNet
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
+        }
+
+        public UasVisionSpeedEstimate()
+        {
+            mMessageId = 103;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8662,6 +9012,11 @@ namespace MavLinkNet
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
+        }
+
+        public UasViconPositionEstimate()
+        {
+            mMessageId = 104;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8840,6 +9195,11 @@ namespace MavLinkNet
             set { mFieldsUpdated = value; NotifyUpdated(); }
         }
 
+        public UasHighresImu()
+        {
+            mMessageId = 105;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -8974,6 +9334,11 @@ namespace MavLinkNet
         public byte Quality {
             get { return mQuality; }
             set { mQuality = value; NotifyUpdated(); }
+        }
+
+        public UasOmnidirectionalFlow()
+        {
+            mMessageId = 106;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9202,6 +9567,11 @@ namespace MavLinkNet
         public UInt32 FieldsUpdated {
             get { return mFieldsUpdated; }
             set { mFieldsUpdated = value; NotifyUpdated(); }
+        }
+
+        public UasHilSensor()
+        {
+            mMessageId = 107;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9460,6 +9830,11 @@ namespace MavLinkNet
             set { mVd = value; NotifyUpdated(); }
         }
 
+        public UasSimState()
+        {
+            mMessageId = 108;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mQ1);
@@ -9628,6 +10003,11 @@ namespace MavLinkNet
             set { mRemnoise = value; NotifyUpdated(); }
         }
 
+        public UasRadioStatus()
+        {
+            mMessageId = 109;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mRxerrors);
@@ -9722,6 +10102,11 @@ namespace MavLinkNet
         public byte Flags {
             get { return mFlags; }
             set { mFlags = value; NotifyUpdated(); }
+        }
+
+        public UasFileTransferStart()
+        {
+            mMessageId = 110;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -10514,6 +10899,11 @@ namespace MavLinkNet
             set { mFlags = value; NotifyUpdated(); }
         }
 
+        public UasFileTransferDirList()
+        {
+            mMessageId = 111;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTransferUid);
@@ -11288,6 +11678,11 @@ namespace MavLinkNet
             set { mResult = value; NotifyUpdated(); }
         }
 
+        public UasFileTransferRes()
+        {
+            mMessageId = 112;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTransferUid);
@@ -11426,6 +11821,11 @@ namespace MavLinkNet
         public byte SatellitesVisible {
             get { return mSatellitesVisible; }
             set { mSatellitesVisible = value; NotifyUpdated(); }
+        }
+
+        public UasHilGps()
+        {
+            mMessageId = 113;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11570,6 +11970,11 @@ namespace MavLinkNet
         public byte Quality {
             get { return mQuality; }
             set { mQuality = value; NotifyUpdated(); }
+        }
+
+        public UasHilOpticalFlow()
+        {
+            mMessageId = 114;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11758,6 +12163,11 @@ namespace MavLinkNet
         public Int16 Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
+        }
+
+        public UasHilStateQuaternion()
+        {
+            mMessageId = 115;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11950,6 +12360,11 @@ namespace MavLinkNet
             set { mBatteryRemaining = value; NotifyUpdated(); }
         }
 
+        public UasBatteryStatus()
+        {
+            mMessageId = 147;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mCurrentConsumed);
@@ -12094,6 +12509,11 @@ namespace MavLinkNet
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        public UasSetpoint8dof()
+        {
+            mMessageId = 148;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mVal1);
@@ -12214,6 +12634,11 @@ namespace MavLinkNet
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        public UasSetpoint6dof()
+        {
+            mMessageId = 149;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTransX);
@@ -12300,6 +12725,11 @@ namespace MavLinkNet
         public SByte[] Value {
             get { return mValue; }
             set { mValue = value; NotifyUpdated(); }
+        }
+
+        public UasMemoryVect()
+        {
+            mMessageId = 249;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12477,6 +12907,11 @@ namespace MavLinkNet
             set { mName = value; NotifyUpdated(); }
         }
 
+        public UasDebugVect()
+        {
+            mMessageId = 250;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeUsec);
@@ -12577,6 +13012,11 @@ namespace MavLinkNet
             set { mName = value; NotifyUpdated(); }
         }
 
+        public UasNamedValueFloat()
+        {
+            mMessageId = 251;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -12669,6 +13109,11 @@ namespace MavLinkNet
             set { mName = value; NotifyUpdated(); }
         }
 
+        public UasNamedValueInt()
+        {
+            mMessageId = 252;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -12751,6 +13196,11 @@ namespace MavLinkNet
         public char[] Text {
             get { return mText; }
             set { mText = value; NotifyUpdated(); }
+        }
+
+        public UasStatustext()
+        {
+            mMessageId = 253;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12961,6 +13411,11 @@ namespace MavLinkNet
             set { mValue = value; NotifyUpdated(); }
         }
 
+        public UasDebug()
+        {
+            mMessageId = 254;
+        }
+
         internal override void SerializeBody(BinaryWriter s)
         {
             s.Write(mTimeBootMs);
@@ -12990,6 +13445,112 @@ namespace MavLinkNet
         private UInt32 mTimeBootMs;
         private byte mInd;
         private float mValue;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    public class UasSummary
+    {
+        public static UasMessage CreateFromId(byte id)
+        {
+            switch (id)
+            {
+               case 0: return new UasHeartbeat();
+               case 1: return new UasSysStatus();
+               case 2: return new UasSystemTime();
+               case 4: return new UasPing();
+               case 5: return new UasChangeOperatorControl();
+               case 6: return new UasChangeOperatorControlAck();
+               case 7: return new UasAuthKey();
+               case 11: return new UasSetMode();
+               case 20: return new UasParamRequestRead();
+               case 21: return new UasParamRequestList();
+               case 22: return new UasParamValue();
+               case 23: return new UasParamSet();
+               case 24: return new UasGpsRawInt();
+               case 25: return new UasGpsStatus();
+               case 26: return new UasScaledImu();
+               case 27: return new UasRawImu();
+               case 28: return new UasRawPressure();
+               case 29: return new UasScaledPressure();
+               case 30: return new UasAttitude();
+               case 31: return new UasAttitudeQuaternion();
+               case 32: return new UasLocalPositionNed();
+               case 33: return new UasGlobalPositionInt();
+               case 34: return new UasRcChannelsScaled();
+               case 35: return new UasRcChannelsRaw();
+               case 36: return new UasServoOutputRaw();
+               case 37: return new UasMissionRequestPartialList();
+               case 38: return new UasMissionWritePartialList();
+               case 39: return new UasMissionItem();
+               case 40: return new UasMissionRequest();
+               case 41: return new UasMissionSetCurrent();
+               case 42: return new UasMissionCurrent();
+               case 43: return new UasMissionRequestList();
+               case 44: return new UasMissionCount();
+               case 45: return new UasMissionClearAll();
+               case 46: return new UasMissionItemReached();
+               case 47: return new UasMissionAck();
+               case 48: return new UasSetGpsGlobalOrigin();
+               case 49: return new UasGpsGlobalOrigin();
+               case 50: return new UasSetLocalPositionSetpoint();
+               case 51: return new UasLocalPositionSetpoint();
+               case 52: return new UasGlobalPositionSetpointInt();
+               case 53: return new UasSetGlobalPositionSetpointInt();
+               case 54: return new UasSafetySetAllowedArea();
+               case 55: return new UasSafetyAllowedArea();
+               case 56: return new UasSetRollPitchYawThrust();
+               case 57: return new UasSetRollPitchYawSpeedThrust();
+               case 58: return new UasRollPitchYawThrustSetpoint();
+               case 59: return new UasRollPitchYawSpeedThrustSetpoint();
+               case 60: return new UasSetQuadMotorsSetpoint();
+               case 61: return new UasSetQuadSwarmRollPitchYawThrust();
+               case 62: return new UasNavControllerOutput();
+               case 63: return new UasSetQuadSwarmLedRollPitchYawThrust();
+               case 64: return new UasStateCorrection();
+               case 66: return new UasRequestDataStream();
+               case 67: return new UasDataStream();
+               case 69: return new UasManualControl();
+               case 70: return new UasRcChannelsOverride();
+               case 74: return new UasVfrHud();
+               case 76: return new UasCommandLong();
+               case 77: return new UasCommandAck();
+               case 80: return new UasRollPitchYawRatesThrustSetpoint();
+               case 81: return new UasManualSetpoint();
+               case 89: return new UasLocalPositionNedSystemGlobalOffset();
+               case 90: return new UasHilState();
+               case 91: return new UasHilControls();
+               case 92: return new UasHilRcInputsRaw();
+               case 100: return new UasOpticalFlow();
+               case 101: return new UasGlobalVisionPositionEstimate();
+               case 102: return new UasVisionPositionEstimate();
+               case 103: return new UasVisionSpeedEstimate();
+               case 104: return new UasViconPositionEstimate();
+               case 105: return new UasHighresImu();
+               case 106: return new UasOmnidirectionalFlow();
+               case 107: return new UasHilSensor();
+               case 108: return new UasSimState();
+               case 109: return new UasRadioStatus();
+               case 110: return new UasFileTransferStart();
+               case 111: return new UasFileTransferDirList();
+               case 112: return new UasFileTransferRes();
+               case 113: return new UasHilGps();
+               case 114: return new UasHilOpticalFlow();
+               case 115: return new UasHilStateQuaternion();
+               case 147: return new UasBatteryStatus();
+               case 148: return new UasSetpoint8dof();
+               case 149: return new UasSetpoint6dof();
+               case 249: return new UasMemoryVect();
+               case 250: return new UasDebugVect();
+               case 251: return new UasNamedValueFloat();
+               case 252: return new UasNamedValueInt();
+               case 253: return new UasStatustext();
+               case 254: return new UasDebug();
+               default: return null;
+            }
+        }
     }
 
 }

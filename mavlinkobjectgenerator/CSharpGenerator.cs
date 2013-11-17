@@ -253,9 +253,10 @@ namespace MavLinkObjectGenerator
 
             foreach (EnumEntry entry in en.Entries)
             {
-                escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1}",
+                escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1} = {2}",
                     GetSanitizedComment(entry.Description),
-                    Utils.GetPascalStyleString(GetStrippedEnumName(en.Name, entry.Name))));
+                    Utils.GetPascalStyleString(GetStrippedEnumName(en.Name, entry.Name)),
+                    entry.Value));
             }
 
             return GetCommaSeparatedValues(escapedEnum, "");

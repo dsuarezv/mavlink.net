@@ -10,111 +10,111 @@ namespace MavLinkNet
     public enum MavAutopilot { 
 
         /// <summary> Generic autopilot, full support for everything </summary>
-        Generic, 
+        Generic = 0, 
 
         /// <summary> PIXHAWK autopilot, http://pixhawk.ethz.ch </summary>
-        Pixhawk, 
+        Pixhawk = 1, 
 
         /// <summary> SLUGS autopilot, http://slugsuav.soe.ucsc.edu </summary>
-        Slugs, 
+        Slugs = 2, 
 
         /// <summary> ArduPilotMega / ArduCopter, http://diydrones.com </summary>
-        Ardupilotmega, 
+        Ardupilotmega = 3, 
 
         /// <summary> OpenPilot, http://openpilot.org </summary>
-        Openpilot, 
+        Openpilot = 4, 
 
         /// <summary> Generic autopilot only supporting simple waypoints </summary>
-        GenericWaypointsOnly, 
+        GenericWaypointsOnly = 5, 
 
         /// <summary> Generic autopilot supporting waypoints and other simple navigation commands </summary>
-        GenericWaypointsAndSimpleNavigationOnly, 
+        GenericWaypointsAndSimpleNavigationOnly = 6, 
 
         /// <summary> Generic autopilot supporting the full mission command set </summary>
-        GenericMissionFull, 
+        GenericMissionFull = 7, 
 
         /// <summary> No valid autopilot, e.g. a GCS or other MAVLink component </summary>
-        Invalid, 
+        Invalid = 8, 
 
         /// <summary> PPZ UAV - http://nongnu.org/paparazzi </summary>
-        Ppz, 
+        Ppz = 9, 
 
         /// <summary> UAV Dev Board </summary>
-        Udb, 
+        Udb = 10, 
 
         /// <summary> FlexiPilot </summary>
-        Fp, 
+        Fp = 11, 
 
         /// <summary> PX4 Autopilot - http://pixhawk.ethz.ch/px4/ </summary>
-        Px4, 
+        Px4 = 12, 
 
         /// <summary> SMACCMPilot - http://smaccmpilot.org </summary>
-        Smaccmpilot, 
+        Smaccmpilot = 13, 
 
         /// <summary> AutoQuad -- http://autoquad.org </summary>
-        Autoquad, 
+        Autoquad = 14, 
 
         /// <summary> Armazila -- http://armazila.com </summary>
-        Armazila, 
+        Armazila = 15, 
 
         /// <summary> Aerob -- http://aerob.ru </summary>
-        Aerob };
+        Aerob = 16 };
 
     public enum MavType { 
 
         /// <summary> Generic micro air vehicle. </summary>
-        Generic, 
+        Generic = 0, 
 
         /// <summary> Fixed wing aircraft. </summary>
-        FixedWing, 
+        FixedWing = 1, 
 
         /// <summary> Quadrotor </summary>
-        Quadrotor, 
+        Quadrotor = 2, 
 
         /// <summary> Coaxial helicopter </summary>
-        Coaxial, 
+        Coaxial = 3, 
 
         /// <summary> Normal helicopter with tail rotor. </summary>
-        Helicopter, 
+        Helicopter = 4, 
 
         /// <summary> Ground installation </summary>
-        AntennaTracker, 
+        AntennaTracker = 5, 
 
         /// <summary> Operator control unit / ground control station </summary>
-        Gcs, 
+        Gcs = 6, 
 
         /// <summary> Airship, controlled </summary>
-        Airship, 
+        Airship = 7, 
 
         /// <summary> Free balloon, uncontrolled </summary>
-        FreeBalloon, 
+        FreeBalloon = 8, 
 
         /// <summary> Rocket </summary>
-        Rocket, 
+        Rocket = 9, 
 
         /// <summary> Ground rover </summary>
-        GroundRover, 
+        GroundRover = 10, 
 
         /// <summary> Surface vessel, boat, ship </summary>
-        SurfaceBoat, 
+        SurfaceBoat = 11, 
 
         /// <summary> Submarine </summary>
-        Submarine, 
+        Submarine = 12, 
 
         /// <summary> Hexarotor </summary>
-        Hexarotor, 
+        Hexarotor = 13, 
 
         /// <summary> Octorotor </summary>
-        Octorotor, 
+        Octorotor = 14, 
 
         /// <summary> Octorotor </summary>
-        Tricopter, 
+        Tricopter = 15, 
 
         /// <summary> Flapping wing </summary>
-        FlappingWing, 
+        FlappingWing = 16, 
 
         /// <summary> Flapping wing </summary>
-        Kite };
+        Kite = 17 };
 
     /// <summary>
     /// These flags encode the MAV mode.
@@ -122,28 +122,28 @@ namespace MavLinkNet
     public enum MavModeFlag { 
 
         /// <summary> 0b10000000 MAV safety set to armed. Motors are enabled / running / can start. Ready to fly. </summary>
-        SafetyArmed, 
+        SafetyArmed = 128, 
 
         /// <summary> 0b01000000 remote control input is enabled. </summary>
-        ManualInputEnabled, 
+        ManualInputEnabled = 64, 
 
         /// <summary> 0b00100000 hardware in the loop simulation. All motors / actuators are blocked, but internal software is full operational. </summary>
-        HilEnabled, 
+        HilEnabled = 32, 
 
         /// <summary> 0b00010000 system stabilizes electronically its attitude (and optionally position). It needs however further control inputs to move around. </summary>
-        StabilizeEnabled, 
+        StabilizeEnabled = 16, 
 
         /// <summary> 0b00001000 guided mode enabled, system flies MISSIONs / mission items. </summary>
-        GuidedEnabled, 
+        GuidedEnabled = 8, 
 
         /// <summary> 0b00000100 autonomous mode enabled, system finds its own goal positions. Guided flag can be set or not, depends on the actual implementation. </summary>
-        AutoEnabled, 
+        AutoEnabled = 4, 
 
         /// <summary> 0b00000010 system has a test mode enabled. This flag is intended for temporary system tests and should not be used for stable implementations. </summary>
-        TestEnabled, 
+        TestEnabled = 2, 
 
         /// <summary> 0b00000001 Reserved for future use. </summary>
-        CustomModeEnabled };
+        CustomModeEnabled = 1 };
 
     /// <summary>
     /// These values encode the bit positions of the decode position. These values can be used to read the value of a flag bit by combining the base_mode variable with AND with the flag position value. The result will be either 0 or 1, depending on if the flag is set or not.
@@ -151,28 +151,28 @@ namespace MavLinkNet
     public enum MavModeFlagDecodePosition { 
 
         /// <summary> First bit:  10000000 </summary>
-        Safety, 
+        Safety = 128, 
 
         /// <summary> Second bit: 01000000 </summary>
-        Manual, 
+        Manual = 64, 
 
         /// <summary> Third bit:  00100000 </summary>
-        Hil, 
+        Hil = 32, 
 
         /// <summary> Fourth bit: 00010000 </summary>
-        Stabilize, 
+        Stabilize = 16, 
 
         /// <summary> Fifth bit:  00001000 </summary>
-        Guided, 
+        Guided = 8, 
 
         /// <summary> Sixt bit:   00000100 </summary>
-        Auto, 
+        Auto = 4, 
 
         /// <summary> Seventh bit: 00000010 </summary>
-        Test, 
+        Test = 2, 
 
         /// <summary> Eighth bit: 00000001 </summary>
-        CustomMode };
+        CustomMode = 1 };
 
     /// <summary>
     /// Override command, pauses current mission execution and moves immediately to a position
@@ -180,16 +180,16 @@ namespace MavLinkNet
     public enum MavGoto { 
 
         /// <summary> Hold at the current position. </summary>
-        DoHold, 
+        DoHold = 0, 
 
         /// <summary> Continue with the next item in mission execution. </summary>
-        DoContinue, 
+        DoContinue = 1, 
 
         /// <summary> Hold at the current position of the system </summary>
-        HoldAtCurrentPosition, 
+        HoldAtCurrentPosition = 2, 
 
         /// <summary> Hold at the position specified in the parameters of the DO_HOLD action </summary>
-        HoldAtSpecifiedPosition };
+        HoldAtSpecifiedPosition = 3 };
 
     /// <summary>
     /// These defines are predefined OR-combined mode flags. There is no need to use values from this enum, but it                 simplifies the use of the mode flags. Note that manual input is enabled in all modes as a safety override.
@@ -197,143 +197,143 @@ namespace MavLinkNet
     public enum MavMode { 
 
         /// <summary> System is not ready to fly, booting, calibrating, etc. No flag is set. </summary>
-        Preflight, 
+        Preflight = 0, 
 
         /// <summary> System is allowed to be active, under assisted RC control. </summary>
-        StabilizeDisarmed, 
+        StabilizeDisarmed = 80, 
 
         /// <summary> System is allowed to be active, under assisted RC control. </summary>
-        StabilizeArmed, 
+        StabilizeArmed = 208, 
 
         /// <summary> System is allowed to be active, under manual (RC) control, no stabilization </summary>
-        ManualDisarmed, 
+        ManualDisarmed = 64, 
 
         /// <summary> System is allowed to be active, under manual (RC) control, no stabilization </summary>
-        ManualArmed, 
+        ManualArmed = 192, 
 
         /// <summary> System is allowed to be active, under autonomous control, manual setpoint </summary>
-        GuidedDisarmed, 
+        GuidedDisarmed = 88, 
 
         /// <summary> System is allowed to be active, under autonomous control, manual setpoint </summary>
-        GuidedArmed, 
+        GuidedArmed = 216, 
 
         /// <summary> System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs) </summary>
-        AutoDisarmed, 
+        AutoDisarmed = 92, 
 
         /// <summary> System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs) </summary>
-        AutoArmed, 
+        AutoArmed = 220, 
 
         /// <summary> UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only. </summary>
-        TestDisarmed, 
+        TestDisarmed = 66, 
 
         /// <summary> UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only. </summary>
-        TestArmed };
+        TestArmed = 194 };
 
     public enum MavState { 
 
         /// <summary> Uninitialized system, state is unknown. </summary>
-        Uninit, 
+        Uninit = 0, 
 
         /// <summary> System is booting up. </summary>
-        Boot, 
+        Boot = 0, 
 
         /// <summary> System is calibrating and not flight-ready. </summary>
-        Calibrating, 
+        Calibrating = 0, 
 
         /// <summary> System is grounded and on standby. It can be launched any time. </summary>
-        Standby, 
+        Standby = 0, 
 
         /// <summary> System is active and might be already airborne. Motors are engaged. </summary>
-        Active, 
+        Active = 0, 
 
         /// <summary> System is in a non-normal flight mode. It can however still navigate. </summary>
-        Critical, 
+        Critical = 0, 
 
         /// <summary> System is in a non-normal flight mode. It lost control over parts or over the whole airframe. It is in mayday and going down. </summary>
-        Emergency, 
+        Emergency = 0, 
 
         /// <summary> System just initialized its power-down sequence, will shut down now. </summary>
-        Poweroff };
+        Poweroff = 0 };
 
     public enum MavComponent { 
 
         /// <summary>  </summary>
-        MavCompIdAll, 
+        MavCompIdAll = 0, 
 
         /// <summary>  </summary>
-        MavCompIdGps, 
+        MavCompIdGps = 220, 
 
         /// <summary>  </summary>
-        MavCompIdMissionplanner, 
+        MavCompIdMissionplanner = 190, 
 
         /// <summary>  </summary>
-        MavCompIdPathplanner, 
+        MavCompIdPathplanner = 195, 
 
         /// <summary>  </summary>
-        MavCompIdMapper, 
+        MavCompIdMapper = 180, 
 
         /// <summary>  </summary>
-        MavCompIdCamera, 
+        MavCompIdCamera = 100, 
 
         /// <summary>  </summary>
-        MavCompIdImu, 
+        MavCompIdImu = 200, 
 
         /// <summary>  </summary>
-        MavCompIdImu2, 
+        MavCompIdImu2 = 201, 
 
         /// <summary>  </summary>
-        MavCompIdImu3, 
+        MavCompIdImu3 = 202, 
 
         /// <summary>  </summary>
-        MavCompIdUdpBridge, 
+        MavCompIdUdpBridge = 240, 
 
         /// <summary>  </summary>
-        MavCompIdUartBridge, 
+        MavCompIdUartBridge = 241, 
 
         /// <summary>  </summary>
-        MavCompIdSystemControl, 
+        MavCompIdSystemControl = 250, 
 
         /// <summary>  </summary>
-        MavCompIdServo1, 
+        MavCompIdServo1 = 140, 
 
         /// <summary>  </summary>
-        MavCompIdServo2, 
+        MavCompIdServo2 = 141, 
 
         /// <summary>  </summary>
-        MavCompIdServo3, 
+        MavCompIdServo3 = 142, 
 
         /// <summary>  </summary>
-        MavCompIdServo4, 
+        MavCompIdServo4 = 143, 
 
         /// <summary>  </summary>
-        MavCompIdServo5, 
+        MavCompIdServo5 = 144, 
 
         /// <summary>  </summary>
-        MavCompIdServo6, 
+        MavCompIdServo6 = 145, 
 
         /// <summary>  </summary>
-        MavCompIdServo7, 
+        MavCompIdServo7 = 146, 
 
         /// <summary>  </summary>
-        MavCompIdServo8, 
+        MavCompIdServo8 = 147, 
 
         /// <summary>  </summary>
-        MavCompIdServo9, 
+        MavCompIdServo9 = 148, 
 
         /// <summary>  </summary>
-        MavCompIdServo10, 
+        MavCompIdServo10 = 149, 
 
         /// <summary>  </summary>
-        MavCompIdServo11, 
+        MavCompIdServo11 = 150, 
 
         /// <summary>  </summary>
-        MavCompIdServo12, 
+        MavCompIdServo12 = 151, 
 
         /// <summary>  </summary>
-        MavCompIdServo13, 
+        MavCompIdServo13 = 152, 
 
         /// <summary>  </summary>
-        MavCompIdServo14 };
+        MavCompIdServo14 = 153 };
 
     /// <summary>
     /// These encode the sensors whose status is sent as part of the SYS_STATUS message.
@@ -341,92 +341,92 @@ namespace MavLinkNet
     public enum MavSysStatusSensor { 
 
         /// <summary> 0x01 3D gyro </summary>
-        _3dGyro, 
+        _3dGyro = 1, 
 
         /// <summary> 0x02 3D accelerometer </summary>
-        _3dAccel, 
+        _3dAccel = 2, 
 
         /// <summary> 0x04 3D magnetometer </summary>
-        _3dMag, 
+        _3dMag = 4, 
 
         /// <summary> 0x08 absolute pressure </summary>
-        AbsolutePressure, 
+        AbsolutePressure = 8, 
 
         /// <summary> 0x10 differential pressure </summary>
-        DifferentialPressure, 
+        DifferentialPressure = 16, 
 
         /// <summary> 0x20 GPS </summary>
-        Gps, 
+        Gps = 32, 
 
         /// <summary> 0x40 optical flow </summary>
-        OpticalFlow, 
+        OpticalFlow = 64, 
 
         /// <summary> 0x80 computer vision position </summary>
-        VisionPosition, 
+        VisionPosition = 128, 
 
         /// <summary> 0x100 laser based position </summary>
-        LaserPosition, 
+        LaserPosition = 256, 
 
         /// <summary> 0x200 external ground truth (Vicon or Leica) </summary>
-        ExternalGroundTruth, 
+        ExternalGroundTruth = 512, 
 
         /// <summary> 0x400 3D angular rate control </summary>
-        AngularRateControl, 
+        AngularRateControl = 1024, 
 
         /// <summary> 0x800 attitude stabilization </summary>
-        AttitudeStabilization, 
+        AttitudeStabilization = 2048, 
 
         /// <summary> 0x1000 yaw position </summary>
-        YawPosition, 
+        YawPosition = 4096, 
 
         /// <summary> 0x2000 z/altitude control </summary>
-        ZAltitudeControl, 
+        ZAltitudeControl = 8192, 
 
         /// <summary> 0x4000 x/y position control </summary>
-        XyPositionControl, 
+        XyPositionControl = 16384, 
 
         /// <summary> 0x8000 motor outputs / control </summary>
-        MotorOutputs, 
+        MotorOutputs = 32768, 
 
         /// <summary> 0x10000 rc receiver </summary>
-        RcReceiver };
+        RcReceiver = 65536 };
 
     public enum MavFrame { 
 
         /// <summary> Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL) </summary>
-        Global, 
+        Global = 0, 
 
         /// <summary> Local coordinate frame, Z-up (x: north, y: east, z: down). </summary>
-        LocalNed, 
+        LocalNed = 1, 
 
         /// <summary> NOT a coordinate frame, indicates a mission command. </summary>
-        Mission, 
+        Mission = 2, 
 
         /// <summary> Global coordinate frame, WGS84 coordinate system, relative altitude over ground with respect to the home position. First value / x: latitude, second value / y: longitude, third value / z: positive altitude with 0 being at the altitude of the home location. </summary>
-        GlobalRelativeAlt, 
+        GlobalRelativeAlt = 3, 
 
         /// <summary> Local coordinate frame, Z-down (x: east, y: north, z: up) </summary>
-        LocalEnu };
+        LocalEnu = 4 };
 
     public enum MavlinkDataStreamType { 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgJpeg, 
+        MavlinkDataStreamImgJpeg = 0, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgBmp, 
+        MavlinkDataStreamImgBmp = 0, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgRaw8u, 
+        MavlinkDataStreamImgRaw8u = 0, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgRaw32u, 
+        MavlinkDataStreamImgRaw32u = 0, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgPgm, 
+        MavlinkDataStreamImgPgm = 0, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgPng };
+        MavlinkDataStreamImgPng = 0 };
 
     /// <summary>
     /// Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data.
@@ -434,109 +434,109 @@ namespace MavLinkNet
     public enum MavCmd { 
 
         /// <summary> Navigate to MISSION. </summary>
-        NavWaypoint, 
+        NavWaypoint = 16, 
 
         /// <summary> Loiter around this MISSION an unlimited amount of time </summary>
-        NavLoiterUnlim, 
+        NavLoiterUnlim = 17, 
 
         /// <summary> Loiter around this MISSION for X turns </summary>
-        NavLoiterTurns, 
+        NavLoiterTurns = 18, 
 
         /// <summary> Loiter around this MISSION for X seconds </summary>
-        NavLoiterTime, 
+        NavLoiterTime = 19, 
 
         /// <summary> Return to launch location </summary>
-        NavReturnToLaunch, 
+        NavReturnToLaunch = 20, 
 
         /// <summary> Land at location </summary>
-        NavLand, 
+        NavLand = 21, 
 
         /// <summary> Takeoff from ground / hand </summary>
-        NavTakeoff, 
+        NavTakeoff = 22, 
 
         /// <summary> Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras. </summary>
-        NavRoi, 
+        NavRoi = 80, 
 
         /// <summary> Control autonomous path planning on the MAV. </summary>
-        NavPathplanning, 
+        NavPathplanning = 81, 
 
         /// <summary> NOP - This command is only used to mark the upper limit of the NAV/ACTION commands in the enumeration </summary>
-        NavLast, 
+        NavLast = 95, 
 
         /// <summary> Delay mission state machine. </summary>
-        ConditionDelay, 
+        ConditionDelay = 112, 
 
         /// <summary> Ascend/descend at rate.  Delay mission state machine until desired altitude reached. </summary>
-        ConditionChangeAlt, 
+        ConditionChangeAlt = 113, 
 
         /// <summary> Delay mission state machine until within desired distance of next NAV point. </summary>
-        ConditionDistance, 
+        ConditionDistance = 114, 
 
         /// <summary> Reach a certain target angle. </summary>
-        ConditionYaw, 
+        ConditionYaw = 115, 
 
         /// <summary> NOP - This command is only used to mark the upper limit of the CONDITION commands in the enumeration </summary>
-        ConditionLast, 
+        ConditionLast = 159, 
 
         /// <summary> Set system mode. </summary>
-        DoSetMode, 
+        DoSetMode = 176, 
 
         /// <summary> Jump to the desired command in the mission list.  Repeat this action only the specified number of times </summary>
-        DoJump, 
+        DoJump = 177, 
 
         /// <summary> Change speed and/or throttle set points. </summary>
-        DoChangeSpeed, 
+        DoChangeSpeed = 178, 
 
         /// <summary> Changes the home location either to the current location or a specified location. </summary>
-        DoSetHome, 
+        DoSetHome = 179, 
 
         /// <summary> Set a system parameter.  Caution!  Use of this command requires knowledge of the numeric enumeration value of the parameter. </summary>
-        DoSetParameter, 
+        DoSetParameter = 180, 
 
         /// <summary> Set a relay to a condition. </summary>
-        DoSetRelay, 
+        DoSetRelay = 181, 
 
         /// <summary> Cycle a relay on and off for a desired number of cyles with a desired period. </summary>
-        DoRepeatRelay, 
+        DoRepeatRelay = 182, 
 
         /// <summary> Set a servo to a desired PWM value. </summary>
-        DoSetServo, 
+        DoSetServo = 183, 
 
         /// <summary> Cycle a between its nominal setting and a desired PWM for a desired number of cycles with a desired period. </summary>
-        DoRepeatServo, 
+        DoRepeatServo = 184, 
 
         /// <summary> Control onboard camera system. </summary>
-        DoControlVideo, 
+        DoControlVideo = 200, 
 
         /// <summary> Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras. </summary>
-        DoSetRoi, 
+        DoSetRoi = 201, 
 
         /// <summary> NOP - This command is only used to mark the upper limit of the DO commands in the enumeration </summary>
-        DoLast, 
+        DoLast = 240, 
 
         /// <summary> Trigger calibration. This command will be only accepted if in pre-flight mode. </summary>
-        PreflightCalibration, 
+        PreflightCalibration = 241, 
 
         /// <summary> Set sensor offsets. This command will be only accepted if in pre-flight mode. </summary>
-        PreflightSetSensorOffsets, 
+        PreflightSetSensorOffsets = 242, 
 
         /// <summary> Request storage of different parameter values and logs. This command will be only accepted if in pre-flight mode. </summary>
-        PreflightStorage, 
+        PreflightStorage = 245, 
 
         /// <summary> Request the reboot or shutdown of system components. </summary>
-        PreflightRebootShutdown, 
+        PreflightRebootShutdown = 246, 
 
         /// <summary> Hold / continue the current action </summary>
-        OverrideGoto, 
+        OverrideGoto = 252, 
 
         /// <summary> start running a mission </summary>
-        MissionStart, 
+        MissionStart = 300, 
 
         /// <summary> Arms / Disarms a component </summary>
-        ComponentArmDisarm, 
+        ComponentArmDisarm = 400, 
 
         /// <summary> Starts receiver pairing </summary>
-        StartRxPair };
+        StartRxPair = 500 };
 
     /// <summary>
     /// Data stream IDs. A data stream is not a fixed set of messages, but rather a       recommendation to the autopilot software. Individual autopilots may or may not obey       the recommended messages.
@@ -544,31 +544,31 @@ namespace MavLinkNet
     public enum MavDataStream { 
 
         /// <summary> Enable all data streams </summary>
-        All, 
+        All = 0, 
 
         /// <summary> Enable IMU_RAW, GPS_RAW, GPS_STATUS packets. </summary>
-        RawSensors, 
+        RawSensors = 1, 
 
         /// <summary> Enable GPS_STATUS, CONTROL_STATUS, AUX_STATUS </summary>
-        ExtendedStatus, 
+        ExtendedStatus = 2, 
 
         /// <summary> Enable RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW </summary>
-        RcChannels, 
+        RcChannels = 3, 
 
         /// <summary> Enable ATTITUDE_CONTROLLER_OUTPUT, POSITION_CONTROLLER_OUTPUT, NAV_CONTROLLER_OUTPUT. </summary>
-        RawController, 
+        RawController = 4, 
 
         /// <summary> Enable LOCAL_POSITION, GLOBAL_POSITION/GLOBAL_POSITION_INT messages. </summary>
-        Position, 
+        Position = 6, 
 
         /// <summary> Dependent on the autopilot </summary>
-        Extra1, 
+        Extra1 = 10, 
 
         /// <summary> Dependent on the autopilot </summary>
-        Extra2, 
+        Extra2 = 11, 
 
         /// <summary> Dependent on the autopilot </summary>
-        Extra3 };
+        Extra3 = 12 };
 
     /// <summary>
     ///  The ROI (region of interest) for the vehicle. This can be                  be used by the vehicle for camera/vehicle attitude alignment (see                  MAV_CMD_NAV_ROI).
@@ -576,19 +576,19 @@ namespace MavLinkNet
     public enum MavRoi { 
 
         /// <summary> No region of interest. </summary>
-        None, 
+        None = 0, 
 
         /// <summary> Point toward next MISSION. </summary>
-        Wpnext, 
+        Wpnext = 1, 
 
         /// <summary> Point toward given MISSION. </summary>
-        Wpindex, 
+        Wpindex = 2, 
 
         /// <summary> Point toward fixed location. </summary>
-        Location, 
+        Location = 3, 
 
         /// <summary> Point toward of given id. </summary>
-        Target };
+        Target = 4 };
 
     /// <summary>
     /// ACK / NACK / ERROR values as a result of MAV_CMDs and for mission item transmission.
@@ -596,31 +596,31 @@ namespace MavLinkNet
     public enum MavCmdAck { 
 
         /// <summary> Command / mission item is ok. </summary>
-        Ok, 
+        Ok = 0, 
 
         /// <summary> Generic error message if none of the other reasons fails or if no detailed error reporting is implemented. </summary>
-        ErrFail, 
+        ErrFail = 0, 
 
         /// <summary> The system is refusing to accept this command from this source / communication partner. </summary>
-        ErrAccessDenied, 
+        ErrAccessDenied = 0, 
 
         /// <summary> Command or mission item is not supported, other commands would be accepted. </summary>
-        ErrNotSupported, 
+        ErrNotSupported = 0, 
 
         /// <summary> The coordinate frame of this command / mission item is not supported. </summary>
-        ErrCoordinateFrameNotSupported, 
+        ErrCoordinateFrameNotSupported = 0, 
 
         /// <summary> The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible. </summary>
-        ErrCoordinatesOutOfRange, 
+        ErrCoordinatesOutOfRange = 0, 
 
         /// <summary> The X or latitude value is out of range. </summary>
-        ErrXLatOutOfRange, 
+        ErrXLatOutOfRange = 0, 
 
         /// <summary> The Y or longitude value is out of range. </summary>
-        ErrYLonOutOfRange, 
+        ErrYLonOutOfRange = 0, 
 
         /// <summary> The Z or altitude value is out of range. </summary>
-        ErrZAltOutOfRange };
+        ErrZAltOutOfRange = 0 };
 
     /// <summary>
     /// Specifies the datatype of a MAVLink parameter.
@@ -628,34 +628,34 @@ namespace MavLinkNet
     public enum MavParamType { 
 
         /// <summary> 8-bit unsigned integer </summary>
-        Uint8, 
+        Uint8 = 1, 
 
         /// <summary> 8-bit signed integer </summary>
-        Int8, 
+        Int8 = 2, 
 
         /// <summary> 16-bit unsigned integer </summary>
-        Uint16, 
+        Uint16 = 3, 
 
         /// <summary> 16-bit signed integer </summary>
-        Int16, 
+        Int16 = 4, 
 
         /// <summary> 32-bit unsigned integer </summary>
-        Uint32, 
+        Uint32 = 5, 
 
         /// <summary> 32-bit signed integer </summary>
-        Int32, 
+        Int32 = 6, 
 
         /// <summary> 64-bit unsigned integer </summary>
-        Uint64, 
+        Uint64 = 7, 
 
         /// <summary> 64-bit signed integer </summary>
-        Int64, 
+        Int64 = 8, 
 
         /// <summary> 32-bit floating-point </summary>
-        Real32, 
+        Real32 = 9, 
 
         /// <summary> 64-bit floating-point </summary>
-        Real64 };
+        Real64 = 10 };
 
     /// <summary>
     /// result from a mavlink command
@@ -663,19 +663,19 @@ namespace MavLinkNet
     public enum MavResult { 
 
         /// <summary> Command ACCEPTED and EXECUTED </summary>
-        Accepted, 
+        Accepted = 0, 
 
         /// <summary> Command TEMPORARY REJECTED/DENIED </summary>
-        TemporarilyRejected, 
+        TemporarilyRejected = 1, 
 
         /// <summary> Command PERMANENTLY DENIED </summary>
-        Denied, 
+        Denied = 2, 
 
         /// <summary> Command UNKNOWN/UNSUPPORTED </summary>
-        Unsupported, 
+        Unsupported = 3, 
 
         /// <summary> Command executed, but failed </summary>
-        Failed };
+        Failed = 4 };
 
     /// <summary>
     /// result in a mavlink mission ack
@@ -683,49 +683,49 @@ namespace MavLinkNet
     public enum MavMissionResult { 
 
         /// <summary> mission accepted OK </summary>
-        MavMissionAccepted, 
+        MavMissionAccepted = 0, 
 
         /// <summary> generic error / not accepting mission commands at all right now </summary>
-        MavMissionError, 
+        MavMissionError = 1, 
 
         /// <summary> coordinate frame is not supported </summary>
-        MavMissionUnsupportedFrame, 
+        MavMissionUnsupportedFrame = 2, 
 
         /// <summary> command is not supported </summary>
-        MavMissionUnsupported, 
+        MavMissionUnsupported = 3, 
 
         /// <summary> mission item exceeds storage space </summary>
-        MavMissionNoSpace, 
+        MavMissionNoSpace = 4, 
 
         /// <summary> one of the parameters has an invalid value </summary>
-        MavMissionInvalid, 
+        MavMissionInvalid = 5, 
 
         /// <summary> param1 has an invalid value </summary>
-        MavMissionInvalidParam1, 
+        MavMissionInvalidParam1 = 6, 
 
         /// <summary> param2 has an invalid value </summary>
-        MavMissionInvalidParam2, 
+        MavMissionInvalidParam2 = 7, 
 
         /// <summary> param3 has an invalid value </summary>
-        MavMissionInvalidParam3, 
+        MavMissionInvalidParam3 = 8, 
 
         /// <summary> param4 has an invalid value </summary>
-        MavMissionInvalidParam4, 
+        MavMissionInvalidParam4 = 9, 
 
         /// <summary> x/param5 has an invalid value </summary>
-        MavMissionInvalidParam5X, 
+        MavMissionInvalidParam5X = 10, 
 
         /// <summary> y/param6 has an invalid value </summary>
-        MavMissionInvalidParam6Y, 
+        MavMissionInvalidParam6Y = 11, 
 
         /// <summary> param7 has an invalid value </summary>
-        MavMissionInvalidParam7, 
+        MavMissionInvalidParam7 = 12, 
 
         /// <summary> received waypoint out of sequence </summary>
-        MavMissionInvalidSequence, 
+        MavMissionInvalidSequence = 13, 
 
         /// <summary> not accepting any mission commands from this communication partner </summary>
-        MavMissionDenied };
+        MavMissionDenied = 14 };
 
     /// <summary>
     /// Indicates the severity level, generally used for status messages to indicate their relative urgency. Based on RFC-5424 using expanded definitions at: http://www.kiwisyslog.com/kb/info:-syslog-message-levels/.
@@ -733,28 +733,28 @@ namespace MavLinkNet
     public enum MavSeverity { 
 
         /// <summary> System is unusable. This is a "panic" condition. </summary>
-        Emergency, 
+        Emergency = 0, 
 
         /// <summary> Action should be taken immediately. Indicates error in non-critical systems. </summary>
-        Alert, 
+        Alert = 1, 
 
         /// <summary> Action must be taken immediately. Indicates failure in a primary system. </summary>
-        Critical, 
+        Critical = 2, 
 
         /// <summary> Indicates an error in secondary/redundant systems. </summary>
-        Error, 
+        Error = 3, 
 
         /// <summary> Indicates about a possible future error if this is not resolved within a given timeframe. Example would be a low battery warning. </summary>
-        Warning, 
+        Warning = 4, 
 
         /// <summary> An unusual event has occured, though not an error condition. This should be investigated for the root cause. </summary>
-        Notice, 
+        Notice = 5, 
 
         /// <summary> Normal operational messages. Useful for logging. No action is required for these messages. </summary>
-        Info, 
+        Info = 6, 
 
         /// <summary> Useful non-operational messages that can assist in debugging. These should not occur during normal operation. </summary>
-        Debug };
+        Debug = 7 };
 
 
     // ___________________________________________________________________________________

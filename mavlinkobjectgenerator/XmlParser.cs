@@ -205,6 +205,7 @@ namespace MavLinkObjectGenerator
             {
                 if (field.Description.IndexOf(s) != -1)
                 {
+                    field.Type = FieldDataType.ENUM;
                     field.IsEnum = true;
                     field.EnumType = s;
                     return;

@@ -48,27 +48,27 @@ namespace MavLinkNet
 
     public class UasHeartbeat: UasMessage
     {
+        public MavType Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
+        public MavAutopilot Autopilot {
+            get { return mAutopilot; }
+            set { mAutopilot = value; NotifyUpdated(); }
+        }
+
+        public MavModeFlag BaseMode {
+            get { return mBaseMode; }
+            set { mBaseMode = value; NotifyUpdated(); }
+        }
+
         public UInt32 CustomMode {
             get { return mCustomMode; }
             set { mCustomMode = value; NotifyUpdated(); }
         }
 
-        public byte Type {
-            get { return mType; }
-            set { mType = value; NotifyUpdated(); }
-        }
-
-        public byte Autopilot {
-            get { return mAutopilot; }
-            set { mAutopilot = value; NotifyUpdated(); }
-        }
-
-        public byte BaseMode {
-            get { return mBaseMode; }
-            set { mBaseMode = value; NotifyUpdated(); }
-        }
-
-        public byte SystemStatus {
+        public MavState SystemStatus {
             get { return mSystemStatus; }
             set { mSystemStatus = value; NotifyUpdated(); }
         }
@@ -78,11 +78,11 @@ namespace MavLinkNet
             set { mMavlinkVersion = value; NotifyUpdated(); }
         }
 
+        private MavType mType;
+        private MavAutopilot mAutopilot;
+        private MavModeFlag mBaseMode;
         private UInt32 mCustomMode;
-        private byte mType;
-        private byte mAutopilot;
-        private byte mBaseMode;
-        private byte mSystemStatus;
+        private MavState mSystemStatus;
         private byte mMavlinkVersion;
     }
 
@@ -92,17 +92,17 @@ namespace MavLinkNet
 
     public class UasSysStatus: UasMessage
     {
-        public UInt32 OnboardControlSensorsPresent {
+        public MavSysStatusSensor OnboardControlSensorsPresent {
             get { return mOnboardControlSensorsPresent; }
             set { mOnboardControlSensorsPresent = value; NotifyUpdated(); }
         }
 
-        public UInt32 OnboardControlSensorsEnabled {
+        public MavSysStatusSensor OnboardControlSensorsEnabled {
             get { return mOnboardControlSensorsEnabled; }
             set { mOnboardControlSensorsEnabled = value; NotifyUpdated(); }
         }
 
-        public UInt32 OnboardControlSensorsHealth {
+        public MavSysStatusSensor OnboardControlSensorsHealth {
             get { return mOnboardControlSensorsHealth; }
             set { mOnboardControlSensorsHealth = value; NotifyUpdated(); }
         }
@@ -157,9 +157,9 @@ namespace MavLinkNet
             set { mBatteryRemaining = value; NotifyUpdated(); }
         }
 
-        private UInt32 mOnboardControlSensorsPresent;
-        private UInt32 mOnboardControlSensorsEnabled;
-        private UInt32 mOnboardControlSensorsHealth;
+        private MavSysStatusSensor mOnboardControlSensorsPresent;
+        private MavSysStatusSensor mOnboardControlSensorsEnabled;
+        private MavSysStatusSensor mOnboardControlSensorsHealth;
         private UInt16 mLoad;
         private UInt16 mVoltageBattery;
         private Int16 mCurrentBattery;
@@ -385,6 +385,11 @@ namespace MavLinkNet
             set { mParamValue = value; NotifyUpdated(); }
         }
 
+        public MavParamType ParamType {
+            get { return mParamType; }
+            set { mParamType = value; NotifyUpdated(); }
+        }
+
         public UInt16 ParamCount {
             get { return mParamCount; }
             set { mParamCount = value; NotifyUpdated(); }
@@ -400,16 +405,11 @@ namespace MavLinkNet
             set { mParamId = value; NotifyUpdated(); }
         }
 
-        public byte ParamType {
-            get { return mParamType; }
-            set { mParamType = value; NotifyUpdated(); }
-        }
-
         private float mParamValue;
+        private MavParamType mParamType;
         private UInt16 mParamCount;
         private UInt16 mParamIndex;
         private char[] mParamId = new char[16];
-        private byte mParamType;
     }
 
 
@@ -421,6 +421,11 @@ namespace MavLinkNet
         public float ParamValue {
             get { return mParamValue; }
             set { mParamValue = value; NotifyUpdated(); }
+        }
+
+        public MavParamType ParamType {
+            get { return mParamType; }
+            set { mParamType = value; NotifyUpdated(); }
         }
 
         public byte TargetSystem {
@@ -438,16 +443,11 @@ namespace MavLinkNet
             set { mParamId = value; NotifyUpdated(); }
         }
 
-        public byte ParamType {
-            get { return mParamType; }
-            set { mParamType = value; NotifyUpdated(); }
-        }
-
         private float mParamValue;
+        private MavParamType mParamType;
         private byte mTargetSystem;
         private byte mTargetComponent;
         private char[] mParamId = new char[16];
-        private byte mParamType;
     }
 
 
@@ -1272,6 +1272,16 @@ namespace MavLinkNet
 
     public class UasMissionItem: UasMessage
     {
+        public MavFrame Frame {
+            get { return mFrame; }
+            set { mFrame = value; NotifyUpdated(); }
+        }
+
+        public MavCmd Command {
+            get { return mCommand; }
+            set { mCommand = value; NotifyUpdated(); }
+        }
+
         public float Param1 {
             get { return mParam1; }
             set { mParam1 = value; NotifyUpdated(); }
@@ -1312,11 +1322,6 @@ namespace MavLinkNet
             set { mSeq = value; NotifyUpdated(); }
         }
 
-        public UInt16 Command {
-            get { return mCommand; }
-            set { mCommand = value; NotifyUpdated(); }
-        }
-
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -1325,11 +1330,6 @@ namespace MavLinkNet
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
-        }
-
-        public byte Frame {
-            get { return mFrame; }
-            set { mFrame = value; NotifyUpdated(); }
         }
 
         public byte Current {
@@ -1342,6 +1342,8 @@ namespace MavLinkNet
             set { mAutocontinue = value; NotifyUpdated(); }
         }
 
+        private MavFrame mFrame;
+        private MavCmd mCommand;
         private float mParam1;
         private float mParam2;
         private float mParam3;
@@ -1350,10 +1352,8 @@ namespace MavLinkNet
         private float mY;
         private float mZ;
         private UInt16 mSeq;
-        private UInt16 mCommand;
         private byte mTargetSystem;
         private byte mTargetComponent;
-        private byte mFrame;
         private byte mCurrent;
         private byte mAutocontinue;
     }
@@ -1510,6 +1510,11 @@ namespace MavLinkNet
 
     public class UasMissionAck: UasMessage
     {
+        public MavMissionResult Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -1520,14 +1525,9 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
-        public byte Type {
-            get { return mType; }
-            set { mType = value; NotifyUpdated(); }
-        }
-
+        private MavMissionResult mType;
         private byte mTargetSystem;
         private byte mTargetComponent;
-        private byte mType;
     }
 
 
@@ -1594,6 +1594,11 @@ namespace MavLinkNet
 
     public class UasSetLocalPositionSetpoint: UasMessage
     {
+        public MavFrame CoordinateFrame {
+            get { return mCoordinateFrame; }
+            set { mCoordinateFrame = value; NotifyUpdated(); }
+        }
+
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
@@ -1624,18 +1629,13 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
-        public byte CoordinateFrame {
-            get { return mCoordinateFrame; }
-            set { mCoordinateFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mCoordinateFrame;
         private float mX;
         private float mY;
         private float mZ;
         private float mYaw;
         private byte mTargetSystem;
         private byte mTargetComponent;
-        private byte mCoordinateFrame;
     }
 
 
@@ -1644,6 +1644,11 @@ namespace MavLinkNet
 
     public class UasLocalPositionSetpoint: UasMessage
     {
+        public MavFrame CoordinateFrame {
+            get { return mCoordinateFrame; }
+            set { mCoordinateFrame = value; NotifyUpdated(); }
+        }
+
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
@@ -1664,16 +1669,11 @@ namespace MavLinkNet
             set { mYaw = value; NotifyUpdated(); }
         }
 
-        public byte CoordinateFrame {
-            get { return mCoordinateFrame; }
-            set { mCoordinateFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mCoordinateFrame;
         private float mX;
         private float mY;
         private float mZ;
         private float mYaw;
-        private byte mCoordinateFrame;
     }
 
 
@@ -1682,6 +1682,11 @@ namespace MavLinkNet
 
     public class UasGlobalPositionSetpointInt: UasMessage
     {
+        public MavFrame CoordinateFrame {
+            get { return mCoordinateFrame; }
+            set { mCoordinateFrame = value; NotifyUpdated(); }
+        }
+
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
@@ -1702,16 +1707,11 @@ namespace MavLinkNet
             set { mYaw = value; NotifyUpdated(); }
         }
 
-        public byte CoordinateFrame {
-            get { return mCoordinateFrame; }
-            set { mCoordinateFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mCoordinateFrame;
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
         private Int16 mYaw;
-        private byte mCoordinateFrame;
     }
 
 
@@ -1720,6 +1720,11 @@ namespace MavLinkNet
 
     public class UasSetGlobalPositionSetpointInt: UasMessage
     {
+        public MavFrame CoordinateFrame {
+            get { return mCoordinateFrame; }
+            set { mCoordinateFrame = value; NotifyUpdated(); }
+        }
+
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
@@ -1740,16 +1745,11 @@ namespace MavLinkNet
             set { mYaw = value; NotifyUpdated(); }
         }
 
-        public byte CoordinateFrame {
-            get { return mCoordinateFrame; }
-            set { mCoordinateFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mCoordinateFrame;
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
         private Int16 mYaw;
-        private byte mCoordinateFrame;
     }
 
 
@@ -1758,6 +1758,11 @@ namespace MavLinkNet
 
     public class UasSafetySetAllowedArea: UasMessage
     {
+        public MavFrame Frame {
+            get { return mFrame; }
+            set { mFrame = value; NotifyUpdated(); }
+        }
+
         public float P1x {
             get { return mP1x; }
             set { mP1x = value; NotifyUpdated(); }
@@ -1798,11 +1803,7 @@ namespace MavLinkNet
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
-        public byte Frame {
-            get { return mFrame; }
-            set { mFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mFrame;
         private float mP1x;
         private float mP1y;
         private float mP1z;
@@ -1811,7 +1812,6 @@ namespace MavLinkNet
         private float mP2z;
         private byte mTargetSystem;
         private byte mTargetComponent;
-        private byte mFrame;
     }
 
 
@@ -1820,6 +1820,11 @@ namespace MavLinkNet
 
     public class UasSafetyAllowedArea: UasMessage
     {
+        public MavFrame Frame {
+            get { return mFrame; }
+            set { mFrame = value; NotifyUpdated(); }
+        }
+
         public float P1x {
             get { return mP1x; }
             set { mP1x = value; NotifyUpdated(); }
@@ -1850,18 +1855,13 @@ namespace MavLinkNet
             set { mP2z = value; NotifyUpdated(); }
         }
 
-        public byte Frame {
-            get { return mFrame; }
-            set { mFrame = value; NotifyUpdated(); }
-        }
-
+        private MavFrame mFrame;
         private float mP1x;
         private float mP1y;
         private float mP1z;
         private float mP2x;
         private float mP2y;
         private float mP2z;
-        private byte mFrame;
     }
 
 
@@ -2516,44 +2516,44 @@ namespace MavLinkNet
 
     public class UasCommandLong: UasMessage
     {
-        public float Param1 {
+        public MavCmd Command {
+            get { return mCommand; }
+            set { mCommand = value; NotifyUpdated(); }
+        }
+
+        public MavCmd Param1 {
             get { return mParam1; }
             set { mParam1 = value; NotifyUpdated(); }
         }
 
-        public float Param2 {
+        public MavCmd Param2 {
             get { return mParam2; }
             set { mParam2 = value; NotifyUpdated(); }
         }
 
-        public float Param3 {
+        public MavCmd Param3 {
             get { return mParam3; }
             set { mParam3 = value; NotifyUpdated(); }
         }
 
-        public float Param4 {
+        public MavCmd Param4 {
             get { return mParam4; }
             set { mParam4 = value; NotifyUpdated(); }
         }
 
-        public float Param5 {
+        public MavCmd Param5 {
             get { return mParam5; }
             set { mParam5 = value; NotifyUpdated(); }
         }
 
-        public float Param6 {
+        public MavCmd Param6 {
             get { return mParam6; }
             set { mParam6 = value; NotifyUpdated(); }
         }
 
-        public float Param7 {
+        public MavCmd Param7 {
             get { return mParam7; }
             set { mParam7 = value; NotifyUpdated(); }
-        }
-
-        public UInt16 Command {
-            get { return mCommand; }
-            set { mCommand = value; NotifyUpdated(); }
         }
 
         public byte TargetSystem {
@@ -2571,14 +2571,14 @@ namespace MavLinkNet
             set { mConfirmation = value; NotifyUpdated(); }
         }
 
-        private float mParam1;
-        private float mParam2;
-        private float mParam3;
-        private float mParam4;
-        private float mParam5;
-        private float mParam6;
-        private float mParam7;
-        private UInt16 mCommand;
+        private MavCmd mCommand;
+        private MavCmd mParam1;
+        private MavCmd mParam2;
+        private MavCmd mParam3;
+        private MavCmd mParam4;
+        private MavCmd mParam5;
+        private MavCmd mParam6;
+        private MavCmd mParam7;
         private byte mTargetSystem;
         private byte mTargetComponent;
         private byte mConfirmation;
@@ -2590,18 +2590,18 @@ namespace MavLinkNet
 
     public class UasCommandAck: UasMessage
     {
-        public UInt16 Command {
+        public MavCmd Command {
             get { return mCommand; }
             set { mCommand = value; NotifyUpdated(); }
         }
 
-        public byte Result {
+        public MavResult Result {
             get { return mResult; }
             set { mResult = value; NotifyUpdated(); }
         }
 
-        private UInt16 mCommand;
-        private byte mResult;
+        private MavCmd mCommand;
+        private MavResult mResult;
     }
 
 
@@ -2897,7 +2897,7 @@ namespace MavLinkNet
             set { mAux4 = value; NotifyUpdated(); }
         }
 
-        public byte Mode {
+        public MavMode Mode {
             get { return mMode; }
             set { mMode = value; NotifyUpdated(); }
         }
@@ -2916,7 +2916,7 @@ namespace MavLinkNet
         private float mAux2;
         private float mAux3;
         private float mAux4;
-        private byte mMode;
+        private MavMode mMode;
         private byte mNavMode;
     }
 
@@ -4318,7 +4318,7 @@ namespace MavLinkNet
 
     public class UasStatustext: UasMessage
     {
-        public byte Severity {
+        public MavSeverity Severity {
             get { return mSeverity; }
             set { mSeverity = value; NotifyUpdated(); }
         }
@@ -4328,7 +4328,7 @@ namespace MavLinkNet
             set { mText = value; NotifyUpdated(); }
         }
 
-        private byte mSeverity;
+        private MavSeverity mSeverity;
         private char[] mText = new char[50];
     }
 

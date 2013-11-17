@@ -16,6 +16,7 @@ namespace MavLinkObjectGenerator
         FLOAT32,
         UINT64,
         CHAR,
+        ENUM,
         NONE
     };
 

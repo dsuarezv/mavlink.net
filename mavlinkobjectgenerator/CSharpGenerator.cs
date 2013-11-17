@@ -368,7 +368,7 @@ namespace MavLinkObjectGenerator
                 case FieldDataType.UINT8: return "byte";
                 case FieldDataType.INT16: return "Int16";
                 case FieldDataType.UINT16: return "UInt16";
-                //case FieldDataType.enum: return GetEnumName(obj, f, false);
+                case FieldDataType.ENUM: return GetEnumName(f.EnumType);
                 case FieldDataType.INT32: return "Int32";
                 case FieldDataType.UINT32: return "UInt32";
                 case FieldDataType.INT64: return "Int64"; 

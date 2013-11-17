@@ -50,7 +50,7 @@ namespace MavLinkObjectGenerator
 
     public class EnumData : ProtocolObject
     {
-        public List<EnumEntry> EnumEntries = new List<EnumEntry>();
+        public List<EnumEntry> Entries = new List<EnumEntry>();
     }
 
     public class EnumEntry : ProtocolObject

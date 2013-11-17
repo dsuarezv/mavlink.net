@@ -12,24 +12,22 @@ namespace MavLinkObjectGenerator
             mSourceFileName = fileName;
         }
 
-        public void Generate(string targetFileName)
+        public void Generate(string targetFileName, GenericGenerator generator)
         {
             using (XmlTextReader reader = new XmlTextReader(mSourceFileName))
             {
                 using (StreamWriter writer = new StreamWriter(targetFileName))
                 {
-                    Generate(reader, writer);
+                    Generate(reader, writer, generator);
                 }
             }
         }
 
-        public void Generate(XmlTextReader reader, TextWriter writer)
+        public void Generate(XmlTextReader reader, TextWriter writer, GenericGenerator generator)
         {
             ProtocolData result = new ProtocolData();
             Parse(reader, result);
-
-            return;
-            //CSharpGenerator.Write(writer, data);
+            generator.Write(result, writer);
         }
 
 
@@ -89,7 +87,7 @@ namespace MavLinkObjectGenerator
                             currentObject = currentEntry;
                             currentEntry.Name = reader.GetAttribute("name");
                             currentEntry.Value = GetIntFromString(reader.GetAttribute("value"));
-                            currentEnum.EnumEntries.Add(currentEntry);
+                            currentEnum.Entries.Add(currentEntry);
                             break;
                         case "param":
                             currentParam = new EnumEntryParameter();
@@ -142,6 +140,7 @@ namespace MavLinkObjectGenerator
                 case "int64_t": return FieldDataType.INT64;
                 case "uint64_t": return FieldDataType.UINT64;
                 case "char": return FieldDataType.CHAR;
+                case "uint8_t_mavlink_version": return FieldDataType.UINT8;
                 default:
                     Console.Error.WriteLine("Unknown type: " + t);
                     return FieldDataType.NONE;
@@ -150,8 +149,11 @@ namespace MavLinkObjectGenerator
 
         private static int GetFieldTypeNumElements(string t)
         {
+            //if (t.IndexOf('[') != -1) System.Diagnostics.Debugger.Break();
+
             string[] tt = t.Split('[', ']');
-            if (tt.Length == 2) return GetIntFromString(tt[1]);
+            if (tt.Length > 1) 
+                return GetIntFromString(tt[1]);
 
             return 1;
         }

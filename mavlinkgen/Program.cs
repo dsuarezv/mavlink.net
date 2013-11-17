@@ -18,7 +18,7 @@ namespace MavLinkGen
                 {
                     try
                     {
-                        new XmlParser(file).Generate(c.OutputFile);
+                        new XmlParser(file).Generate(c.OutputFile, c.GetGenerator());
                     }
                     catch (Exception ex)
                     {

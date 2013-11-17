@@ -29,7 +29,28 @@ namespace MavLinkObjectGenerator
 
             foreach (string s in parts) sb.Append(GetPascalStyleWord(s));
 
-            return sb.ToString();
+            return GetEscapedItemName(sb.ToString());
+        }
+
+        public static string GetEscapedItemName(string s)
+        {
+            if (s == null || s == "") return "";
+
+            //string old = s;
+
+            if (s[0] >= '0' && s[0] <= '9') s = '_' + s;
+
+            s = s.Trim();
+            s = s.Replace(' ', '_');
+            s = s.Replace('+', '_');
+            s = s.Replace('.', '_');
+            s = s.Replace('(', '_');
+            s = s.Replace(')', '_');
+            s = s.Replace('-', '_');
+
+            //Console.WriteLine("D: initial: [{0}] processed: [{1}]", old, s);
+
+            return s;
         }
 
         private static string GetPascalStyleWord(string word)

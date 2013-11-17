@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MavLinkObjectGenerator;
 
 namespace MavLinkGen
 {
@@ -31,17 +32,15 @@ namespace MavLinkGen
         }
 
 
+        // __ API _____________________________________________________________
+
+
         public void CheckValid()
         {
             if (mFiles.Count == 0)
             {
                 throw new Exception(GetUsage());
             }
-        }
-
-        private string GetUsage()
-        {
-            return "Usage: mavlinkgen [--output=<output directory>]  <xml definition file>";
         }
 
         public string GetOption(string opt)
@@ -52,6 +51,31 @@ namespace MavLinkGen
                 return result;
 
             return "";
+        }
+
+        public GenericGenerator GetGenerator()
+        {
+            switch (GetOption("type").ToLower())
+            { 
+                case "c":
+                    throw new NotImplementedException("C generation not supported yet");
+                default:
+                    return new CSharpGenerator();
+            }
+        }
+
+        // __ Impl ____________________________________________________________
+
+
+        private string GetUsage()
+        {
+            return
+                "Usage: mavlinkgen [options] <xml definition file>\n" + 
+                "Options:\n" +
+                "  --output=<output directory>\n" + 
+                "  [--type=<language>]: CSharp is the default and only option for now.\n" +
+                "  \n" + 
+                "";
         }
 
         private void Parse(string[] args)

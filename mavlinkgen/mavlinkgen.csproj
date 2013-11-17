@@ -39,9 +39,6 @@
     <Compile Include="Configuration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\mavlinkobjectgenerator\mavlinkobjectgenerator.csproj">
       <Project>{4cd09dd8-735e-465e-96e7-58f3336c3030}</Project>
       <Name>mavlinkobjectgenerator</Name>

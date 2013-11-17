@@ -72,7 +72,7 @@ namespace MavLinkObjectGenerator
                 WriteProperties(m);
                 WriteSerialize(m);
                 WriteDeserialize(m);
-
+                WriteToString(m);
                 WritePrivateFields(m);
                 WriteClassFooter(m);
             }
@@ -191,36 +191,36 @@ namespace MavLinkObjectGenerator
             WL();
         }
 
-        //private static void WriteToString(TextWriter w, ProtocolData obj)
-        //{
-        //    WL(w, "        public override string ToString()");
-        //    WL(w, "        {");
-        //    WL(w, "            System.Text.StringBuilder sb = new System.Text.StringBuilder();");
-        //    WL(w);
-        //    WL(w, "            sb.Append(\"{0} \\n\");", obj.Name);
+        private void WriteToString(MessageData m)
+        {
+            WL("        public override string ToString()");
+            WL("        {");
+            WL("            System.Text.StringBuilder sb = new System.Text.StringBuilder();");
+            WL();
+            WL("            sb.Append(\"{0} \\n\");", Utils.GetPascalStyleString(m.Name));
 
-        //    foreach (FieldData f in obj.Fields)
-        //    {
-        //        if (f.NumElements == 1)
-        //        {
-        //            WL(w, "            sb.AppendFormat(\"    {0}: {{0}} {1}\\n\", {0});", f.Name, f.Units);
-        //        }
-        //        else
-        //        {
-        //            WL(w, "            sb.Append(\"    {0}\\n\");", f.Name);
-        //            for (int i = 0; i < f.NumElements; ++i)
-        //            {
-        //                string elemName = (f.ElementNames.Count == f.NumElements) ? f.ElementNames[i] : "";
-        //                WL(w, "            sb.AppendFormat(\"        {1}: {{0}} {3}\\n\", {0}[{2}]);", f.Name, elemName, i, f.Units);
-        //            }
-        //        }
-        //    }
+            foreach (FieldData f in m.Fields)
+            {
+                if (f.NumElements == 1)
+                {
+                    WL("            sb.AppendFormat(\"    {0}: {{0}}\\n\", {1});", GetFieldName(f), GetPrivateFieldName(f));
+                }
+                else
+                {
+                    WL("            sb.Append(\"    {0}\\n\");", GetFieldName(f));
+                    for (int i = 0; i < f.NumElements; ++i)
+                    {
+                        //string elemName = (f.ElementNames.Count == f.NumElements) ? f.ElementNames[i] : "";
+                        WL("            sb.AppendFormat(\"        [{1}]: {{0}}\\n\", {2}[{1}]);", GetFieldName(f), i, GetPrivateFieldName(f));
+                    }
+                }
+            }
 
-        //    WL(w);
-        //    WL(w, "            return sb.ToString();");
-        //    WL(w, "        }");
-        //    WL(w);
-        //}
+            WL();
+            WL("            return sb.ToString();");
+            WL("        }");
+            WL();
+        }
 
         private void WritePrivateFields(MessageData m)
         {

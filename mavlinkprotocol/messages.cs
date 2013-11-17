@@ -833,6 +833,21 @@ namespace MavLinkNet
             this.mMavlinkVersion = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Heartbeat \n");
+            sb.AppendFormat("    CustomMode: {0}\n", mCustomMode);
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.AppendFormat("    Autopilot: {0}\n", mAutopilot);
+            sb.AppendFormat("    BaseMode: {0}\n", mBaseMode);
+            sb.AppendFormat("    SystemStatus: {0}\n", mSystemStatus);
+            sb.AppendFormat("    MavlinkVersion: {0}\n", mMavlinkVersion);
+
+            return sb.ToString();
+        }
+
         private UInt32 mCustomMode;
         private MavType mType;
         private MavAutopilot mAutopilot;
@@ -988,6 +1003,28 @@ namespace MavLinkNet
             this.mBatteryRemaining = s.ReadSByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SysStatus \n");
+            sb.AppendFormat("    OnboardControlSensorsPresent: {0}\n", mOnboardControlSensorsPresent);
+            sb.AppendFormat("    OnboardControlSensorsEnabled: {0}\n", mOnboardControlSensorsEnabled);
+            sb.AppendFormat("    OnboardControlSensorsHealth: {0}\n", mOnboardControlSensorsHealth);
+            sb.AppendFormat("    Load: {0}\n", mLoad);
+            sb.AppendFormat("    VoltageBattery: {0}\n", mVoltageBattery);
+            sb.AppendFormat("    CurrentBattery: {0}\n", mCurrentBattery);
+            sb.AppendFormat("    DropRateComm: {0}\n", mDropRateComm);
+            sb.AppendFormat("    ErrorsComm: {0}\n", mErrorsComm);
+            sb.AppendFormat("    ErrorsCount1: {0}\n", mErrorsCount1);
+            sb.AppendFormat("    ErrorsCount2: {0}\n", mErrorsCount2);
+            sb.AppendFormat("    ErrorsCount3: {0}\n", mErrorsCount3);
+            sb.AppendFormat("    ErrorsCount4: {0}\n", mErrorsCount4);
+            sb.AppendFormat("    BatteryRemaining: {0}\n", mBatteryRemaining);
+
+            return sb.ToString();
+        }
+
         private MavSysStatusSensor mOnboardControlSensorsPresent;
         private MavSysStatusSensor mOnboardControlSensorsEnabled;
         private MavSysStatusSensor mOnboardControlSensorsHealth;
@@ -1038,6 +1075,17 @@ namespace MavLinkNet
         {
             this.mTimeUnixUsec = s.ReadUInt64();
             this.mTimeBootMs = s.ReadUInt32();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SystemTime \n");
+            sb.AppendFormat("    TimeUnixUsec: {0}\n", mTimeUnixUsec);
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUnixUsec;
@@ -1099,6 +1147,19 @@ namespace MavLinkNet
             this.mSeq = s.ReadUInt32();
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Ping \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -1212,6 +1273,44 @@ namespace MavLinkNet
             this.mPasskey[24] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ChangeOperatorControl \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    ControlRequest: {0}\n", mControlRequest);
+            sb.AppendFormat("    Version: {0}\n", mVersion);
+            sb.Append("    Passkey\n");
+            sb.AppendFormat("        [0]: {0}\n", mPasskey[0]);
+            sb.AppendFormat("        [1]: {0}\n", mPasskey[1]);
+            sb.AppendFormat("        [2]: {0}\n", mPasskey[2]);
+            sb.AppendFormat("        [3]: {0}\n", mPasskey[3]);
+            sb.AppendFormat("        [4]: {0}\n", mPasskey[4]);
+            sb.AppendFormat("        [5]: {0}\n", mPasskey[5]);
+            sb.AppendFormat("        [6]: {0}\n", mPasskey[6]);
+            sb.AppendFormat("        [7]: {0}\n", mPasskey[7]);
+            sb.AppendFormat("        [8]: {0}\n", mPasskey[8]);
+            sb.AppendFormat("        [9]: {0}\n", mPasskey[9]);
+            sb.AppendFormat("        [10]: {0}\n", mPasskey[10]);
+            sb.AppendFormat("        [11]: {0}\n", mPasskey[11]);
+            sb.AppendFormat("        [12]: {0}\n", mPasskey[12]);
+            sb.AppendFormat("        [13]: {0}\n", mPasskey[13]);
+            sb.AppendFormat("        [14]: {0}\n", mPasskey[14]);
+            sb.AppendFormat("        [15]: {0}\n", mPasskey[15]);
+            sb.AppendFormat("        [16]: {0}\n", mPasskey[16]);
+            sb.AppendFormat("        [17]: {0}\n", mPasskey[17]);
+            sb.AppendFormat("        [18]: {0}\n", mPasskey[18]);
+            sb.AppendFormat("        [19]: {0}\n", mPasskey[19]);
+            sb.AppendFormat("        [20]: {0}\n", mPasskey[20]);
+            sb.AppendFormat("        [21]: {0}\n", mPasskey[21]);
+            sb.AppendFormat("        [22]: {0}\n", mPasskey[22]);
+            sb.AppendFormat("        [23]: {0}\n", mPasskey[23]);
+            sb.AppendFormat("        [24]: {0}\n", mPasskey[24]);
+
+            return sb.ToString();
+        }
+
         private byte mTargetSystem;
         private byte mControlRequest;
         private byte mVersion;
@@ -1263,6 +1362,18 @@ namespace MavLinkNet
             this.mGcsSystemId = s.ReadByte();
             this.mControlRequest = s.ReadByte();
             this.mAck = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ChangeOperatorControlAck \n");
+            sb.AppendFormat("    GcsSystemId: {0}\n", mGcsSystemId);
+            sb.AppendFormat("    ControlRequest: {0}\n", mControlRequest);
+            sb.AppendFormat("    Ack: {0}\n", mAck);
+
+            return sb.ToString();
         }
 
         private byte mGcsSystemId;
@@ -1359,6 +1470,48 @@ namespace MavLinkNet
             this.mKey[31] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("AuthKey \n");
+            sb.Append("    Key\n");
+            sb.AppendFormat("        [0]: {0}\n", mKey[0]);
+            sb.AppendFormat("        [1]: {0}\n", mKey[1]);
+            sb.AppendFormat("        [2]: {0}\n", mKey[2]);
+            sb.AppendFormat("        [3]: {0}\n", mKey[3]);
+            sb.AppendFormat("        [4]: {0}\n", mKey[4]);
+            sb.AppendFormat("        [5]: {0}\n", mKey[5]);
+            sb.AppendFormat("        [6]: {0}\n", mKey[6]);
+            sb.AppendFormat("        [7]: {0}\n", mKey[7]);
+            sb.AppendFormat("        [8]: {0}\n", mKey[8]);
+            sb.AppendFormat("        [9]: {0}\n", mKey[9]);
+            sb.AppendFormat("        [10]: {0}\n", mKey[10]);
+            sb.AppendFormat("        [11]: {0}\n", mKey[11]);
+            sb.AppendFormat("        [12]: {0}\n", mKey[12]);
+            sb.AppendFormat("        [13]: {0}\n", mKey[13]);
+            sb.AppendFormat("        [14]: {0}\n", mKey[14]);
+            sb.AppendFormat("        [15]: {0}\n", mKey[15]);
+            sb.AppendFormat("        [16]: {0}\n", mKey[16]);
+            sb.AppendFormat("        [17]: {0}\n", mKey[17]);
+            sb.AppendFormat("        [18]: {0}\n", mKey[18]);
+            sb.AppendFormat("        [19]: {0}\n", mKey[19]);
+            sb.AppendFormat("        [20]: {0}\n", mKey[20]);
+            sb.AppendFormat("        [21]: {0}\n", mKey[21]);
+            sb.AppendFormat("        [22]: {0}\n", mKey[22]);
+            sb.AppendFormat("        [23]: {0}\n", mKey[23]);
+            sb.AppendFormat("        [24]: {0}\n", mKey[24]);
+            sb.AppendFormat("        [25]: {0}\n", mKey[25]);
+            sb.AppendFormat("        [26]: {0}\n", mKey[26]);
+            sb.AppendFormat("        [27]: {0}\n", mKey[27]);
+            sb.AppendFormat("        [28]: {0}\n", mKey[28]);
+            sb.AppendFormat("        [29]: {0}\n", mKey[29]);
+            sb.AppendFormat("        [30]: {0}\n", mKey[30]);
+            sb.AppendFormat("        [31]: {0}\n", mKey[31]);
+
+            return sb.ToString();
+        }
+
         private char[] mKey = new char[32];
     }
 
@@ -1407,6 +1560,18 @@ namespace MavLinkNet
             this.mCustomMode = s.ReadUInt32();
             this.mTargetSystem = s.ReadByte();
             this.mBaseMode = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetMode \n");
+            sb.AppendFormat("    CustomMode: {0}\n", mCustomMode);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    BaseMode: {0}\n", mBaseMode);
+
+            return sb.ToString();
         }
 
         private UInt32 mCustomMode;
@@ -1501,6 +1666,35 @@ namespace MavLinkNet
             this.mParamId[15] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ParamRequestRead \n");
+            sb.AppendFormat("    ParamIndex: {0}\n", mParamIndex);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.Append("    ParamId\n");
+            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
+            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
+            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
+            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
+            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
+            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
+            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
+            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
+            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
+            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
+            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
+            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
+            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
+            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
+            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
+            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
+
+            return sb.ToString();
+        }
+
         private Int16 mParamIndex;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -1542,6 +1736,17 @@ namespace MavLinkNet
         {
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ParamRequestList \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
         }
 
         private byte mTargetSystem;
@@ -1643,6 +1848,36 @@ namespace MavLinkNet
             this.mParamId[14] = s.ReadChar();
             this.mParamId[15] = s.ReadChar();
             this.mParamType = (MavParamType)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ParamValue \n");
+            sb.AppendFormat("    ParamValue: {0}\n", mParamValue);
+            sb.AppendFormat("    ParamCount: {0}\n", mParamCount);
+            sb.AppendFormat("    ParamIndex: {0}\n", mParamIndex);
+            sb.Append("    ParamId\n");
+            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
+            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
+            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
+            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
+            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
+            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
+            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
+            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
+            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
+            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
+            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
+            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
+            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
+            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
+            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
+            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
+            sb.AppendFormat("    ParamType: {0}\n", mParamType);
+
+            return sb.ToString();
         }
 
         private float mParamValue;
@@ -1747,6 +1982,36 @@ namespace MavLinkNet
             this.mParamId[14] = s.ReadChar();
             this.mParamId[15] = s.ReadChar();
             this.mParamType = (MavParamType)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ParamSet \n");
+            sb.AppendFormat("    ParamValue: {0}\n", mParamValue);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.Append("    ParamId\n");
+            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
+            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
+            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
+            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
+            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
+            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
+            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
+            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
+            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
+            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
+            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
+            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
+            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
+            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
+            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
+            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
+            sb.AppendFormat("    ParamType: {0}\n", mParamType);
+
+            return sb.ToString();
         }
 
         private float mParamValue;
@@ -1871,6 +2136,25 @@ namespace MavLinkNet
             this.mCog = s.ReadUInt16();
             this.mFixType = s.ReadByte();
             this.mSatellitesVisible = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GpsRawInt \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    Eph: {0}\n", mEph);
+            sb.AppendFormat("    Epv: {0}\n", mEpv);
+            sb.AppendFormat("    Vel: {0}\n", mVel);
+            sb.AppendFormat("    Cog: {0}\n", mCog);
+            sb.AppendFormat("    FixType: {0}\n", mFixType);
+            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -2152,6 +2436,121 @@ namespace MavLinkNet
             this.mSatelliteSnr[19] = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GpsStatus \n");
+            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
+            sb.Append("    SatellitePrn\n");
+            sb.AppendFormat("        [0]: {0}\n", mSatellitePrn[0]);
+            sb.AppendFormat("        [1]: {0}\n", mSatellitePrn[1]);
+            sb.AppendFormat("        [2]: {0}\n", mSatellitePrn[2]);
+            sb.AppendFormat("        [3]: {0}\n", mSatellitePrn[3]);
+            sb.AppendFormat("        [4]: {0}\n", mSatellitePrn[4]);
+            sb.AppendFormat("        [5]: {0}\n", mSatellitePrn[5]);
+            sb.AppendFormat("        [6]: {0}\n", mSatellitePrn[6]);
+            sb.AppendFormat("        [7]: {0}\n", mSatellitePrn[7]);
+            sb.AppendFormat("        [8]: {0}\n", mSatellitePrn[8]);
+            sb.AppendFormat("        [9]: {0}\n", mSatellitePrn[9]);
+            sb.AppendFormat("        [10]: {0}\n", mSatellitePrn[10]);
+            sb.AppendFormat("        [11]: {0}\n", mSatellitePrn[11]);
+            sb.AppendFormat("        [12]: {0}\n", mSatellitePrn[12]);
+            sb.AppendFormat("        [13]: {0}\n", mSatellitePrn[13]);
+            sb.AppendFormat("        [14]: {0}\n", mSatellitePrn[14]);
+            sb.AppendFormat("        [15]: {0}\n", mSatellitePrn[15]);
+            sb.AppendFormat("        [16]: {0}\n", mSatellitePrn[16]);
+            sb.AppendFormat("        [17]: {0}\n", mSatellitePrn[17]);
+            sb.AppendFormat("        [18]: {0}\n", mSatellitePrn[18]);
+            sb.AppendFormat("        [19]: {0}\n", mSatellitePrn[19]);
+            sb.Append("    SatelliteUsed\n");
+            sb.AppendFormat("        [0]: {0}\n", mSatelliteUsed[0]);
+            sb.AppendFormat("        [1]: {0}\n", mSatelliteUsed[1]);
+            sb.AppendFormat("        [2]: {0}\n", mSatelliteUsed[2]);
+            sb.AppendFormat("        [3]: {0}\n", mSatelliteUsed[3]);
+            sb.AppendFormat("        [4]: {0}\n", mSatelliteUsed[4]);
+            sb.AppendFormat("        [5]: {0}\n", mSatelliteUsed[5]);
+            sb.AppendFormat("        [6]: {0}\n", mSatelliteUsed[6]);
+            sb.AppendFormat("        [7]: {0}\n", mSatelliteUsed[7]);
+            sb.AppendFormat("        [8]: {0}\n", mSatelliteUsed[8]);
+            sb.AppendFormat("        [9]: {0}\n", mSatelliteUsed[9]);
+            sb.AppendFormat("        [10]: {0}\n", mSatelliteUsed[10]);
+            sb.AppendFormat("        [11]: {0}\n", mSatelliteUsed[11]);
+            sb.AppendFormat("        [12]: {0}\n", mSatelliteUsed[12]);
+            sb.AppendFormat("        [13]: {0}\n", mSatelliteUsed[13]);
+            sb.AppendFormat("        [14]: {0}\n", mSatelliteUsed[14]);
+            sb.AppendFormat("        [15]: {0}\n", mSatelliteUsed[15]);
+            sb.AppendFormat("        [16]: {0}\n", mSatelliteUsed[16]);
+            sb.AppendFormat("        [17]: {0}\n", mSatelliteUsed[17]);
+            sb.AppendFormat("        [18]: {0}\n", mSatelliteUsed[18]);
+            sb.AppendFormat("        [19]: {0}\n", mSatelliteUsed[19]);
+            sb.Append("    SatelliteElevation\n");
+            sb.AppendFormat("        [0]: {0}\n", mSatelliteElevation[0]);
+            sb.AppendFormat("        [1]: {0}\n", mSatelliteElevation[1]);
+            sb.AppendFormat("        [2]: {0}\n", mSatelliteElevation[2]);
+            sb.AppendFormat("        [3]: {0}\n", mSatelliteElevation[3]);
+            sb.AppendFormat("        [4]: {0}\n", mSatelliteElevation[4]);
+            sb.AppendFormat("        [5]: {0}\n", mSatelliteElevation[5]);
+            sb.AppendFormat("        [6]: {0}\n", mSatelliteElevation[6]);
+            sb.AppendFormat("        [7]: {0}\n", mSatelliteElevation[7]);
+            sb.AppendFormat("        [8]: {0}\n", mSatelliteElevation[8]);
+            sb.AppendFormat("        [9]: {0}\n", mSatelliteElevation[9]);
+            sb.AppendFormat("        [10]: {0}\n", mSatelliteElevation[10]);
+            sb.AppendFormat("        [11]: {0}\n", mSatelliteElevation[11]);
+            sb.AppendFormat("        [12]: {0}\n", mSatelliteElevation[12]);
+            sb.AppendFormat("        [13]: {0}\n", mSatelliteElevation[13]);
+            sb.AppendFormat("        [14]: {0}\n", mSatelliteElevation[14]);
+            sb.AppendFormat("        [15]: {0}\n", mSatelliteElevation[15]);
+            sb.AppendFormat("        [16]: {0}\n", mSatelliteElevation[16]);
+            sb.AppendFormat("        [17]: {0}\n", mSatelliteElevation[17]);
+            sb.AppendFormat("        [18]: {0}\n", mSatelliteElevation[18]);
+            sb.AppendFormat("        [19]: {0}\n", mSatelliteElevation[19]);
+            sb.Append("    SatelliteAzimuth\n");
+            sb.AppendFormat("        [0]: {0}\n", mSatelliteAzimuth[0]);
+            sb.AppendFormat("        [1]: {0}\n", mSatelliteAzimuth[1]);
+            sb.AppendFormat("        [2]: {0}\n", mSatelliteAzimuth[2]);
+            sb.AppendFormat("        [3]: {0}\n", mSatelliteAzimuth[3]);
+            sb.AppendFormat("        [4]: {0}\n", mSatelliteAzimuth[4]);
+            sb.AppendFormat("        [5]: {0}\n", mSatelliteAzimuth[5]);
+            sb.AppendFormat("        [6]: {0}\n", mSatelliteAzimuth[6]);
+            sb.AppendFormat("        [7]: {0}\n", mSatelliteAzimuth[7]);
+            sb.AppendFormat("        [8]: {0}\n", mSatelliteAzimuth[8]);
+            sb.AppendFormat("        [9]: {0}\n", mSatelliteAzimuth[9]);
+            sb.AppendFormat("        [10]: {0}\n", mSatelliteAzimuth[10]);
+            sb.AppendFormat("        [11]: {0}\n", mSatelliteAzimuth[11]);
+            sb.AppendFormat("        [12]: {0}\n", mSatelliteAzimuth[12]);
+            sb.AppendFormat("        [13]: {0}\n", mSatelliteAzimuth[13]);
+            sb.AppendFormat("        [14]: {0}\n", mSatelliteAzimuth[14]);
+            sb.AppendFormat("        [15]: {0}\n", mSatelliteAzimuth[15]);
+            sb.AppendFormat("        [16]: {0}\n", mSatelliteAzimuth[16]);
+            sb.AppendFormat("        [17]: {0}\n", mSatelliteAzimuth[17]);
+            sb.AppendFormat("        [18]: {0}\n", mSatelliteAzimuth[18]);
+            sb.AppendFormat("        [19]: {0}\n", mSatelliteAzimuth[19]);
+            sb.Append("    SatelliteSnr\n");
+            sb.AppendFormat("        [0]: {0}\n", mSatelliteSnr[0]);
+            sb.AppendFormat("        [1]: {0}\n", mSatelliteSnr[1]);
+            sb.AppendFormat("        [2]: {0}\n", mSatelliteSnr[2]);
+            sb.AppendFormat("        [3]: {0}\n", mSatelliteSnr[3]);
+            sb.AppendFormat("        [4]: {0}\n", mSatelliteSnr[4]);
+            sb.AppendFormat("        [5]: {0}\n", mSatelliteSnr[5]);
+            sb.AppendFormat("        [6]: {0}\n", mSatelliteSnr[6]);
+            sb.AppendFormat("        [7]: {0}\n", mSatelliteSnr[7]);
+            sb.AppendFormat("        [8]: {0}\n", mSatelliteSnr[8]);
+            sb.AppendFormat("        [9]: {0}\n", mSatelliteSnr[9]);
+            sb.AppendFormat("        [10]: {0}\n", mSatelliteSnr[10]);
+            sb.AppendFormat("        [11]: {0}\n", mSatelliteSnr[11]);
+            sb.AppendFormat("        [12]: {0}\n", mSatelliteSnr[12]);
+            sb.AppendFormat("        [13]: {0}\n", mSatelliteSnr[13]);
+            sb.AppendFormat("        [14]: {0}\n", mSatelliteSnr[14]);
+            sb.AppendFormat("        [15]: {0}\n", mSatelliteSnr[15]);
+            sb.AppendFormat("        [16]: {0}\n", mSatelliteSnr[16]);
+            sb.AppendFormat("        [17]: {0}\n", mSatelliteSnr[17]);
+            sb.AppendFormat("        [18]: {0}\n", mSatelliteSnr[18]);
+            sb.AppendFormat("        [19]: {0}\n", mSatelliteSnr[19]);
+
+            return sb.ToString();
+        }
+
         private byte mSatellitesVisible;
         private byte[] mSatellitePrn = new byte[20];
         private byte[] mSatelliteUsed = new byte[20];
@@ -2275,6 +2674,25 @@ namespace MavLinkNet
             this.mXmag = s.ReadInt16();
             this.mYmag = s.ReadInt16();
             this.mZmag = s.ReadInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ScaledImu \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Xmag: {0}\n", mXmag);
+            sb.AppendFormat("    Ymag: {0}\n", mYmag);
+            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -2406,6 +2824,25 @@ namespace MavLinkNet
             this.mZmag = s.ReadInt16();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RawImu \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Xmag: {0}\n", mXmag);
+            sb.AppendFormat("    Ymag: {0}\n", mYmag);
+            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private Int16 mXacc;
         private Int16 mYacc;
@@ -2485,6 +2922,20 @@ namespace MavLinkNet
             this.mTemperature = s.ReadInt16();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RawPressure \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    PressAbs: {0}\n", mPressAbs);
+            sb.AppendFormat("    PressDiff1: {0}\n", mPressDiff1);
+            sb.AppendFormat("    PressDiff2: {0}\n", mPressDiff2);
+            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private Int16 mPressAbs;
         private Int16 mPressDiff1;
@@ -2547,6 +2998,19 @@ namespace MavLinkNet
             this.mPressAbs = s.ReadSingle();
             this.mPressDiff = s.ReadSingle();
             this.mTemperature = s.ReadInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ScaledPressure \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    PressAbs: {0}\n", mPressAbs);
+            sb.AppendFormat("    PressDiff: {0}\n", mPressDiff);
+            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -2640,6 +3104,22 @@ namespace MavLinkNet
             this.mRollspeed = s.ReadSingle();
             this.mPitchspeed = s.ReadSingle();
             this.mYawspeed = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Attitude \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
+            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
+            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -2748,6 +3228,23 @@ namespace MavLinkNet
             this.mYawspeed = s.ReadSingle();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("AttitudeQuaternion \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Q1: {0}\n", mQ1);
+            sb.AppendFormat("    Q2: {0}\n", mQ2);
+            sb.AppendFormat("    Q3: {0}\n", mQ3);
+            sb.AppendFormat("    Q4: {0}\n", mQ4);
+            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
+            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
+            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeBootMs;
         private float mQ1;
         private float mQ2;
@@ -2843,6 +3340,22 @@ namespace MavLinkNet
             this.mVx = s.ReadSingle();
             this.mVy = s.ReadSingle();
             this.mVz = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("LocalPositionNed \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Vx: {0}\n", mVx);
+            sb.AppendFormat("    Vy: {0}\n", mVy);
+            sb.AppendFormat("    Vz: {0}\n", mVz);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -2959,6 +3472,24 @@ namespace MavLinkNet
             this.mVy = s.ReadInt16();
             this.mVz = s.ReadInt16();
             this.mHdg = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GlobalPositionInt \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    RelativeAlt: {0}\n", mRelativeAlt);
+            sb.AppendFormat("    Vx: {0}\n", mVx);
+            sb.AppendFormat("    Vy: {0}\n", mVy);
+            sb.AppendFormat("    Vz: {0}\n", mVz);
+            sb.AppendFormat("    Hdg: {0}\n", mHdg);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -3097,6 +3628,26 @@ namespace MavLinkNet
             this.mChan8Scaled = s.ReadInt16();
             this.mPort = s.ReadByte();
             this.mRssi = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RcChannelsScaled \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Chan1Scaled: {0}\n", mChan1Scaled);
+            sb.AppendFormat("    Chan2Scaled: {0}\n", mChan2Scaled);
+            sb.AppendFormat("    Chan3Scaled: {0}\n", mChan3Scaled);
+            sb.AppendFormat("    Chan4Scaled: {0}\n", mChan4Scaled);
+            sb.AppendFormat("    Chan5Scaled: {0}\n", mChan5Scaled);
+            sb.AppendFormat("    Chan6Scaled: {0}\n", mChan6Scaled);
+            sb.AppendFormat("    Chan7Scaled: {0}\n", mChan7Scaled);
+            sb.AppendFormat("    Chan8Scaled: {0}\n", mChan8Scaled);
+            sb.AppendFormat("    Port: {0}\n", mPort);
+            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -3239,6 +3790,26 @@ namespace MavLinkNet
             this.mRssi = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RcChannelsRaw \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
+            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
+            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
+            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
+            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
+            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
+            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
+            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
+            sb.AppendFormat("    Port: {0}\n", mPort);
+            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeBootMs;
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
@@ -3369,6 +3940,25 @@ namespace MavLinkNet
             this.mPort = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ServoOutputRaw \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Servo1Raw: {0}\n", mServo1Raw);
+            sb.AppendFormat("    Servo2Raw: {0}\n", mServo2Raw);
+            sb.AppendFormat("    Servo3Raw: {0}\n", mServo3Raw);
+            sb.AppendFormat("    Servo4Raw: {0}\n", mServo4Raw);
+            sb.AppendFormat("    Servo5Raw: {0}\n", mServo5Raw);
+            sb.AppendFormat("    Servo6Raw: {0}\n", mServo6Raw);
+            sb.AppendFormat("    Servo7Raw: {0}\n", mServo7Raw);
+            sb.AppendFormat("    Servo8Raw: {0}\n", mServo8Raw);
+            sb.AppendFormat("    Port: {0}\n", mPort);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeUsec;
         private UInt16 mServo1Raw;
         private UInt16 mServo2Raw;
@@ -3438,6 +4028,19 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionRequestPartialList \n");
+            sb.AppendFormat("    StartIndex: {0}\n", mStartIndex);
+            sb.AppendFormat("    EndIndex: {0}\n", mEndIndex);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private Int16 mStartIndex;
         private Int16 mEndIndex;
         private byte mTargetSystem;
@@ -3499,6 +4102,19 @@ namespace MavLinkNet
             this.mEndIndex = s.ReadInt16();
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionWritePartialList \n");
+            sb.AppendFormat("    StartIndex: {0}\n", mStartIndex);
+            sb.AppendFormat("    EndIndex: {0}\n", mEndIndex);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
         }
 
         private Int16 mStartIndex;
@@ -3664,6 +4280,29 @@ namespace MavLinkNet
             this.mAutocontinue = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionItem \n");
+            sb.AppendFormat("    Param1: {0}\n", mParam1);
+            sb.AppendFormat("    Param2: {0}\n", mParam2);
+            sb.AppendFormat("    Param3: {0}\n", mParam3);
+            sb.AppendFormat("    Param4: {0}\n", mParam4);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            sb.AppendFormat("    Command: {0}\n", mCommand);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Frame: {0}\n", mFrame);
+            sb.AppendFormat("    Current: {0}\n", mCurrent);
+            sb.AppendFormat("    Autocontinue: {0}\n", mAutocontinue);
+
+            return sb.ToString();
+        }
+
         private float mParam1;
         private float mParam2;
         private float mParam3;
@@ -3727,6 +4366,18 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionRequest \n");
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private UInt16 mSeq;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -3779,6 +4430,18 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionSetCurrent \n");
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private UInt16 mSeq;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -3809,6 +4472,16 @@ namespace MavLinkNet
         internal override void DeserializeBody(BinaryReader s)
         {
             this.mSeq = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionCurrent \n");
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+
+            return sb.ToString();
         }
 
         private UInt16 mSeq;
@@ -3849,6 +4522,17 @@ namespace MavLinkNet
         {
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionRequestList \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
         }
 
         private byte mTargetSystem;
@@ -3902,6 +4586,18 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionCount \n");
+            sb.AppendFormat("    Count: {0}\n", mCount);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private UInt16 mCount;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -3944,6 +4640,17 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionClearAll \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private byte mTargetSystem;
         private byte mTargetComponent;
     }
@@ -3973,6 +4680,16 @@ namespace MavLinkNet
         internal override void DeserializeBody(BinaryReader s)
         {
             this.mSeq = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionItemReached \n");
+            sb.AppendFormat("    Seq: {0}\n", mSeq);
+
+            return sb.ToString();
         }
 
         private UInt16 mSeq;
@@ -4023,6 +4740,18 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
             this.mType = (MavMissionResult)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MissionAck \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Type: {0}\n", mType);
+
+            return sb.ToString();
         }
 
         private byte mTargetSystem;
@@ -4087,6 +4816,19 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetGpsGlobalOrigin \n");
+            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
+            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
+            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+
+            return sb.ToString();
+        }
+
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -4138,6 +4880,18 @@ namespace MavLinkNet
             this.mLatitude = s.ReadInt32();
             this.mLongitude = s.ReadInt32();
             this.mAltitude = s.ReadInt32();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GpsGlobalOrigin \n");
+            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
+            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
+            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
+
+            return sb.ToString();
         }
 
         private Int32 mLatitude;
@@ -4232,6 +4986,22 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetLocalPositionSetpoint \n");
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+
+            return sb.ToString();
+        }
+
         private float mX;
         private float mY;
         private float mZ;
@@ -4308,6 +5078,20 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("LocalPositionSetpoint \n");
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+
+            return sb.ToString();
+        }
+
         private float mX;
         private float mY;
         private float mZ;
@@ -4382,6 +5166,20 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GlobalPositionSetpointInt \n");
+            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
+            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
+            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+
+            return sb.ToString();
+        }
+
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -4454,6 +5252,20 @@ namespace MavLinkNet
             this.mAltitude = s.ReadInt32();
             this.mYaw = s.ReadInt16();
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetGlobalPositionSetpointInt \n");
+            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
+            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
+            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+
+            return sb.ToString();
         }
 
         private Int32 mLatitude;
@@ -4570,6 +5382,24 @@ namespace MavLinkNet
             this.mFrame = (MavFrame)s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SafetySetAllowedArea \n");
+            sb.AppendFormat("    P1x: {0}\n", mP1x);
+            sb.AppendFormat("    P1y: {0}\n", mP1y);
+            sb.AppendFormat("    P1z: {0}\n", mP1z);
+            sb.AppendFormat("    P2x: {0}\n", mP2x);
+            sb.AppendFormat("    P2y: {0}\n", mP2y);
+            sb.AppendFormat("    P2z: {0}\n", mP2z);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Frame: {0}\n", mFrame);
+
+            return sb.ToString();
+        }
+
         private float mP1x;
         private float mP1y;
         private float mP1z;
@@ -4668,6 +5498,22 @@ namespace MavLinkNet
             this.mFrame = (MavFrame)s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SafetyAllowedArea \n");
+            sb.AppendFormat("    P1x: {0}\n", mP1x);
+            sb.AppendFormat("    P1y: {0}\n", mP1y);
+            sb.AppendFormat("    P1z: {0}\n", mP1z);
+            sb.AppendFormat("    P2x: {0}\n", mP2x);
+            sb.AppendFormat("    P2y: {0}\n", mP2y);
+            sb.AppendFormat("    P2z: {0}\n", mP2z);
+            sb.AppendFormat("    Frame: {0}\n", mFrame);
+
+            return sb.ToString();
+        }
+
         private float mP1x;
         private float mP1y;
         private float mP1z;
@@ -4752,6 +5598,21 @@ namespace MavLinkNet
             this.mThrust = s.ReadSingle();
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetRollPitchYawThrust \n");
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
         }
 
         private float mRoll;
@@ -4839,6 +5700,21 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetRollPitchYawSpeedThrust \n");
+            sb.AppendFormat("    RollSpeed: {0}\n", mRollSpeed);
+            sb.AppendFormat("    PitchSpeed: {0}\n", mPitchSpeed);
+            sb.AppendFormat("    YawSpeed: {0}\n", mYawSpeed);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private float mRollSpeed;
         private float mPitchSpeed;
         private float mYawSpeed;
@@ -4912,6 +5788,20 @@ namespace MavLinkNet
             this.mPitch = s.ReadSingle();
             this.mYaw = s.ReadSingle();
             this.mThrust = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RollPitchYawThrustSetpoint \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -4988,6 +5878,20 @@ namespace MavLinkNet
             this.mThrust = s.ReadSingle();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RollPitchYawSpeedThrustSetpoint \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    RollSpeed: {0}\n", mRollSpeed);
+            sb.AppendFormat("    PitchSpeed: {0}\n", mPitchSpeed);
+            sb.AppendFormat("    YawSpeed: {0}\n", mYawSpeed);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeBootMs;
         private float mRollSpeed;
         private float mPitchSpeed;
@@ -5060,6 +5964,20 @@ namespace MavLinkNet
             this.mMotorBackSe = s.ReadUInt16();
             this.mMotorLeftSw = s.ReadUInt16();
             this.mTargetSystem = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetQuadMotorsSetpoint \n");
+            sb.AppendFormat("    MotorFrontNw: {0}\n", mMotorFrontNw);
+            sb.AppendFormat("    MotorRightNe: {0}\n", mMotorRightNe);
+            sb.AppendFormat("    MotorBackSe: {0}\n", mMotorBackSe);
+            sb.AppendFormat("    MotorLeftSw: {0}\n", mMotorLeftSw);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+
+            return sb.ToString();
         }
 
         private UInt16 mMotorFrontNw;
@@ -5170,6 +6088,37 @@ namespace MavLinkNet
             this.mMode = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetQuadSwarmRollPitchYawThrust \n");
+            sb.Append("    Roll\n");
+            sb.AppendFormat("        [0]: {0}\n", mRoll[0]);
+            sb.AppendFormat("        [1]: {0}\n", mRoll[1]);
+            sb.AppendFormat("        [2]: {0}\n", mRoll[2]);
+            sb.AppendFormat("        [3]: {0}\n", mRoll[3]);
+            sb.Append("    Pitch\n");
+            sb.AppendFormat("        [0]: {0}\n", mPitch[0]);
+            sb.AppendFormat("        [1]: {0}\n", mPitch[1]);
+            sb.AppendFormat("        [2]: {0}\n", mPitch[2]);
+            sb.AppendFormat("        [3]: {0}\n", mPitch[3]);
+            sb.Append("    Yaw\n");
+            sb.AppendFormat("        [0]: {0}\n", mYaw[0]);
+            sb.AppendFormat("        [1]: {0}\n", mYaw[1]);
+            sb.AppendFormat("        [2]: {0}\n", mYaw[2]);
+            sb.AppendFormat("        [3]: {0}\n", mYaw[3]);
+            sb.Append("    Thrust\n");
+            sb.AppendFormat("        [0]: {0}\n", mThrust[0]);
+            sb.AppendFormat("        [1]: {0}\n", mThrust[1]);
+            sb.AppendFormat("        [2]: {0}\n", mThrust[2]);
+            sb.AppendFormat("        [3]: {0}\n", mThrust[3]);
+            sb.AppendFormat("    Group: {0}\n", mGroup);
+            sb.AppendFormat("    Mode: {0}\n", mMode);
+
+            return sb.ToString();
+        }
+
         private Int16[] mRoll = new Int16[4];
         private Int16[] mPitch = new Int16[4];
         private Int16[] mYaw = new Int16[4];
@@ -5273,6 +6222,23 @@ namespace MavLinkNet
             this.mNavBearing = s.ReadInt16();
             this.mTargetBearing = s.ReadInt16();
             this.mWpDist = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("NavControllerOutput \n");
+            sb.AppendFormat("    NavRoll: {0}\n", mNavRoll);
+            sb.AppendFormat("    NavPitch: {0}\n", mNavPitch);
+            sb.AppendFormat("    AltError: {0}\n", mAltError);
+            sb.AppendFormat("    AspdError: {0}\n", mAspdError);
+            sb.AppendFormat("    XtrackError: {0}\n", mXtrackError);
+            sb.AppendFormat("    NavBearing: {0}\n", mNavBearing);
+            sb.AppendFormat("    TargetBearing: {0}\n", mTargetBearing);
+            sb.AppendFormat("    WpDist: {0}\n", mWpDist);
+
+            return sb.ToString();
         }
 
         private float mNavRoll;
@@ -5434,6 +6400,52 @@ namespace MavLinkNet
             this.mLedGreen[3] = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetQuadSwarmLedRollPitchYawThrust \n");
+            sb.Append("    Roll\n");
+            sb.AppendFormat("        [0]: {0}\n", mRoll[0]);
+            sb.AppendFormat("        [1]: {0}\n", mRoll[1]);
+            sb.AppendFormat("        [2]: {0}\n", mRoll[2]);
+            sb.AppendFormat("        [3]: {0}\n", mRoll[3]);
+            sb.Append("    Pitch\n");
+            sb.AppendFormat("        [0]: {0}\n", mPitch[0]);
+            sb.AppendFormat("        [1]: {0}\n", mPitch[1]);
+            sb.AppendFormat("        [2]: {0}\n", mPitch[2]);
+            sb.AppendFormat("        [3]: {0}\n", mPitch[3]);
+            sb.Append("    Yaw\n");
+            sb.AppendFormat("        [0]: {0}\n", mYaw[0]);
+            sb.AppendFormat("        [1]: {0}\n", mYaw[1]);
+            sb.AppendFormat("        [2]: {0}\n", mYaw[2]);
+            sb.AppendFormat("        [3]: {0}\n", mYaw[3]);
+            sb.Append("    Thrust\n");
+            sb.AppendFormat("        [0]: {0}\n", mThrust[0]);
+            sb.AppendFormat("        [1]: {0}\n", mThrust[1]);
+            sb.AppendFormat("        [2]: {0}\n", mThrust[2]);
+            sb.AppendFormat("        [3]: {0}\n", mThrust[3]);
+            sb.AppendFormat("    Group: {0}\n", mGroup);
+            sb.AppendFormat("    Mode: {0}\n", mMode);
+            sb.Append("    LedRed\n");
+            sb.AppendFormat("        [0]: {0}\n", mLedRed[0]);
+            sb.AppendFormat("        [1]: {0}\n", mLedRed[1]);
+            sb.AppendFormat("        [2]: {0}\n", mLedRed[2]);
+            sb.AppendFormat("        [3]: {0}\n", mLedRed[3]);
+            sb.Append("    LedBlue\n");
+            sb.AppendFormat("        [0]: {0}\n", mLedBlue[0]);
+            sb.AppendFormat("        [1]: {0}\n", mLedBlue[1]);
+            sb.AppendFormat("        [2]: {0}\n", mLedBlue[2]);
+            sb.AppendFormat("        [3]: {0}\n", mLedBlue[3]);
+            sb.Append("    LedGreen\n");
+            sb.AppendFormat("        [0]: {0}\n", mLedGreen[0]);
+            sb.AppendFormat("        [1]: {0}\n", mLedGreen[1]);
+            sb.AppendFormat("        [2]: {0}\n", mLedGreen[2]);
+            sb.AppendFormat("        [3]: {0}\n", mLedGreen[3]);
+
+            return sb.ToString();
+        }
+
         private Int16[] mRoll = new Int16[4];
         private Int16[] mPitch = new Int16[4];
         private Int16[] mYaw = new Int16[4];
@@ -5552,6 +6564,24 @@ namespace MavLinkNet
             this.mVzerr = s.ReadSingle();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("StateCorrection \n");
+            sb.AppendFormat("    Xerr: {0}\n", mXerr);
+            sb.AppendFormat("    Yerr: {0}\n", mYerr);
+            sb.AppendFormat("    Zerr: {0}\n", mZerr);
+            sb.AppendFormat("    Rollerr: {0}\n", mRollerr);
+            sb.AppendFormat("    Pitcherr: {0}\n", mPitcherr);
+            sb.AppendFormat("    Yawerr: {0}\n", mYawerr);
+            sb.AppendFormat("    Vxerr: {0}\n", mVxerr);
+            sb.AppendFormat("    Vyerr: {0}\n", mVyerr);
+            sb.AppendFormat("    Vzerr: {0}\n", mVzerr);
+
+            return sb.ToString();
+        }
+
         private float mXerr;
         private float mYerr;
         private float mZerr;
@@ -5627,6 +6657,20 @@ namespace MavLinkNet
             this.mStartStop = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RequestDataStream \n");
+            sb.AppendFormat("    ReqMessageRate: {0}\n", mReqMessageRate);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    ReqStreamId: {0}\n", mReqStreamId);
+            sb.AppendFormat("    StartStop: {0}\n", mStartStop);
+
+            return sb.ToString();
+        }
+
         private UInt16 mReqMessageRate;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -5676,6 +6720,18 @@ namespace MavLinkNet
             this.mMessageRate = s.ReadUInt16();
             this.mStreamId = s.ReadByte();
             this.mOnOff = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("DataStream \n");
+            sb.AppendFormat("    MessageRate: {0}\n", mMessageRate);
+            sb.AppendFormat("    StreamId: {0}\n", mStreamId);
+            sb.AppendFormat("    OnOff: {0}\n", mOnOff);
+
+            return sb.ToString();
         }
 
         private UInt16 mMessageRate;
@@ -5758,6 +6814,21 @@ namespace MavLinkNet
             this.mR = s.ReadInt16();
             this.mButtons = s.ReadUInt16();
             this.mTarget = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ManualControl \n");
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    R: {0}\n", mR);
+            sb.AppendFormat("    Buttons: {0}\n", mButtons);
+            sb.AppendFormat("    Target: {0}\n", mTarget);
+
+            return sb.ToString();
         }
 
         private Int16 mX;
@@ -5885,6 +6956,25 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RcChannelsOverride \n");
+            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
+            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
+            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
+            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
+            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
+            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
+            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
+            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
         private UInt16 mChan3Raw;
@@ -5972,6 +7062,21 @@ namespace MavLinkNet
             this.mClimb = s.ReadSingle();
             this.mHeading = s.ReadInt16();
             this.mThrottle = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("VfrHud \n");
+            sb.AppendFormat("    Airspeed: {0}\n", mAirspeed);
+            sb.AppendFormat("    Groundspeed: {0}\n", mGroundspeed);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    Climb: {0}\n", mClimb);
+            sb.AppendFormat("    Heading: {0}\n", mHeading);
+            sb.AppendFormat("    Throttle: {0}\n", mThrottle);
+
+            return sb.ToString();
         }
 
         private float mAirspeed;
@@ -6109,6 +7214,26 @@ namespace MavLinkNet
             this.mConfirmation = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("CommandLong \n");
+            sb.AppendFormat("    Param1: {0}\n", mParam1);
+            sb.AppendFormat("    Param2: {0}\n", mParam2);
+            sb.AppendFormat("    Param3: {0}\n", mParam3);
+            sb.AppendFormat("    Param4: {0}\n", mParam4);
+            sb.AppendFormat("    Param5: {0}\n", mParam5);
+            sb.AppendFormat("    Param6: {0}\n", mParam6);
+            sb.AppendFormat("    Param7: {0}\n", mParam7);
+            sb.AppendFormat("    Command: {0}\n", mCommand);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Confirmation: {0}\n", mConfirmation);
+
+            return sb.ToString();
+        }
+
         private MavCmd mParam1;
         private MavCmd mParam2;
         private MavCmd mParam3;
@@ -6157,6 +7282,17 @@ namespace MavLinkNet
         {
             this.mCommand = (MavCmd)s.ReadUInt16();
             this.mResult = (MavResult)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("CommandAck \n");
+            sb.AppendFormat("    Command: {0}\n", mCommand);
+            sb.AppendFormat("    Result: {0}\n", mResult);
+
+            return sb.ToString();
         }
 
         private MavCmd mCommand;
@@ -6228,6 +7364,20 @@ namespace MavLinkNet
             this.mPitchRate = s.ReadSingle();
             this.mYawRate = s.ReadSingle();
             this.mThrust = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RollPitchYawRatesThrustSetpoint \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    RollRate: {0}\n", mRollRate);
+            sb.AppendFormat("    PitchRate: {0}\n", mPitchRate);
+            sb.AppendFormat("    YawRate: {0}\n", mYawRate);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -6324,6 +7474,22 @@ namespace MavLinkNet
             this.mManualOverrideSwitch = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ManualSetpoint \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            sb.AppendFormat("    ModeSwitch: {0}\n", mModeSwitch);
+            sb.AppendFormat("    ManualOverrideSwitch: {0}\n", mManualOverrideSwitch);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeBootMs;
         private float mRoll;
         private float mPitch;
@@ -6418,6 +7584,22 @@ namespace MavLinkNet
             this.mRoll = s.ReadSingle();
             this.mPitch = s.ReadSingle();
             this.mYaw = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("LocalPositionNedSystemGlobalOffset \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -6606,6 +7788,31 @@ namespace MavLinkNet
             this.mZacc = s.ReadInt16();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilState \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
+            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
+            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    Vx: {0}\n", mVx);
+            sb.AppendFormat("    Vy: {0}\n", mVy);
+            sb.AppendFormat("    Vz: {0}\n", mVz);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private float mRoll;
         private float mPitch;
@@ -6749,6 +7956,26 @@ namespace MavLinkNet
             this.mAux4 = s.ReadSingle();
             this.mMode = (MavMode)s.ReadByte();
             this.mNavMode = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilControls \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    RollAilerons: {0}\n", mRollAilerons);
+            sb.AppendFormat("    PitchElevator: {0}\n", mPitchElevator);
+            sb.AppendFormat("    YawRudder: {0}\n", mYawRudder);
+            sb.AppendFormat("    Throttle: {0}\n", mThrottle);
+            sb.AppendFormat("    Aux1: {0}\n", mAux1);
+            sb.AppendFormat("    Aux2: {0}\n", mAux2);
+            sb.AppendFormat("    Aux3: {0}\n", mAux3);
+            sb.AppendFormat("    Aux4: {0}\n", mAux4);
+            sb.AppendFormat("    Mode: {0}\n", mMode);
+            sb.AppendFormat("    NavMode: {0}\n", mNavMode);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -6921,6 +8148,29 @@ namespace MavLinkNet
             this.mRssi = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilRcInputsRaw \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
+            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
+            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
+            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
+            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
+            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
+            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
+            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
+            sb.AppendFormat("    Chan9Raw: {0}\n", mChan9Raw);
+            sb.AppendFormat("    Chan10Raw: {0}\n", mChan10Raw);
+            sb.AppendFormat("    Chan11Raw: {0}\n", mChan11Raw);
+            sb.AppendFormat("    Chan12Raw: {0}\n", mChan12Raw);
+            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
@@ -7034,6 +8284,23 @@ namespace MavLinkNet
             this.mQuality = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("OpticalFlow \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    FlowCompMX: {0}\n", mFlowCompMX);
+            sb.AppendFormat("    FlowCompMY: {0}\n", mFlowCompMY);
+            sb.AppendFormat("    GroundDistance: {0}\n", mGroundDistance);
+            sb.AppendFormat("    FlowX: {0}\n", mFlowX);
+            sb.AppendFormat("    FlowY: {0}\n", mFlowY);
+            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
+            sb.AppendFormat("    Quality: {0}\n", mQuality);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private float mFlowCompMX;
         private float mFlowCompMY;
@@ -7126,6 +8393,22 @@ namespace MavLinkNet
             this.mRoll = s.ReadSingle();
             this.mPitch = s.ReadSingle();
             this.mYaw = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("GlobalVisionPositionEstimate \n");
+            sb.AppendFormat("    Usec: {0}\n", mUsec);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+
+            return sb.ToString();
         }
 
         private UInt64 mUsec;
@@ -7221,6 +8504,22 @@ namespace MavLinkNet
             this.mYaw = s.ReadSingle();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("VisionPositionEstimate \n");
+            sb.AppendFormat("    Usec: {0}\n", mUsec);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+
+            return sb.ToString();
+        }
+
         private UInt64 mUsec;
         private float mX;
         private float mY;
@@ -7282,6 +8581,19 @@ namespace MavLinkNet
             this.mX = s.ReadSingle();
             this.mY = s.ReadSingle();
             this.mZ = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("VisionSpeedEstimate \n");
+            sb.AppendFormat("    Usec: {0}\n", mUsec);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+
+            return sb.ToString();
         }
 
         private UInt64 mUsec;
@@ -7372,6 +8684,22 @@ namespace MavLinkNet
             this.mRoll = s.ReadSingle();
             this.mPitch = s.ReadSingle();
             this.mYaw = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ViconPositionEstimate \n");
+            sb.AppendFormat("    Usec: {0}\n", mUsec);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+
+            return sb.ToString();
         }
 
         private UInt64 mUsec;
@@ -7550,6 +8878,30 @@ namespace MavLinkNet
             this.mFieldsUpdated = s.ReadUInt16();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HighresImu \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Xmag: {0}\n", mXmag);
+            sb.AppendFormat("    Ymag: {0}\n", mYmag);
+            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+            sb.AppendFormat("    AbsPressure: {0}\n", mAbsPressure);
+            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
+            sb.AppendFormat("    PressureAlt: {0}\n", mPressureAlt);
+            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+            sb.AppendFormat("    FieldsUpdated: {0}\n", mFieldsUpdated);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private float mXacc;
         private float mYacc;
@@ -7678,6 +9030,41 @@ namespace MavLinkNet
             this.mRight[9] = s.ReadInt16();
             this.mSensorId = s.ReadByte();
             this.mQuality = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("OmnidirectionalFlow \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    FrontDistanceM: {0}\n", mFrontDistanceM);
+            sb.Append("    Left\n");
+            sb.AppendFormat("        [0]: {0}\n", mLeft[0]);
+            sb.AppendFormat("        [1]: {0}\n", mLeft[1]);
+            sb.AppendFormat("        [2]: {0}\n", mLeft[2]);
+            sb.AppendFormat("        [3]: {0}\n", mLeft[3]);
+            sb.AppendFormat("        [4]: {0}\n", mLeft[4]);
+            sb.AppendFormat("        [5]: {0}\n", mLeft[5]);
+            sb.AppendFormat("        [6]: {0}\n", mLeft[6]);
+            sb.AppendFormat("        [7]: {0}\n", mLeft[7]);
+            sb.AppendFormat("        [8]: {0}\n", mLeft[8]);
+            sb.AppendFormat("        [9]: {0}\n", mLeft[9]);
+            sb.Append("    Right\n");
+            sb.AppendFormat("        [0]: {0}\n", mRight[0]);
+            sb.AppendFormat("        [1]: {0}\n", mRight[1]);
+            sb.AppendFormat("        [2]: {0}\n", mRight[2]);
+            sb.AppendFormat("        [3]: {0}\n", mRight[3]);
+            sb.AppendFormat("        [4]: {0}\n", mRight[4]);
+            sb.AppendFormat("        [5]: {0}\n", mRight[5]);
+            sb.AppendFormat("        [6]: {0}\n", mRight[6]);
+            sb.AppendFormat("        [7]: {0}\n", mRight[7]);
+            sb.AppendFormat("        [8]: {0}\n", mRight[8]);
+            sb.AppendFormat("        [9]: {0}\n", mRight[9]);
+            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
+            sb.AppendFormat("    Quality: {0}\n", mQuality);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -7853,6 +9240,30 @@ namespace MavLinkNet
             this.mPressureAlt = s.ReadSingle();
             this.mTemperature = s.ReadSingle();
             this.mFieldsUpdated = s.ReadUInt32();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilSensor \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Xmag: {0}\n", mXmag);
+            sb.AppendFormat("    Ymag: {0}\n", mYmag);
+            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+            sb.AppendFormat("    AbsPressure: {0}\n", mAbsPressure);
+            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
+            sb.AppendFormat("    PressureAlt: {0}\n", mPressureAlt);
+            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+            sb.AppendFormat("    FieldsUpdated: {0}\n", mFieldsUpdated);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -8099,6 +9510,36 @@ namespace MavLinkNet
             this.mVd = s.ReadSingle();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SimState \n");
+            sb.AppendFormat("    Q1: {0}\n", mQ1);
+            sb.AppendFormat("    Q2: {0}\n", mQ2);
+            sb.AppendFormat("    Q3: {0}\n", mQ3);
+            sb.AppendFormat("    Q4: {0}\n", mQ4);
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    StdDevHorz: {0}\n", mStdDevHorz);
+            sb.AppendFormat("    StdDevVert: {0}\n", mStdDevVert);
+            sb.AppendFormat("    Vn: {0}\n", mVn);
+            sb.AppendFormat("    Ve: {0}\n", mVe);
+            sb.AppendFormat("    Vd: {0}\n", mVd);
+
+            return sb.ToString();
+        }
+
         private float mQ1;
         private float mQ2;
         private float mQ3;
@@ -8207,6 +9648,22 @@ namespace MavLinkNet
             this.mTxbuf = s.ReadByte();
             this.mNoise = s.ReadByte();
             this.mRemnoise = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RadioStatus \n");
+            sb.AppendFormat("    Rxerrors: {0}\n", mRxerrors);
+            sb.AppendFormat("    Fixed: {0}\n", mFixed);
+            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+            sb.AppendFormat("    Remrssi: {0}\n", mRemrssi);
+            sb.AppendFormat("    Txbuf: {0}\n", mTxbuf);
+            sb.AppendFormat("    Noise: {0}\n", mNoise);
+            sb.AppendFormat("    Remnoise: {0}\n", mRemnoise);
+
+            return sb.ToString();
         }
 
         private UInt16 mRxerrors;
@@ -8763,6 +10220,260 @@ namespace MavLinkNet
             this.mFlags = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FileTransferStart \n");
+            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
+            sb.AppendFormat("    FileSize: {0}\n", mFileSize);
+            sb.Append("    DestPath\n");
+            sb.AppendFormat("        [0]: {0}\n", mDestPath[0]);
+            sb.AppendFormat("        [1]: {0}\n", mDestPath[1]);
+            sb.AppendFormat("        [2]: {0}\n", mDestPath[2]);
+            sb.AppendFormat("        [3]: {0}\n", mDestPath[3]);
+            sb.AppendFormat("        [4]: {0}\n", mDestPath[4]);
+            sb.AppendFormat("        [5]: {0}\n", mDestPath[5]);
+            sb.AppendFormat("        [6]: {0}\n", mDestPath[6]);
+            sb.AppendFormat("        [7]: {0}\n", mDestPath[7]);
+            sb.AppendFormat("        [8]: {0}\n", mDestPath[8]);
+            sb.AppendFormat("        [9]: {0}\n", mDestPath[9]);
+            sb.AppendFormat("        [10]: {0}\n", mDestPath[10]);
+            sb.AppendFormat("        [11]: {0}\n", mDestPath[11]);
+            sb.AppendFormat("        [12]: {0}\n", mDestPath[12]);
+            sb.AppendFormat("        [13]: {0}\n", mDestPath[13]);
+            sb.AppendFormat("        [14]: {0}\n", mDestPath[14]);
+            sb.AppendFormat("        [15]: {0}\n", mDestPath[15]);
+            sb.AppendFormat("        [16]: {0}\n", mDestPath[16]);
+            sb.AppendFormat("        [17]: {0}\n", mDestPath[17]);
+            sb.AppendFormat("        [18]: {0}\n", mDestPath[18]);
+            sb.AppendFormat("        [19]: {0}\n", mDestPath[19]);
+            sb.AppendFormat("        [20]: {0}\n", mDestPath[20]);
+            sb.AppendFormat("        [21]: {0}\n", mDestPath[21]);
+            sb.AppendFormat("        [22]: {0}\n", mDestPath[22]);
+            sb.AppendFormat("        [23]: {0}\n", mDestPath[23]);
+            sb.AppendFormat("        [24]: {0}\n", mDestPath[24]);
+            sb.AppendFormat("        [25]: {0}\n", mDestPath[25]);
+            sb.AppendFormat("        [26]: {0}\n", mDestPath[26]);
+            sb.AppendFormat("        [27]: {0}\n", mDestPath[27]);
+            sb.AppendFormat("        [28]: {0}\n", mDestPath[28]);
+            sb.AppendFormat("        [29]: {0}\n", mDestPath[29]);
+            sb.AppendFormat("        [30]: {0}\n", mDestPath[30]);
+            sb.AppendFormat("        [31]: {0}\n", mDestPath[31]);
+            sb.AppendFormat("        [32]: {0}\n", mDestPath[32]);
+            sb.AppendFormat("        [33]: {0}\n", mDestPath[33]);
+            sb.AppendFormat("        [34]: {0}\n", mDestPath[34]);
+            sb.AppendFormat("        [35]: {0}\n", mDestPath[35]);
+            sb.AppendFormat("        [36]: {0}\n", mDestPath[36]);
+            sb.AppendFormat("        [37]: {0}\n", mDestPath[37]);
+            sb.AppendFormat("        [38]: {0}\n", mDestPath[38]);
+            sb.AppendFormat("        [39]: {0}\n", mDestPath[39]);
+            sb.AppendFormat("        [40]: {0}\n", mDestPath[40]);
+            sb.AppendFormat("        [41]: {0}\n", mDestPath[41]);
+            sb.AppendFormat("        [42]: {0}\n", mDestPath[42]);
+            sb.AppendFormat("        [43]: {0}\n", mDestPath[43]);
+            sb.AppendFormat("        [44]: {0}\n", mDestPath[44]);
+            sb.AppendFormat("        [45]: {0}\n", mDestPath[45]);
+            sb.AppendFormat("        [46]: {0}\n", mDestPath[46]);
+            sb.AppendFormat("        [47]: {0}\n", mDestPath[47]);
+            sb.AppendFormat("        [48]: {0}\n", mDestPath[48]);
+            sb.AppendFormat("        [49]: {0}\n", mDestPath[49]);
+            sb.AppendFormat("        [50]: {0}\n", mDestPath[50]);
+            sb.AppendFormat("        [51]: {0}\n", mDestPath[51]);
+            sb.AppendFormat("        [52]: {0}\n", mDestPath[52]);
+            sb.AppendFormat("        [53]: {0}\n", mDestPath[53]);
+            sb.AppendFormat("        [54]: {0}\n", mDestPath[54]);
+            sb.AppendFormat("        [55]: {0}\n", mDestPath[55]);
+            sb.AppendFormat("        [56]: {0}\n", mDestPath[56]);
+            sb.AppendFormat("        [57]: {0}\n", mDestPath[57]);
+            sb.AppendFormat("        [58]: {0}\n", mDestPath[58]);
+            sb.AppendFormat("        [59]: {0}\n", mDestPath[59]);
+            sb.AppendFormat("        [60]: {0}\n", mDestPath[60]);
+            sb.AppendFormat("        [61]: {0}\n", mDestPath[61]);
+            sb.AppendFormat("        [62]: {0}\n", mDestPath[62]);
+            sb.AppendFormat("        [63]: {0}\n", mDestPath[63]);
+            sb.AppendFormat("        [64]: {0}\n", mDestPath[64]);
+            sb.AppendFormat("        [65]: {0}\n", mDestPath[65]);
+            sb.AppendFormat("        [66]: {0}\n", mDestPath[66]);
+            sb.AppendFormat("        [67]: {0}\n", mDestPath[67]);
+            sb.AppendFormat("        [68]: {0}\n", mDestPath[68]);
+            sb.AppendFormat("        [69]: {0}\n", mDestPath[69]);
+            sb.AppendFormat("        [70]: {0}\n", mDestPath[70]);
+            sb.AppendFormat("        [71]: {0}\n", mDestPath[71]);
+            sb.AppendFormat("        [72]: {0}\n", mDestPath[72]);
+            sb.AppendFormat("        [73]: {0}\n", mDestPath[73]);
+            sb.AppendFormat("        [74]: {0}\n", mDestPath[74]);
+            sb.AppendFormat("        [75]: {0}\n", mDestPath[75]);
+            sb.AppendFormat("        [76]: {0}\n", mDestPath[76]);
+            sb.AppendFormat("        [77]: {0}\n", mDestPath[77]);
+            sb.AppendFormat("        [78]: {0}\n", mDestPath[78]);
+            sb.AppendFormat("        [79]: {0}\n", mDestPath[79]);
+            sb.AppendFormat("        [80]: {0}\n", mDestPath[80]);
+            sb.AppendFormat("        [81]: {0}\n", mDestPath[81]);
+            sb.AppendFormat("        [82]: {0}\n", mDestPath[82]);
+            sb.AppendFormat("        [83]: {0}\n", mDestPath[83]);
+            sb.AppendFormat("        [84]: {0}\n", mDestPath[84]);
+            sb.AppendFormat("        [85]: {0}\n", mDestPath[85]);
+            sb.AppendFormat("        [86]: {0}\n", mDestPath[86]);
+            sb.AppendFormat("        [87]: {0}\n", mDestPath[87]);
+            sb.AppendFormat("        [88]: {0}\n", mDestPath[88]);
+            sb.AppendFormat("        [89]: {0}\n", mDestPath[89]);
+            sb.AppendFormat("        [90]: {0}\n", mDestPath[90]);
+            sb.AppendFormat("        [91]: {0}\n", mDestPath[91]);
+            sb.AppendFormat("        [92]: {0}\n", mDestPath[92]);
+            sb.AppendFormat("        [93]: {0}\n", mDestPath[93]);
+            sb.AppendFormat("        [94]: {0}\n", mDestPath[94]);
+            sb.AppendFormat("        [95]: {0}\n", mDestPath[95]);
+            sb.AppendFormat("        [96]: {0}\n", mDestPath[96]);
+            sb.AppendFormat("        [97]: {0}\n", mDestPath[97]);
+            sb.AppendFormat("        [98]: {0}\n", mDestPath[98]);
+            sb.AppendFormat("        [99]: {0}\n", mDestPath[99]);
+            sb.AppendFormat("        [100]: {0}\n", mDestPath[100]);
+            sb.AppendFormat("        [101]: {0}\n", mDestPath[101]);
+            sb.AppendFormat("        [102]: {0}\n", mDestPath[102]);
+            sb.AppendFormat("        [103]: {0}\n", mDestPath[103]);
+            sb.AppendFormat("        [104]: {0}\n", mDestPath[104]);
+            sb.AppendFormat("        [105]: {0}\n", mDestPath[105]);
+            sb.AppendFormat("        [106]: {0}\n", mDestPath[106]);
+            sb.AppendFormat("        [107]: {0}\n", mDestPath[107]);
+            sb.AppendFormat("        [108]: {0}\n", mDestPath[108]);
+            sb.AppendFormat("        [109]: {0}\n", mDestPath[109]);
+            sb.AppendFormat("        [110]: {0}\n", mDestPath[110]);
+            sb.AppendFormat("        [111]: {0}\n", mDestPath[111]);
+            sb.AppendFormat("        [112]: {0}\n", mDestPath[112]);
+            sb.AppendFormat("        [113]: {0}\n", mDestPath[113]);
+            sb.AppendFormat("        [114]: {0}\n", mDestPath[114]);
+            sb.AppendFormat("        [115]: {0}\n", mDestPath[115]);
+            sb.AppendFormat("        [116]: {0}\n", mDestPath[116]);
+            sb.AppendFormat("        [117]: {0}\n", mDestPath[117]);
+            sb.AppendFormat("        [118]: {0}\n", mDestPath[118]);
+            sb.AppendFormat("        [119]: {0}\n", mDestPath[119]);
+            sb.AppendFormat("        [120]: {0}\n", mDestPath[120]);
+            sb.AppendFormat("        [121]: {0}\n", mDestPath[121]);
+            sb.AppendFormat("        [122]: {0}\n", mDestPath[122]);
+            sb.AppendFormat("        [123]: {0}\n", mDestPath[123]);
+            sb.AppendFormat("        [124]: {0}\n", mDestPath[124]);
+            sb.AppendFormat("        [125]: {0}\n", mDestPath[125]);
+            sb.AppendFormat("        [126]: {0}\n", mDestPath[126]);
+            sb.AppendFormat("        [127]: {0}\n", mDestPath[127]);
+            sb.AppendFormat("        [128]: {0}\n", mDestPath[128]);
+            sb.AppendFormat("        [129]: {0}\n", mDestPath[129]);
+            sb.AppendFormat("        [130]: {0}\n", mDestPath[130]);
+            sb.AppendFormat("        [131]: {0}\n", mDestPath[131]);
+            sb.AppendFormat("        [132]: {0}\n", mDestPath[132]);
+            sb.AppendFormat("        [133]: {0}\n", mDestPath[133]);
+            sb.AppendFormat("        [134]: {0}\n", mDestPath[134]);
+            sb.AppendFormat("        [135]: {0}\n", mDestPath[135]);
+            sb.AppendFormat("        [136]: {0}\n", mDestPath[136]);
+            sb.AppendFormat("        [137]: {0}\n", mDestPath[137]);
+            sb.AppendFormat("        [138]: {0}\n", mDestPath[138]);
+            sb.AppendFormat("        [139]: {0}\n", mDestPath[139]);
+            sb.AppendFormat("        [140]: {0}\n", mDestPath[140]);
+            sb.AppendFormat("        [141]: {0}\n", mDestPath[141]);
+            sb.AppendFormat("        [142]: {0}\n", mDestPath[142]);
+            sb.AppendFormat("        [143]: {0}\n", mDestPath[143]);
+            sb.AppendFormat("        [144]: {0}\n", mDestPath[144]);
+            sb.AppendFormat("        [145]: {0}\n", mDestPath[145]);
+            sb.AppendFormat("        [146]: {0}\n", mDestPath[146]);
+            sb.AppendFormat("        [147]: {0}\n", mDestPath[147]);
+            sb.AppendFormat("        [148]: {0}\n", mDestPath[148]);
+            sb.AppendFormat("        [149]: {0}\n", mDestPath[149]);
+            sb.AppendFormat("        [150]: {0}\n", mDestPath[150]);
+            sb.AppendFormat("        [151]: {0}\n", mDestPath[151]);
+            sb.AppendFormat("        [152]: {0}\n", mDestPath[152]);
+            sb.AppendFormat("        [153]: {0}\n", mDestPath[153]);
+            sb.AppendFormat("        [154]: {0}\n", mDestPath[154]);
+            sb.AppendFormat("        [155]: {0}\n", mDestPath[155]);
+            sb.AppendFormat("        [156]: {0}\n", mDestPath[156]);
+            sb.AppendFormat("        [157]: {0}\n", mDestPath[157]);
+            sb.AppendFormat("        [158]: {0}\n", mDestPath[158]);
+            sb.AppendFormat("        [159]: {0}\n", mDestPath[159]);
+            sb.AppendFormat("        [160]: {0}\n", mDestPath[160]);
+            sb.AppendFormat("        [161]: {0}\n", mDestPath[161]);
+            sb.AppendFormat("        [162]: {0}\n", mDestPath[162]);
+            sb.AppendFormat("        [163]: {0}\n", mDestPath[163]);
+            sb.AppendFormat("        [164]: {0}\n", mDestPath[164]);
+            sb.AppendFormat("        [165]: {0}\n", mDestPath[165]);
+            sb.AppendFormat("        [166]: {0}\n", mDestPath[166]);
+            sb.AppendFormat("        [167]: {0}\n", mDestPath[167]);
+            sb.AppendFormat("        [168]: {0}\n", mDestPath[168]);
+            sb.AppendFormat("        [169]: {0}\n", mDestPath[169]);
+            sb.AppendFormat("        [170]: {0}\n", mDestPath[170]);
+            sb.AppendFormat("        [171]: {0}\n", mDestPath[171]);
+            sb.AppendFormat("        [172]: {0}\n", mDestPath[172]);
+            sb.AppendFormat("        [173]: {0}\n", mDestPath[173]);
+            sb.AppendFormat("        [174]: {0}\n", mDestPath[174]);
+            sb.AppendFormat("        [175]: {0}\n", mDestPath[175]);
+            sb.AppendFormat("        [176]: {0}\n", mDestPath[176]);
+            sb.AppendFormat("        [177]: {0}\n", mDestPath[177]);
+            sb.AppendFormat("        [178]: {0}\n", mDestPath[178]);
+            sb.AppendFormat("        [179]: {0}\n", mDestPath[179]);
+            sb.AppendFormat("        [180]: {0}\n", mDestPath[180]);
+            sb.AppendFormat("        [181]: {0}\n", mDestPath[181]);
+            sb.AppendFormat("        [182]: {0}\n", mDestPath[182]);
+            sb.AppendFormat("        [183]: {0}\n", mDestPath[183]);
+            sb.AppendFormat("        [184]: {0}\n", mDestPath[184]);
+            sb.AppendFormat("        [185]: {0}\n", mDestPath[185]);
+            sb.AppendFormat("        [186]: {0}\n", mDestPath[186]);
+            sb.AppendFormat("        [187]: {0}\n", mDestPath[187]);
+            sb.AppendFormat("        [188]: {0}\n", mDestPath[188]);
+            sb.AppendFormat("        [189]: {0}\n", mDestPath[189]);
+            sb.AppendFormat("        [190]: {0}\n", mDestPath[190]);
+            sb.AppendFormat("        [191]: {0}\n", mDestPath[191]);
+            sb.AppendFormat("        [192]: {0}\n", mDestPath[192]);
+            sb.AppendFormat("        [193]: {0}\n", mDestPath[193]);
+            sb.AppendFormat("        [194]: {0}\n", mDestPath[194]);
+            sb.AppendFormat("        [195]: {0}\n", mDestPath[195]);
+            sb.AppendFormat("        [196]: {0}\n", mDestPath[196]);
+            sb.AppendFormat("        [197]: {0}\n", mDestPath[197]);
+            sb.AppendFormat("        [198]: {0}\n", mDestPath[198]);
+            sb.AppendFormat("        [199]: {0}\n", mDestPath[199]);
+            sb.AppendFormat("        [200]: {0}\n", mDestPath[200]);
+            sb.AppendFormat("        [201]: {0}\n", mDestPath[201]);
+            sb.AppendFormat("        [202]: {0}\n", mDestPath[202]);
+            sb.AppendFormat("        [203]: {0}\n", mDestPath[203]);
+            sb.AppendFormat("        [204]: {0}\n", mDestPath[204]);
+            sb.AppendFormat("        [205]: {0}\n", mDestPath[205]);
+            sb.AppendFormat("        [206]: {0}\n", mDestPath[206]);
+            sb.AppendFormat("        [207]: {0}\n", mDestPath[207]);
+            sb.AppendFormat("        [208]: {0}\n", mDestPath[208]);
+            sb.AppendFormat("        [209]: {0}\n", mDestPath[209]);
+            sb.AppendFormat("        [210]: {0}\n", mDestPath[210]);
+            sb.AppendFormat("        [211]: {0}\n", mDestPath[211]);
+            sb.AppendFormat("        [212]: {0}\n", mDestPath[212]);
+            sb.AppendFormat("        [213]: {0}\n", mDestPath[213]);
+            sb.AppendFormat("        [214]: {0}\n", mDestPath[214]);
+            sb.AppendFormat("        [215]: {0}\n", mDestPath[215]);
+            sb.AppendFormat("        [216]: {0}\n", mDestPath[216]);
+            sb.AppendFormat("        [217]: {0}\n", mDestPath[217]);
+            sb.AppendFormat("        [218]: {0}\n", mDestPath[218]);
+            sb.AppendFormat("        [219]: {0}\n", mDestPath[219]);
+            sb.AppendFormat("        [220]: {0}\n", mDestPath[220]);
+            sb.AppendFormat("        [221]: {0}\n", mDestPath[221]);
+            sb.AppendFormat("        [222]: {0}\n", mDestPath[222]);
+            sb.AppendFormat("        [223]: {0}\n", mDestPath[223]);
+            sb.AppendFormat("        [224]: {0}\n", mDestPath[224]);
+            sb.AppendFormat("        [225]: {0}\n", mDestPath[225]);
+            sb.AppendFormat("        [226]: {0}\n", mDestPath[226]);
+            sb.AppendFormat("        [227]: {0}\n", mDestPath[227]);
+            sb.AppendFormat("        [228]: {0}\n", mDestPath[228]);
+            sb.AppendFormat("        [229]: {0}\n", mDestPath[229]);
+            sb.AppendFormat("        [230]: {0}\n", mDestPath[230]);
+            sb.AppendFormat("        [231]: {0}\n", mDestPath[231]);
+            sb.AppendFormat("        [232]: {0}\n", mDestPath[232]);
+            sb.AppendFormat("        [233]: {0}\n", mDestPath[233]);
+            sb.AppendFormat("        [234]: {0}\n", mDestPath[234]);
+            sb.AppendFormat("        [235]: {0}\n", mDestPath[235]);
+            sb.AppendFormat("        [236]: {0}\n", mDestPath[236]);
+            sb.AppendFormat("        [237]: {0}\n", mDestPath[237]);
+            sb.AppendFormat("        [238]: {0}\n", mDestPath[238]);
+            sb.AppendFormat("        [239]: {0}\n", mDestPath[239]);
+            sb.AppendFormat("    Direction: {0}\n", mDirection);
+            sb.AppendFormat("    Flags: {0}\n", mFlags);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTransferUid;
         private UInt32 mFileSize;
         private char[] mDestPath = new char[240];
@@ -9295,6 +11006,258 @@ namespace MavLinkNet
             this.mFlags = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FileTransferDirList \n");
+            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
+            sb.Append("    DirPath\n");
+            sb.AppendFormat("        [0]: {0}\n", mDirPath[0]);
+            sb.AppendFormat("        [1]: {0}\n", mDirPath[1]);
+            sb.AppendFormat("        [2]: {0}\n", mDirPath[2]);
+            sb.AppendFormat("        [3]: {0}\n", mDirPath[3]);
+            sb.AppendFormat("        [4]: {0}\n", mDirPath[4]);
+            sb.AppendFormat("        [5]: {0}\n", mDirPath[5]);
+            sb.AppendFormat("        [6]: {0}\n", mDirPath[6]);
+            sb.AppendFormat("        [7]: {0}\n", mDirPath[7]);
+            sb.AppendFormat("        [8]: {0}\n", mDirPath[8]);
+            sb.AppendFormat("        [9]: {0}\n", mDirPath[9]);
+            sb.AppendFormat("        [10]: {0}\n", mDirPath[10]);
+            sb.AppendFormat("        [11]: {0}\n", mDirPath[11]);
+            sb.AppendFormat("        [12]: {0}\n", mDirPath[12]);
+            sb.AppendFormat("        [13]: {0}\n", mDirPath[13]);
+            sb.AppendFormat("        [14]: {0}\n", mDirPath[14]);
+            sb.AppendFormat("        [15]: {0}\n", mDirPath[15]);
+            sb.AppendFormat("        [16]: {0}\n", mDirPath[16]);
+            sb.AppendFormat("        [17]: {0}\n", mDirPath[17]);
+            sb.AppendFormat("        [18]: {0}\n", mDirPath[18]);
+            sb.AppendFormat("        [19]: {0}\n", mDirPath[19]);
+            sb.AppendFormat("        [20]: {0}\n", mDirPath[20]);
+            sb.AppendFormat("        [21]: {0}\n", mDirPath[21]);
+            sb.AppendFormat("        [22]: {0}\n", mDirPath[22]);
+            sb.AppendFormat("        [23]: {0}\n", mDirPath[23]);
+            sb.AppendFormat("        [24]: {0}\n", mDirPath[24]);
+            sb.AppendFormat("        [25]: {0}\n", mDirPath[25]);
+            sb.AppendFormat("        [26]: {0}\n", mDirPath[26]);
+            sb.AppendFormat("        [27]: {0}\n", mDirPath[27]);
+            sb.AppendFormat("        [28]: {0}\n", mDirPath[28]);
+            sb.AppendFormat("        [29]: {0}\n", mDirPath[29]);
+            sb.AppendFormat("        [30]: {0}\n", mDirPath[30]);
+            sb.AppendFormat("        [31]: {0}\n", mDirPath[31]);
+            sb.AppendFormat("        [32]: {0}\n", mDirPath[32]);
+            sb.AppendFormat("        [33]: {0}\n", mDirPath[33]);
+            sb.AppendFormat("        [34]: {0}\n", mDirPath[34]);
+            sb.AppendFormat("        [35]: {0}\n", mDirPath[35]);
+            sb.AppendFormat("        [36]: {0}\n", mDirPath[36]);
+            sb.AppendFormat("        [37]: {0}\n", mDirPath[37]);
+            sb.AppendFormat("        [38]: {0}\n", mDirPath[38]);
+            sb.AppendFormat("        [39]: {0}\n", mDirPath[39]);
+            sb.AppendFormat("        [40]: {0}\n", mDirPath[40]);
+            sb.AppendFormat("        [41]: {0}\n", mDirPath[41]);
+            sb.AppendFormat("        [42]: {0}\n", mDirPath[42]);
+            sb.AppendFormat("        [43]: {0}\n", mDirPath[43]);
+            sb.AppendFormat("        [44]: {0}\n", mDirPath[44]);
+            sb.AppendFormat("        [45]: {0}\n", mDirPath[45]);
+            sb.AppendFormat("        [46]: {0}\n", mDirPath[46]);
+            sb.AppendFormat("        [47]: {0}\n", mDirPath[47]);
+            sb.AppendFormat("        [48]: {0}\n", mDirPath[48]);
+            sb.AppendFormat("        [49]: {0}\n", mDirPath[49]);
+            sb.AppendFormat("        [50]: {0}\n", mDirPath[50]);
+            sb.AppendFormat("        [51]: {0}\n", mDirPath[51]);
+            sb.AppendFormat("        [52]: {0}\n", mDirPath[52]);
+            sb.AppendFormat("        [53]: {0}\n", mDirPath[53]);
+            sb.AppendFormat("        [54]: {0}\n", mDirPath[54]);
+            sb.AppendFormat("        [55]: {0}\n", mDirPath[55]);
+            sb.AppendFormat("        [56]: {0}\n", mDirPath[56]);
+            sb.AppendFormat("        [57]: {0}\n", mDirPath[57]);
+            sb.AppendFormat("        [58]: {0}\n", mDirPath[58]);
+            sb.AppendFormat("        [59]: {0}\n", mDirPath[59]);
+            sb.AppendFormat("        [60]: {0}\n", mDirPath[60]);
+            sb.AppendFormat("        [61]: {0}\n", mDirPath[61]);
+            sb.AppendFormat("        [62]: {0}\n", mDirPath[62]);
+            sb.AppendFormat("        [63]: {0}\n", mDirPath[63]);
+            sb.AppendFormat("        [64]: {0}\n", mDirPath[64]);
+            sb.AppendFormat("        [65]: {0}\n", mDirPath[65]);
+            sb.AppendFormat("        [66]: {0}\n", mDirPath[66]);
+            sb.AppendFormat("        [67]: {0}\n", mDirPath[67]);
+            sb.AppendFormat("        [68]: {0}\n", mDirPath[68]);
+            sb.AppendFormat("        [69]: {0}\n", mDirPath[69]);
+            sb.AppendFormat("        [70]: {0}\n", mDirPath[70]);
+            sb.AppendFormat("        [71]: {0}\n", mDirPath[71]);
+            sb.AppendFormat("        [72]: {0}\n", mDirPath[72]);
+            sb.AppendFormat("        [73]: {0}\n", mDirPath[73]);
+            sb.AppendFormat("        [74]: {0}\n", mDirPath[74]);
+            sb.AppendFormat("        [75]: {0}\n", mDirPath[75]);
+            sb.AppendFormat("        [76]: {0}\n", mDirPath[76]);
+            sb.AppendFormat("        [77]: {0}\n", mDirPath[77]);
+            sb.AppendFormat("        [78]: {0}\n", mDirPath[78]);
+            sb.AppendFormat("        [79]: {0}\n", mDirPath[79]);
+            sb.AppendFormat("        [80]: {0}\n", mDirPath[80]);
+            sb.AppendFormat("        [81]: {0}\n", mDirPath[81]);
+            sb.AppendFormat("        [82]: {0}\n", mDirPath[82]);
+            sb.AppendFormat("        [83]: {0}\n", mDirPath[83]);
+            sb.AppendFormat("        [84]: {0}\n", mDirPath[84]);
+            sb.AppendFormat("        [85]: {0}\n", mDirPath[85]);
+            sb.AppendFormat("        [86]: {0}\n", mDirPath[86]);
+            sb.AppendFormat("        [87]: {0}\n", mDirPath[87]);
+            sb.AppendFormat("        [88]: {0}\n", mDirPath[88]);
+            sb.AppendFormat("        [89]: {0}\n", mDirPath[89]);
+            sb.AppendFormat("        [90]: {0}\n", mDirPath[90]);
+            sb.AppendFormat("        [91]: {0}\n", mDirPath[91]);
+            sb.AppendFormat("        [92]: {0}\n", mDirPath[92]);
+            sb.AppendFormat("        [93]: {0}\n", mDirPath[93]);
+            sb.AppendFormat("        [94]: {0}\n", mDirPath[94]);
+            sb.AppendFormat("        [95]: {0}\n", mDirPath[95]);
+            sb.AppendFormat("        [96]: {0}\n", mDirPath[96]);
+            sb.AppendFormat("        [97]: {0}\n", mDirPath[97]);
+            sb.AppendFormat("        [98]: {0}\n", mDirPath[98]);
+            sb.AppendFormat("        [99]: {0}\n", mDirPath[99]);
+            sb.AppendFormat("        [100]: {0}\n", mDirPath[100]);
+            sb.AppendFormat("        [101]: {0}\n", mDirPath[101]);
+            sb.AppendFormat("        [102]: {0}\n", mDirPath[102]);
+            sb.AppendFormat("        [103]: {0}\n", mDirPath[103]);
+            sb.AppendFormat("        [104]: {0}\n", mDirPath[104]);
+            sb.AppendFormat("        [105]: {0}\n", mDirPath[105]);
+            sb.AppendFormat("        [106]: {0}\n", mDirPath[106]);
+            sb.AppendFormat("        [107]: {0}\n", mDirPath[107]);
+            sb.AppendFormat("        [108]: {0}\n", mDirPath[108]);
+            sb.AppendFormat("        [109]: {0}\n", mDirPath[109]);
+            sb.AppendFormat("        [110]: {0}\n", mDirPath[110]);
+            sb.AppendFormat("        [111]: {0}\n", mDirPath[111]);
+            sb.AppendFormat("        [112]: {0}\n", mDirPath[112]);
+            sb.AppendFormat("        [113]: {0}\n", mDirPath[113]);
+            sb.AppendFormat("        [114]: {0}\n", mDirPath[114]);
+            sb.AppendFormat("        [115]: {0}\n", mDirPath[115]);
+            sb.AppendFormat("        [116]: {0}\n", mDirPath[116]);
+            sb.AppendFormat("        [117]: {0}\n", mDirPath[117]);
+            sb.AppendFormat("        [118]: {0}\n", mDirPath[118]);
+            sb.AppendFormat("        [119]: {0}\n", mDirPath[119]);
+            sb.AppendFormat("        [120]: {0}\n", mDirPath[120]);
+            sb.AppendFormat("        [121]: {0}\n", mDirPath[121]);
+            sb.AppendFormat("        [122]: {0}\n", mDirPath[122]);
+            sb.AppendFormat("        [123]: {0}\n", mDirPath[123]);
+            sb.AppendFormat("        [124]: {0}\n", mDirPath[124]);
+            sb.AppendFormat("        [125]: {0}\n", mDirPath[125]);
+            sb.AppendFormat("        [126]: {0}\n", mDirPath[126]);
+            sb.AppendFormat("        [127]: {0}\n", mDirPath[127]);
+            sb.AppendFormat("        [128]: {0}\n", mDirPath[128]);
+            sb.AppendFormat("        [129]: {0}\n", mDirPath[129]);
+            sb.AppendFormat("        [130]: {0}\n", mDirPath[130]);
+            sb.AppendFormat("        [131]: {0}\n", mDirPath[131]);
+            sb.AppendFormat("        [132]: {0}\n", mDirPath[132]);
+            sb.AppendFormat("        [133]: {0}\n", mDirPath[133]);
+            sb.AppendFormat("        [134]: {0}\n", mDirPath[134]);
+            sb.AppendFormat("        [135]: {0}\n", mDirPath[135]);
+            sb.AppendFormat("        [136]: {0}\n", mDirPath[136]);
+            sb.AppendFormat("        [137]: {0}\n", mDirPath[137]);
+            sb.AppendFormat("        [138]: {0}\n", mDirPath[138]);
+            sb.AppendFormat("        [139]: {0}\n", mDirPath[139]);
+            sb.AppendFormat("        [140]: {0}\n", mDirPath[140]);
+            sb.AppendFormat("        [141]: {0}\n", mDirPath[141]);
+            sb.AppendFormat("        [142]: {0}\n", mDirPath[142]);
+            sb.AppendFormat("        [143]: {0}\n", mDirPath[143]);
+            sb.AppendFormat("        [144]: {0}\n", mDirPath[144]);
+            sb.AppendFormat("        [145]: {0}\n", mDirPath[145]);
+            sb.AppendFormat("        [146]: {0}\n", mDirPath[146]);
+            sb.AppendFormat("        [147]: {0}\n", mDirPath[147]);
+            sb.AppendFormat("        [148]: {0}\n", mDirPath[148]);
+            sb.AppendFormat("        [149]: {0}\n", mDirPath[149]);
+            sb.AppendFormat("        [150]: {0}\n", mDirPath[150]);
+            sb.AppendFormat("        [151]: {0}\n", mDirPath[151]);
+            sb.AppendFormat("        [152]: {0}\n", mDirPath[152]);
+            sb.AppendFormat("        [153]: {0}\n", mDirPath[153]);
+            sb.AppendFormat("        [154]: {0}\n", mDirPath[154]);
+            sb.AppendFormat("        [155]: {0}\n", mDirPath[155]);
+            sb.AppendFormat("        [156]: {0}\n", mDirPath[156]);
+            sb.AppendFormat("        [157]: {0}\n", mDirPath[157]);
+            sb.AppendFormat("        [158]: {0}\n", mDirPath[158]);
+            sb.AppendFormat("        [159]: {0}\n", mDirPath[159]);
+            sb.AppendFormat("        [160]: {0}\n", mDirPath[160]);
+            sb.AppendFormat("        [161]: {0}\n", mDirPath[161]);
+            sb.AppendFormat("        [162]: {0}\n", mDirPath[162]);
+            sb.AppendFormat("        [163]: {0}\n", mDirPath[163]);
+            sb.AppendFormat("        [164]: {0}\n", mDirPath[164]);
+            sb.AppendFormat("        [165]: {0}\n", mDirPath[165]);
+            sb.AppendFormat("        [166]: {0}\n", mDirPath[166]);
+            sb.AppendFormat("        [167]: {0}\n", mDirPath[167]);
+            sb.AppendFormat("        [168]: {0}\n", mDirPath[168]);
+            sb.AppendFormat("        [169]: {0}\n", mDirPath[169]);
+            sb.AppendFormat("        [170]: {0}\n", mDirPath[170]);
+            sb.AppendFormat("        [171]: {0}\n", mDirPath[171]);
+            sb.AppendFormat("        [172]: {0}\n", mDirPath[172]);
+            sb.AppendFormat("        [173]: {0}\n", mDirPath[173]);
+            sb.AppendFormat("        [174]: {0}\n", mDirPath[174]);
+            sb.AppendFormat("        [175]: {0}\n", mDirPath[175]);
+            sb.AppendFormat("        [176]: {0}\n", mDirPath[176]);
+            sb.AppendFormat("        [177]: {0}\n", mDirPath[177]);
+            sb.AppendFormat("        [178]: {0}\n", mDirPath[178]);
+            sb.AppendFormat("        [179]: {0}\n", mDirPath[179]);
+            sb.AppendFormat("        [180]: {0}\n", mDirPath[180]);
+            sb.AppendFormat("        [181]: {0}\n", mDirPath[181]);
+            sb.AppendFormat("        [182]: {0}\n", mDirPath[182]);
+            sb.AppendFormat("        [183]: {0}\n", mDirPath[183]);
+            sb.AppendFormat("        [184]: {0}\n", mDirPath[184]);
+            sb.AppendFormat("        [185]: {0}\n", mDirPath[185]);
+            sb.AppendFormat("        [186]: {0}\n", mDirPath[186]);
+            sb.AppendFormat("        [187]: {0}\n", mDirPath[187]);
+            sb.AppendFormat("        [188]: {0}\n", mDirPath[188]);
+            sb.AppendFormat("        [189]: {0}\n", mDirPath[189]);
+            sb.AppendFormat("        [190]: {0}\n", mDirPath[190]);
+            sb.AppendFormat("        [191]: {0}\n", mDirPath[191]);
+            sb.AppendFormat("        [192]: {0}\n", mDirPath[192]);
+            sb.AppendFormat("        [193]: {0}\n", mDirPath[193]);
+            sb.AppendFormat("        [194]: {0}\n", mDirPath[194]);
+            sb.AppendFormat("        [195]: {0}\n", mDirPath[195]);
+            sb.AppendFormat("        [196]: {0}\n", mDirPath[196]);
+            sb.AppendFormat("        [197]: {0}\n", mDirPath[197]);
+            sb.AppendFormat("        [198]: {0}\n", mDirPath[198]);
+            sb.AppendFormat("        [199]: {0}\n", mDirPath[199]);
+            sb.AppendFormat("        [200]: {0}\n", mDirPath[200]);
+            sb.AppendFormat("        [201]: {0}\n", mDirPath[201]);
+            sb.AppendFormat("        [202]: {0}\n", mDirPath[202]);
+            sb.AppendFormat("        [203]: {0}\n", mDirPath[203]);
+            sb.AppendFormat("        [204]: {0}\n", mDirPath[204]);
+            sb.AppendFormat("        [205]: {0}\n", mDirPath[205]);
+            sb.AppendFormat("        [206]: {0}\n", mDirPath[206]);
+            sb.AppendFormat("        [207]: {0}\n", mDirPath[207]);
+            sb.AppendFormat("        [208]: {0}\n", mDirPath[208]);
+            sb.AppendFormat("        [209]: {0}\n", mDirPath[209]);
+            sb.AppendFormat("        [210]: {0}\n", mDirPath[210]);
+            sb.AppendFormat("        [211]: {0}\n", mDirPath[211]);
+            sb.AppendFormat("        [212]: {0}\n", mDirPath[212]);
+            sb.AppendFormat("        [213]: {0}\n", mDirPath[213]);
+            sb.AppendFormat("        [214]: {0}\n", mDirPath[214]);
+            sb.AppendFormat("        [215]: {0}\n", mDirPath[215]);
+            sb.AppendFormat("        [216]: {0}\n", mDirPath[216]);
+            sb.AppendFormat("        [217]: {0}\n", mDirPath[217]);
+            sb.AppendFormat("        [218]: {0}\n", mDirPath[218]);
+            sb.AppendFormat("        [219]: {0}\n", mDirPath[219]);
+            sb.AppendFormat("        [220]: {0}\n", mDirPath[220]);
+            sb.AppendFormat("        [221]: {0}\n", mDirPath[221]);
+            sb.AppendFormat("        [222]: {0}\n", mDirPath[222]);
+            sb.AppendFormat("        [223]: {0}\n", mDirPath[223]);
+            sb.AppendFormat("        [224]: {0}\n", mDirPath[224]);
+            sb.AppendFormat("        [225]: {0}\n", mDirPath[225]);
+            sb.AppendFormat("        [226]: {0}\n", mDirPath[226]);
+            sb.AppendFormat("        [227]: {0}\n", mDirPath[227]);
+            sb.AppendFormat("        [228]: {0}\n", mDirPath[228]);
+            sb.AppendFormat("        [229]: {0}\n", mDirPath[229]);
+            sb.AppendFormat("        [230]: {0}\n", mDirPath[230]);
+            sb.AppendFormat("        [231]: {0}\n", mDirPath[231]);
+            sb.AppendFormat("        [232]: {0}\n", mDirPath[232]);
+            sb.AppendFormat("        [233]: {0}\n", mDirPath[233]);
+            sb.AppendFormat("        [234]: {0}\n", mDirPath[234]);
+            sb.AppendFormat("        [235]: {0}\n", mDirPath[235]);
+            sb.AppendFormat("        [236]: {0}\n", mDirPath[236]);
+            sb.AppendFormat("        [237]: {0}\n", mDirPath[237]);
+            sb.AppendFormat("        [238]: {0}\n", mDirPath[238]);
+            sb.AppendFormat("        [239]: {0}\n", mDirPath[239]);
+            sb.AppendFormat("    Flags: {0}\n", mFlags);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTransferUid;
         private char[] mDirPath = new char[240];
         private byte mFlags;
@@ -9335,6 +11298,17 @@ namespace MavLinkNet
         {
             this.mTransferUid = s.ReadUInt64();
             this.mResult = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FileTransferRes \n");
+            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
+            sb.AppendFormat("    Result: {0}\n", mResult);
+
+            return sb.ToString();
         }
 
         private UInt64 mTransferUid;
@@ -9488,6 +11462,28 @@ namespace MavLinkNet
             this.mSatellitesVisible = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilGps \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    Eph: {0}\n", mEph);
+            sb.AppendFormat("    Epv: {0}\n", mEpv);
+            sb.AppendFormat("    Vel: {0}\n", mVel);
+            sb.AppendFormat("    Vn: {0}\n", mVn);
+            sb.AppendFormat("    Ve: {0}\n", mVe);
+            sb.AppendFormat("    Vd: {0}\n", mVd);
+            sb.AppendFormat("    Cog: {0}\n", mCog);
+            sb.AppendFormat("    FixType: {0}\n", mFixType);
+            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private Int32 mLat;
         private Int32 mLon;
@@ -9598,6 +11594,23 @@ namespace MavLinkNet
             this.mFlowY = s.ReadInt16();
             this.mSensorId = s.ReadByte();
             this.mQuality = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilOpticalFlow \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    FlowCompMX: {0}\n", mFlowCompMX);
+            sb.AppendFormat("    FlowCompMY: {0}\n", mFlowCompMY);
+            sb.AppendFormat("    GroundDistance: {0}\n", mGroundDistance);
+            sb.AppendFormat("    FlowX: {0}\n", mFlowX);
+            sb.AppendFormat("    FlowY: {0}\n", mFlowY);
+            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
+            sb.AppendFormat("    Quality: {0}\n", mQuality);
+
+            return sb.ToString();
         }
 
         private UInt64 mTimeUsec;
@@ -9793,6 +11806,35 @@ namespace MavLinkNet
             this.mZacc = s.ReadInt16();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("HilStateQuaternion \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.Append("    AttitudeQuaternion\n");
+            sb.AppendFormat("        [0]: {0}\n", mAttitudeQuaternion[0]);
+            sb.AppendFormat("        [1]: {0}\n", mAttitudeQuaternion[1]);
+            sb.AppendFormat("        [2]: {0}\n", mAttitudeQuaternion[2]);
+            sb.AppendFormat("        [3]: {0}\n", mAttitudeQuaternion[3]);
+            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
+            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
+            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lon: {0}\n", mLon);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    Vx: {0}\n", mVx);
+            sb.AppendFormat("    Vy: {0}\n", mVy);
+            sb.AppendFormat("    Vz: {0}\n", mVz);
+            sb.AppendFormat("    IndAirspeed: {0}\n", mIndAirspeed);
+            sb.AppendFormat("    TrueAirspeed: {0}\n", mTrueAirspeed);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private float[] mAttitudeQuaternion = new float[4];
         private float mRollspeed;
@@ -9938,6 +11980,26 @@ namespace MavLinkNet
             this.mBatteryRemaining = s.ReadSByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("BatteryStatus \n");
+            sb.AppendFormat("    CurrentConsumed: {0}\n", mCurrentConsumed);
+            sb.AppendFormat("    EnergyConsumed: {0}\n", mEnergyConsumed);
+            sb.AppendFormat("    VoltageCell1: {0}\n", mVoltageCell1);
+            sb.AppendFormat("    VoltageCell2: {0}\n", mVoltageCell2);
+            sb.AppendFormat("    VoltageCell3: {0}\n", mVoltageCell3);
+            sb.AppendFormat("    VoltageCell4: {0}\n", mVoltageCell4);
+            sb.AppendFormat("    VoltageCell5: {0}\n", mVoltageCell5);
+            sb.AppendFormat("    VoltageCell6: {0}\n", mVoltageCell6);
+            sb.AppendFormat("    CurrentBattery: {0}\n", mCurrentBattery);
+            sb.AppendFormat("    AccuId: {0}\n", mAccuId);
+            sb.AppendFormat("    BatteryRemaining: {0}\n", mBatteryRemaining);
+
+            return sb.ToString();
+        }
+
         private Int32 mCurrentConsumed;
         private Int32 mEnergyConsumed;
         private UInt16 mVoltageCell1;
@@ -10058,6 +12120,24 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Setpoint8dof \n");
+            sb.AppendFormat("    Val1: {0}\n", mVal1);
+            sb.AppendFormat("    Val2: {0}\n", mVal2);
+            sb.AppendFormat("    Val3: {0}\n", mVal3);
+            sb.AppendFormat("    Val4: {0}\n", mVal4);
+            sb.AppendFormat("    Val5: {0}\n", mVal5);
+            sb.AppendFormat("    Val6: {0}\n", mVal6);
+            sb.AppendFormat("    Val7: {0}\n", mVal7);
+            sb.AppendFormat("    Val8: {0}\n", mVal8);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+
+            return sb.ToString();
+        }
+
         private float mVal1;
         private float mVal2;
         private float mVal3;
@@ -10154,6 +12234,22 @@ namespace MavLinkNet
             this.mRotY = s.ReadSingle();
             this.mRotZ = s.ReadSingle();
             this.mTargetSystem = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Setpoint6dof \n");
+            sb.AppendFormat("    TransX: {0}\n", mTransX);
+            sb.AppendFormat("    TransY: {0}\n", mTransY);
+            sb.AppendFormat("    TransZ: {0}\n", mTransZ);
+            sb.AppendFormat("    RotX: {0}\n", mRotX);
+            sb.AppendFormat("    RotY: {0}\n", mRotY);
+            sb.AppendFormat("    RotZ: {0}\n", mRotZ);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+
+            return sb.ToString();
         }
 
         private float mTransX;
@@ -10284,6 +12380,51 @@ namespace MavLinkNet
             this.mValue[31] = s.ReadSByte();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MemoryVect \n");
+            sb.AppendFormat("    Address: {0}\n", mAddress);
+            sb.AppendFormat("    Ver: {0}\n", mVer);
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.Append("    Value\n");
+            sb.AppendFormat("        [0]: {0}\n", mValue[0]);
+            sb.AppendFormat("        [1]: {0}\n", mValue[1]);
+            sb.AppendFormat("        [2]: {0}\n", mValue[2]);
+            sb.AppendFormat("        [3]: {0}\n", mValue[3]);
+            sb.AppendFormat("        [4]: {0}\n", mValue[4]);
+            sb.AppendFormat("        [5]: {0}\n", mValue[5]);
+            sb.AppendFormat("        [6]: {0}\n", mValue[6]);
+            sb.AppendFormat("        [7]: {0}\n", mValue[7]);
+            sb.AppendFormat("        [8]: {0}\n", mValue[8]);
+            sb.AppendFormat("        [9]: {0}\n", mValue[9]);
+            sb.AppendFormat("        [10]: {0}\n", mValue[10]);
+            sb.AppendFormat("        [11]: {0}\n", mValue[11]);
+            sb.AppendFormat("        [12]: {0}\n", mValue[12]);
+            sb.AppendFormat("        [13]: {0}\n", mValue[13]);
+            sb.AppendFormat("        [14]: {0}\n", mValue[14]);
+            sb.AppendFormat("        [15]: {0}\n", mValue[15]);
+            sb.AppendFormat("        [16]: {0}\n", mValue[16]);
+            sb.AppendFormat("        [17]: {0}\n", mValue[17]);
+            sb.AppendFormat("        [18]: {0}\n", mValue[18]);
+            sb.AppendFormat("        [19]: {0}\n", mValue[19]);
+            sb.AppendFormat("        [20]: {0}\n", mValue[20]);
+            sb.AppendFormat("        [21]: {0}\n", mValue[21]);
+            sb.AppendFormat("        [22]: {0}\n", mValue[22]);
+            sb.AppendFormat("        [23]: {0}\n", mValue[23]);
+            sb.AppendFormat("        [24]: {0}\n", mValue[24]);
+            sb.AppendFormat("        [25]: {0}\n", mValue[25]);
+            sb.AppendFormat("        [26]: {0}\n", mValue[26]);
+            sb.AppendFormat("        [27]: {0}\n", mValue[27]);
+            sb.AppendFormat("        [28]: {0}\n", mValue[28]);
+            sb.AppendFormat("        [29]: {0}\n", mValue[29]);
+            sb.AppendFormat("        [30]: {0}\n", mValue[30]);
+            sb.AppendFormat("        [31]: {0}\n", mValue[31]);
+
+            return sb.ToString();
+        }
+
         private UInt16 mAddress;
         private byte mVer;
         private byte mType;
@@ -10372,6 +12513,30 @@ namespace MavLinkNet
             this.mName[9] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("DebugVect \n");
+            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
+            sb.AppendFormat("    X: {0}\n", mX);
+            sb.AppendFormat("    Y: {0}\n", mY);
+            sb.AppendFormat("    Z: {0}\n", mZ);
+            sb.Append("    Name\n");
+            sb.AppendFormat("        [0]: {0}\n", mName[0]);
+            sb.AppendFormat("        [1]: {0}\n", mName[1]);
+            sb.AppendFormat("        [2]: {0}\n", mName[2]);
+            sb.AppendFormat("        [3]: {0}\n", mName[3]);
+            sb.AppendFormat("        [4]: {0}\n", mName[4]);
+            sb.AppendFormat("        [5]: {0}\n", mName[5]);
+            sb.AppendFormat("        [6]: {0}\n", mName[6]);
+            sb.AppendFormat("        [7]: {0}\n", mName[7]);
+            sb.AppendFormat("        [8]: {0}\n", mName[8]);
+            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+
+            return sb.ToString();
+        }
+
         private UInt64 mTimeUsec;
         private float mX;
         private float mY;
@@ -10444,6 +12609,28 @@ namespace MavLinkNet
             this.mName[9] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("NamedValueFloat \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Value: {0}\n", mValue);
+            sb.Append("    Name\n");
+            sb.AppendFormat("        [0]: {0}\n", mName[0]);
+            sb.AppendFormat("        [1]: {0}\n", mName[1]);
+            sb.AppendFormat("        [2]: {0}\n", mName[2]);
+            sb.AppendFormat("        [3]: {0}\n", mName[3]);
+            sb.AppendFormat("        [4]: {0}\n", mName[4]);
+            sb.AppendFormat("        [5]: {0}\n", mName[5]);
+            sb.AppendFormat("        [6]: {0}\n", mName[6]);
+            sb.AppendFormat("        [7]: {0}\n", mName[7]);
+            sb.AppendFormat("        [8]: {0}\n", mName[8]);
+            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+
+            return sb.ToString();
+        }
+
         private UInt32 mTimeBootMs;
         private float mValue;
         private char[] mName = new char[10];
@@ -10512,6 +12699,28 @@ namespace MavLinkNet
             this.mName[7] = s.ReadChar();
             this.mName[8] = s.ReadChar();
             this.mName[9] = s.ReadChar();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("NamedValueInt \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Value: {0}\n", mValue);
+            sb.Append("    Name\n");
+            sb.AppendFormat("        [0]: {0}\n", mName[0]);
+            sb.AppendFormat("        [1]: {0}\n", mName[1]);
+            sb.AppendFormat("        [2]: {0}\n", mName[2]);
+            sb.AppendFormat("        [3]: {0}\n", mName[3]);
+            sb.AppendFormat("        [4]: {0}\n", mName[4]);
+            sb.AppendFormat("        [5]: {0}\n", mName[5]);
+            sb.AppendFormat("        [6]: {0}\n", mName[6]);
+            sb.AppendFormat("        [7]: {0}\n", mName[7]);
+            sb.AppendFormat("        [8]: {0}\n", mName[8]);
+            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;
@@ -10654,6 +12863,67 @@ namespace MavLinkNet
             this.mText[49] = s.ReadChar();
         }
 
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Statustext \n");
+            sb.AppendFormat("    Severity: {0}\n", mSeverity);
+            sb.Append("    Text\n");
+            sb.AppendFormat("        [0]: {0}\n", mText[0]);
+            sb.AppendFormat("        [1]: {0}\n", mText[1]);
+            sb.AppendFormat("        [2]: {0}\n", mText[2]);
+            sb.AppendFormat("        [3]: {0}\n", mText[3]);
+            sb.AppendFormat("        [4]: {0}\n", mText[4]);
+            sb.AppendFormat("        [5]: {0}\n", mText[5]);
+            sb.AppendFormat("        [6]: {0}\n", mText[6]);
+            sb.AppendFormat("        [7]: {0}\n", mText[7]);
+            sb.AppendFormat("        [8]: {0}\n", mText[8]);
+            sb.AppendFormat("        [9]: {0}\n", mText[9]);
+            sb.AppendFormat("        [10]: {0}\n", mText[10]);
+            sb.AppendFormat("        [11]: {0}\n", mText[11]);
+            sb.AppendFormat("        [12]: {0}\n", mText[12]);
+            sb.AppendFormat("        [13]: {0}\n", mText[13]);
+            sb.AppendFormat("        [14]: {0}\n", mText[14]);
+            sb.AppendFormat("        [15]: {0}\n", mText[15]);
+            sb.AppendFormat("        [16]: {0}\n", mText[16]);
+            sb.AppendFormat("        [17]: {0}\n", mText[17]);
+            sb.AppendFormat("        [18]: {0}\n", mText[18]);
+            sb.AppendFormat("        [19]: {0}\n", mText[19]);
+            sb.AppendFormat("        [20]: {0}\n", mText[20]);
+            sb.AppendFormat("        [21]: {0}\n", mText[21]);
+            sb.AppendFormat("        [22]: {0}\n", mText[22]);
+            sb.AppendFormat("        [23]: {0}\n", mText[23]);
+            sb.AppendFormat("        [24]: {0}\n", mText[24]);
+            sb.AppendFormat("        [25]: {0}\n", mText[25]);
+            sb.AppendFormat("        [26]: {0}\n", mText[26]);
+            sb.AppendFormat("        [27]: {0}\n", mText[27]);
+            sb.AppendFormat("        [28]: {0}\n", mText[28]);
+            sb.AppendFormat("        [29]: {0}\n", mText[29]);
+            sb.AppendFormat("        [30]: {0}\n", mText[30]);
+            sb.AppendFormat("        [31]: {0}\n", mText[31]);
+            sb.AppendFormat("        [32]: {0}\n", mText[32]);
+            sb.AppendFormat("        [33]: {0}\n", mText[33]);
+            sb.AppendFormat("        [34]: {0}\n", mText[34]);
+            sb.AppendFormat("        [35]: {0}\n", mText[35]);
+            sb.AppendFormat("        [36]: {0}\n", mText[36]);
+            sb.AppendFormat("        [37]: {0}\n", mText[37]);
+            sb.AppendFormat("        [38]: {0}\n", mText[38]);
+            sb.AppendFormat("        [39]: {0}\n", mText[39]);
+            sb.AppendFormat("        [40]: {0}\n", mText[40]);
+            sb.AppendFormat("        [41]: {0}\n", mText[41]);
+            sb.AppendFormat("        [42]: {0}\n", mText[42]);
+            sb.AppendFormat("        [43]: {0}\n", mText[43]);
+            sb.AppendFormat("        [44]: {0}\n", mText[44]);
+            sb.AppendFormat("        [45]: {0}\n", mText[45]);
+            sb.AppendFormat("        [46]: {0}\n", mText[46]);
+            sb.AppendFormat("        [47]: {0}\n", mText[47]);
+            sb.AppendFormat("        [48]: {0}\n", mText[48]);
+            sb.AppendFormat("        [49]: {0}\n", mText[49]);
+
+            return sb.ToString();
+        }
+
         private MavSeverity mSeverity;
         private char[] mText = new char[50];
     }
@@ -10703,6 +12973,18 @@ namespace MavLinkNet
             this.mTimeBootMs = s.ReadUInt32();
             this.mInd = s.ReadByte();
             this.mValue = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Debug \n");
+            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            sb.AppendFormat("    Ind: {0}\n", mInd);
+            sb.AppendFormat("    Value: {0}\n", mValue);
+
+            return sb.ToString();
         }
 
         private UInt32 mTimeBootMs;

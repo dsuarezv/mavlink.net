@@ -51,6 +51,13 @@ namespace MavLinkObjectGenerator
         {
             foreach (EnumData e in mProtocolData.Enumerations.Values)
             {
+                if (e.Description != null)
+                {
+                    WL("    /// <summary>");
+                    WL("    /// {0}", GetSanitizedComment(e.Description));
+                    WL("    /// </summary>");
+                }
+
                 WL("    public enum {0} {{ {1} }};", GetEnumName(e.Name), GetEnumItems(e));
                 WL();                
             }
@@ -86,6 +93,14 @@ namespace MavLinkObjectGenerator
             WL("    // ___________________________________________________________________________________");
             WL();
             WL();
+
+            if (m.Description != null)
+            {
+                WL("    /// <summary>");
+                WL("    /// {0}", GetSanitizedComment(m.Description));
+                WL("    /// </summary>");
+            }
+
             WL("    public class Uas{0}: UasMessage", Utils.GetPascalStyleString(m.Name));
             WL("    {");
         }
@@ -95,6 +110,13 @@ namespace MavLinkObjectGenerator
         {
             foreach (FieldData f in m.Fields)
             {
+                if (f.Description != null)
+                {
+                    WL("        /// <summary>");
+                    WL("        /// {0}", GetSanitizedComment(f.Description));
+                    WL("        /// </summary>");
+                }
+
                 WL("        public {0}{1} {2} {{", GetCSharpType(f), GetArrayModifier(f, false), GetFieldName(f));
                 WL("            get {{ return {0}; }}", GetPrivateFieldName(f));
                 WL("            set {{ {0} = value; NotifyUpdated(); }}", GetPrivateFieldName(f));
@@ -135,7 +157,6 @@ namespace MavLinkObjectGenerator
                            GetSerializeTypeCast(f), GetPrivateFieldName(f), i);
                     }
                 }
-
             }
 
             WL("        }");
@@ -232,8 +253,9 @@ namespace MavLinkObjectGenerator
 
             foreach (EnumEntry entry in en.Entries)
             {
-                escapedEnum.Add(Utils.GetPascalStyleString(
-                    GetStrippedEnumName(en.Name, entry.Name)));
+                escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1}",
+                    GetSanitizedComment(entry.Description),
+                    Utils.GetPascalStyleString(GetStrippedEnumName(en.Name, entry.Name))));
             }
 
             return GetCommaSeparatedValues(escapedEnum, "");
@@ -428,6 +450,10 @@ namespace MavLinkObjectGenerator
             return string.Format("m{0}", Utils.GetPascalStyleString(f.Name));
         }
 
+        private static string GetSanitizedComment(string comment)
+        {
+            return comment.Replace('\n', ' ').Replace('\r', ' ');
+        }
 
         // __ Output __________________________________________________________
 

@@ -4,75 +4,810 @@ using System.IO;
 namespace MavLinkNet
 {
 
-    public enum MavAutopilot { Generic, Pixhawk, Slugs, Ardupilotmega, Openpilot, GenericWaypointsOnly, GenericWaypointsAndSimpleNavigationOnly, GenericMissionFull, Invalid, Ppz, Udb, Fp, Px4, Smaccmpilot, Autoquad, Armazila, Aerob };
+    /// <summary>
+    /// Micro air vehicle / autopilot classes. This identifies the individual model.
+    /// </summary>
+    public enum MavAutopilot { 
 
-    public enum MavType { Generic, FixedWing, Quadrotor, Coaxial, Helicopter, AntennaTracker, Gcs, Airship, FreeBalloon, Rocket, GroundRover, SurfaceBoat, Submarine, Hexarotor, Octorotor, Tricopter, FlappingWing, Kite };
+        /// <summary> Generic autopilot, full support for everything </summary>
+        Generic, 
 
-    public enum MavModeFlag { SafetyArmed, ManualInputEnabled, HilEnabled, StabilizeEnabled, GuidedEnabled, AutoEnabled, TestEnabled, CustomModeEnabled };
+        /// <summary> PIXHAWK autopilot, http://pixhawk.ethz.ch </summary>
+        Pixhawk, 
 
-    public enum MavModeFlagDecodePosition { Safety, Manual, Hil, Stabilize, Guided, Auto, Test, CustomMode };
+        /// <summary> SLUGS autopilot, http://slugsuav.soe.ucsc.edu </summary>
+        Slugs, 
 
-    public enum MavGoto { DoHold, DoContinue, HoldAtCurrentPosition, HoldAtSpecifiedPosition };
+        /// <summary> ArduPilotMega / ArduCopter, http://diydrones.com </summary>
+        Ardupilotmega, 
 
-    public enum MavMode { Preflight, StabilizeDisarmed, StabilizeArmed, ManualDisarmed, ManualArmed, GuidedDisarmed, GuidedArmed, AutoDisarmed, AutoArmed, TestDisarmed, TestArmed };
+        /// <summary> OpenPilot, http://openpilot.org </summary>
+        Openpilot, 
 
-    public enum MavState { Uninit, Boot, Calibrating, Standby, Active, Critical, Emergency, Poweroff };
+        /// <summary> Generic autopilot only supporting simple waypoints </summary>
+        GenericWaypointsOnly, 
 
-    public enum MavComponent { MavCompIdAll, MavCompIdGps, MavCompIdMissionplanner, MavCompIdPathplanner, MavCompIdMapper, MavCompIdCamera, MavCompIdImu, MavCompIdImu2, MavCompIdImu3, MavCompIdUdpBridge, MavCompIdUartBridge, MavCompIdSystemControl, MavCompIdServo1, MavCompIdServo2, MavCompIdServo3, MavCompIdServo4, MavCompIdServo5, MavCompIdServo6, MavCompIdServo7, MavCompIdServo8, MavCompIdServo9, MavCompIdServo10, MavCompIdServo11, MavCompIdServo12, MavCompIdServo13, MavCompIdServo14 };
+        /// <summary> Generic autopilot supporting waypoints and other simple navigation commands </summary>
+        GenericWaypointsAndSimpleNavigationOnly, 
 
-    public enum MavSysStatusSensor { _3dGyro, _3dAccel, _3dMag, AbsolutePressure, DifferentialPressure, Gps, OpticalFlow, VisionPosition, LaserPosition, ExternalGroundTruth, AngularRateControl, AttitudeStabilization, YawPosition, ZAltitudeControl, XyPositionControl, MotorOutputs, RcReceiver };
+        /// <summary> Generic autopilot supporting the full mission command set </summary>
+        GenericMissionFull, 
 
-    public enum MavFrame { Global, LocalNed, Mission, GlobalRelativeAlt, LocalEnu };
+        /// <summary> No valid autopilot, e.g. a GCS or other MAVLink component </summary>
+        Invalid, 
 
-    public enum MavlinkDataStreamType { MavlinkDataStreamImgJpeg, MavlinkDataStreamImgBmp, MavlinkDataStreamImgRaw8u, MavlinkDataStreamImgRaw32u, MavlinkDataStreamImgPgm, MavlinkDataStreamImgPng };
+        /// <summary> PPZ UAV - http://nongnu.org/paparazzi </summary>
+        Ppz, 
 
-    public enum MavCmd { NavWaypoint, NavLoiterUnlim, NavLoiterTurns, NavLoiterTime, NavReturnToLaunch, NavLand, NavTakeoff, NavRoi, NavPathplanning, NavLast, ConditionDelay, ConditionChangeAlt, ConditionDistance, ConditionYaw, ConditionLast, DoSetMode, DoJump, DoChangeSpeed, DoSetHome, DoSetParameter, DoSetRelay, DoRepeatRelay, DoSetServo, DoRepeatServo, DoControlVideo, DoSetRoi, DoLast, PreflightCalibration, PreflightSetSensorOffsets, PreflightStorage, PreflightRebootShutdown, OverrideGoto, MissionStart, ComponentArmDisarm, StartRxPair };
+        /// <summary> UAV Dev Board </summary>
+        Udb, 
 
-    public enum MavDataStream { All, RawSensors, ExtendedStatus, RcChannels, RawController, Position, Extra1, Extra2, Extra3 };
+        /// <summary> FlexiPilot </summary>
+        Fp, 
 
-    public enum MavRoi { None, Wpnext, Wpindex, Location, Target };
+        /// <summary> PX4 Autopilot - http://pixhawk.ethz.ch/px4/ </summary>
+        Px4, 
 
-    public enum MavCmdAck { Ok, ErrFail, ErrAccessDenied, ErrNotSupported, ErrCoordinateFrameNotSupported, ErrCoordinatesOutOfRange, ErrXLatOutOfRange, ErrYLonOutOfRange, ErrZAltOutOfRange };
+        /// <summary> SMACCMPilot - http://smaccmpilot.org </summary>
+        Smaccmpilot, 
 
-    public enum MavParamType { Uint8, Int8, Uint16, Int16, Uint32, Int32, Uint64, Int64, Real32, Real64 };
+        /// <summary> AutoQuad -- http://autoquad.org </summary>
+        Autoquad, 
 
-    public enum MavResult { Accepted, TemporarilyRejected, Denied, Unsupported, Failed };
+        /// <summary> Armazila -- http://armazila.com </summary>
+        Armazila, 
 
-    public enum MavMissionResult { MavMissionAccepted, MavMissionError, MavMissionUnsupportedFrame, MavMissionUnsupported, MavMissionNoSpace, MavMissionInvalid, MavMissionInvalidParam1, MavMissionInvalidParam2, MavMissionInvalidParam3, MavMissionInvalidParam4, MavMissionInvalidParam5X, MavMissionInvalidParam6Y, MavMissionInvalidParam7, MavMissionInvalidSequence, MavMissionDenied };
+        /// <summary> Aerob -- http://aerob.ru </summary>
+        Aerob };
 
-    public enum MavSeverity { Emergency, Alert, Critical, Error, Warning, Notice, Info, Debug };
+    public enum MavType { 
+
+        /// <summary> Generic micro air vehicle. </summary>
+        Generic, 
+
+        /// <summary> Fixed wing aircraft. </summary>
+        FixedWing, 
+
+        /// <summary> Quadrotor </summary>
+        Quadrotor, 
+
+        /// <summary> Coaxial helicopter </summary>
+        Coaxial, 
+
+        /// <summary> Normal helicopter with tail rotor. </summary>
+        Helicopter, 
+
+        /// <summary> Ground installation </summary>
+        AntennaTracker, 
+
+        /// <summary> Operator control unit / ground control station </summary>
+        Gcs, 
+
+        /// <summary> Airship, controlled </summary>
+        Airship, 
+
+        /// <summary> Free balloon, uncontrolled </summary>
+        FreeBalloon, 
+
+        /// <summary> Rocket </summary>
+        Rocket, 
+
+        /// <summary> Ground rover </summary>
+        GroundRover, 
+
+        /// <summary> Surface vessel, boat, ship </summary>
+        SurfaceBoat, 
+
+        /// <summary> Submarine </summary>
+        Submarine, 
+
+        /// <summary> Hexarotor </summary>
+        Hexarotor, 
+
+        /// <summary> Octorotor </summary>
+        Octorotor, 
+
+        /// <summary> Octorotor </summary>
+        Tricopter, 
+
+        /// <summary> Flapping wing </summary>
+        FlappingWing, 
+
+        /// <summary> Flapping wing </summary>
+        Kite };
+
+    /// <summary>
+    /// These flags encode the MAV mode.
+    /// </summary>
+    public enum MavModeFlag { 
+
+        /// <summary> 0b10000000 MAV safety set to armed. Motors are enabled / running / can start. Ready to fly. </summary>
+        SafetyArmed, 
+
+        /// <summary> 0b01000000 remote control input is enabled. </summary>
+        ManualInputEnabled, 
+
+        /// <summary> 0b00100000 hardware in the loop simulation. All motors / actuators are blocked, but internal software is full operational. </summary>
+        HilEnabled, 
+
+        /// <summary> 0b00010000 system stabilizes electronically its attitude (and optionally position). It needs however further control inputs to move around. </summary>
+        StabilizeEnabled, 
+
+        /// <summary> 0b00001000 guided mode enabled, system flies MISSIONs / mission items. </summary>
+        GuidedEnabled, 
+
+        /// <summary> 0b00000100 autonomous mode enabled, system finds its own goal positions. Guided flag can be set or not, depends on the actual implementation. </summary>
+        AutoEnabled, 
+
+        /// <summary> 0b00000010 system has a test mode enabled. This flag is intended for temporary system tests and should not be used for stable implementations. </summary>
+        TestEnabled, 
+
+        /// <summary> 0b00000001 Reserved for future use. </summary>
+        CustomModeEnabled };
+
+    /// <summary>
+    /// These values encode the bit positions of the decode position. These values can be used to read the value of a flag bit by combining the base_mode variable with AND with the flag position value. The result will be either 0 or 1, depending on if the flag is set or not.
+    /// </summary>
+    public enum MavModeFlagDecodePosition { 
+
+        /// <summary> First bit:  10000000 </summary>
+        Safety, 
+
+        /// <summary> Second bit: 01000000 </summary>
+        Manual, 
+
+        /// <summary> Third bit:  00100000 </summary>
+        Hil, 
+
+        /// <summary> Fourth bit: 00010000 </summary>
+        Stabilize, 
+
+        /// <summary> Fifth bit:  00001000 </summary>
+        Guided, 
+
+        /// <summary> Sixt bit:   00000100 </summary>
+        Auto, 
+
+        /// <summary> Seventh bit: 00000010 </summary>
+        Test, 
+
+        /// <summary> Eighth bit: 00000001 </summary>
+        CustomMode };
+
+    /// <summary>
+    /// Override command, pauses current mission execution and moves immediately to a position
+    /// </summary>
+    public enum MavGoto { 
+
+        /// <summary> Hold at the current position. </summary>
+        DoHold, 
+
+        /// <summary> Continue with the next item in mission execution. </summary>
+        DoContinue, 
+
+        /// <summary> Hold at the current position of the system </summary>
+        HoldAtCurrentPosition, 
+
+        /// <summary> Hold at the position specified in the parameters of the DO_HOLD action </summary>
+        HoldAtSpecifiedPosition };
+
+    /// <summary>
+    /// These defines are predefined OR-combined mode flags. There is no need to use values from this enum, but it                 simplifies the use of the mode flags. Note that manual input is enabled in all modes as a safety override.
+    /// </summary>
+    public enum MavMode { 
+
+        /// <summary> System is not ready to fly, booting, calibrating, etc. No flag is set. </summary>
+        Preflight, 
+
+        /// <summary> System is allowed to be active, under assisted RC control. </summary>
+        StabilizeDisarmed, 
+
+        /// <summary> System is allowed to be active, under assisted RC control. </summary>
+        StabilizeArmed, 
+
+        /// <summary> System is allowed to be active, under manual (RC) control, no stabilization </summary>
+        ManualDisarmed, 
+
+        /// <summary> System is allowed to be active, under manual (RC) control, no stabilization </summary>
+        ManualArmed, 
+
+        /// <summary> System is allowed to be active, under autonomous control, manual setpoint </summary>
+        GuidedDisarmed, 
+
+        /// <summary> System is allowed to be active, under autonomous control, manual setpoint </summary>
+        GuidedArmed, 
+
+        /// <summary> System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs) </summary>
+        AutoDisarmed, 
+
+        /// <summary> System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs) </summary>
+        AutoArmed, 
+
+        /// <summary> UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only. </summary>
+        TestDisarmed, 
+
+        /// <summary> UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only. </summary>
+        TestArmed };
+
+    public enum MavState { 
+
+        /// <summary> Uninitialized system, state is unknown. </summary>
+        Uninit, 
+
+        /// <summary> System is booting up. </summary>
+        Boot, 
+
+        /// <summary> System is calibrating and not flight-ready. </summary>
+        Calibrating, 
+
+        /// <summary> System is grounded and on standby. It can be launched any time. </summary>
+        Standby, 
+
+        /// <summary> System is active and might be already airborne. Motors are engaged. </summary>
+        Active, 
+
+        /// <summary> System is in a non-normal flight mode. It can however still navigate. </summary>
+        Critical, 
+
+        /// <summary> System is in a non-normal flight mode. It lost control over parts or over the whole airframe. It is in mayday and going down. </summary>
+        Emergency, 
+
+        /// <summary> System just initialized its power-down sequence, will shut down now. </summary>
+        Poweroff };
+
+    public enum MavComponent { 
+
+        /// <summary>  </summary>
+        MavCompIdAll, 
+
+        /// <summary>  </summary>
+        MavCompIdGps, 
+
+        /// <summary>  </summary>
+        MavCompIdMissionplanner, 
+
+        /// <summary>  </summary>
+        MavCompIdPathplanner, 
+
+        /// <summary>  </summary>
+        MavCompIdMapper, 
+
+        /// <summary>  </summary>
+        MavCompIdCamera, 
+
+        /// <summary>  </summary>
+        MavCompIdImu, 
+
+        /// <summary>  </summary>
+        MavCompIdImu2, 
+
+        /// <summary>  </summary>
+        MavCompIdImu3, 
+
+        /// <summary>  </summary>
+        MavCompIdUdpBridge, 
+
+        /// <summary>  </summary>
+        MavCompIdUartBridge, 
+
+        /// <summary>  </summary>
+        MavCompIdSystemControl, 
+
+        /// <summary>  </summary>
+        MavCompIdServo1, 
+
+        /// <summary>  </summary>
+        MavCompIdServo2, 
+
+        /// <summary>  </summary>
+        MavCompIdServo3, 
+
+        /// <summary>  </summary>
+        MavCompIdServo4, 
+
+        /// <summary>  </summary>
+        MavCompIdServo5, 
+
+        /// <summary>  </summary>
+        MavCompIdServo6, 
+
+        /// <summary>  </summary>
+        MavCompIdServo7, 
+
+        /// <summary>  </summary>
+        MavCompIdServo8, 
+
+        /// <summary>  </summary>
+        MavCompIdServo9, 
+
+        /// <summary>  </summary>
+        MavCompIdServo10, 
+
+        /// <summary>  </summary>
+        MavCompIdServo11, 
+
+        /// <summary>  </summary>
+        MavCompIdServo12, 
+
+        /// <summary>  </summary>
+        MavCompIdServo13, 
+
+        /// <summary>  </summary>
+        MavCompIdServo14 };
+
+    /// <summary>
+    /// These encode the sensors whose status is sent as part of the SYS_STATUS message.
+    /// </summary>
+    public enum MavSysStatusSensor { 
+
+        /// <summary> 0x01 3D gyro </summary>
+        _3dGyro, 
+
+        /// <summary> 0x02 3D accelerometer </summary>
+        _3dAccel, 
+
+        /// <summary> 0x04 3D magnetometer </summary>
+        _3dMag, 
+
+        /// <summary> 0x08 absolute pressure </summary>
+        AbsolutePressure, 
+
+        /// <summary> 0x10 differential pressure </summary>
+        DifferentialPressure, 
+
+        /// <summary> 0x20 GPS </summary>
+        Gps, 
+
+        /// <summary> 0x40 optical flow </summary>
+        OpticalFlow, 
+
+        /// <summary> 0x80 computer vision position </summary>
+        VisionPosition, 
+
+        /// <summary> 0x100 laser based position </summary>
+        LaserPosition, 
+
+        /// <summary> 0x200 external ground truth (Vicon or Leica) </summary>
+        ExternalGroundTruth, 
+
+        /// <summary> 0x400 3D angular rate control </summary>
+        AngularRateControl, 
+
+        /// <summary> 0x800 attitude stabilization </summary>
+        AttitudeStabilization, 
+
+        /// <summary> 0x1000 yaw position </summary>
+        YawPosition, 
+
+        /// <summary> 0x2000 z/altitude control </summary>
+        ZAltitudeControl, 
+
+        /// <summary> 0x4000 x/y position control </summary>
+        XyPositionControl, 
+
+        /// <summary> 0x8000 motor outputs / control </summary>
+        MotorOutputs, 
+
+        /// <summary> 0x10000 rc receiver </summary>
+        RcReceiver };
+
+    public enum MavFrame { 
+
+        /// <summary> Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL) </summary>
+        Global, 
+
+        /// <summary> Local coordinate frame, Z-up (x: north, y: east, z: down). </summary>
+        LocalNed, 
+
+        /// <summary> NOT a coordinate frame, indicates a mission command. </summary>
+        Mission, 
+
+        /// <summary> Global coordinate frame, WGS84 coordinate system, relative altitude over ground with respect to the home position. First value / x: latitude, second value / y: longitude, third value / z: positive altitude with 0 being at the altitude of the home location. </summary>
+        GlobalRelativeAlt, 
+
+        /// <summary> Local coordinate frame, Z-down (x: east, y: north, z: up) </summary>
+        LocalEnu };
+
+    public enum MavlinkDataStreamType { 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgJpeg, 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgBmp, 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgRaw8u, 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgRaw32u, 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgPgm, 
+
+        /// <summary>  </summary>
+        MavlinkDataStreamImgPng };
+
+    /// <summary>
+    /// Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data.
+    /// </summary>
+    public enum MavCmd { 
+
+        /// <summary> Navigate to MISSION. </summary>
+        NavWaypoint, 
+
+        /// <summary> Loiter around this MISSION an unlimited amount of time </summary>
+        NavLoiterUnlim, 
+
+        /// <summary> Loiter around this MISSION for X turns </summary>
+        NavLoiterTurns, 
+
+        /// <summary> Loiter around this MISSION for X seconds </summary>
+        NavLoiterTime, 
+
+        /// <summary> Return to launch location </summary>
+        NavReturnToLaunch, 
+
+        /// <summary> Land at location </summary>
+        NavLand, 
+
+        /// <summary> Takeoff from ground / hand </summary>
+        NavTakeoff, 
+
+        /// <summary> Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras. </summary>
+        NavRoi, 
+
+        /// <summary> Control autonomous path planning on the MAV. </summary>
+        NavPathplanning, 
+
+        /// <summary> NOP - This command is only used to mark the upper limit of the NAV/ACTION commands in the enumeration </summary>
+        NavLast, 
+
+        /// <summary> Delay mission state machine. </summary>
+        ConditionDelay, 
+
+        /// <summary> Ascend/descend at rate.  Delay mission state machine until desired altitude reached. </summary>
+        ConditionChangeAlt, 
+
+        /// <summary> Delay mission state machine until within desired distance of next NAV point. </summary>
+        ConditionDistance, 
+
+        /// <summary> Reach a certain target angle. </summary>
+        ConditionYaw, 
+
+        /// <summary> NOP - This command is only used to mark the upper limit of the CONDITION commands in the enumeration </summary>
+        ConditionLast, 
+
+        /// <summary> Set system mode. </summary>
+        DoSetMode, 
+
+        /// <summary> Jump to the desired command in the mission list.  Repeat this action only the specified number of times </summary>
+        DoJump, 
+
+        /// <summary> Change speed and/or throttle set points. </summary>
+        DoChangeSpeed, 
+
+        /// <summary> Changes the home location either to the current location or a specified location. </summary>
+        DoSetHome, 
+
+        /// <summary> Set a system parameter.  Caution!  Use of this command requires knowledge of the numeric enumeration value of the parameter. </summary>
+        DoSetParameter, 
+
+        /// <summary> Set a relay to a condition. </summary>
+        DoSetRelay, 
+
+        /// <summary> Cycle a relay on and off for a desired number of cyles with a desired period. </summary>
+        DoRepeatRelay, 
+
+        /// <summary> Set a servo to a desired PWM value. </summary>
+        DoSetServo, 
+
+        /// <summary> Cycle a between its nominal setting and a desired PWM for a desired number of cycles with a desired period. </summary>
+        DoRepeatServo, 
+
+        /// <summary> Control onboard camera system. </summary>
+        DoControlVideo, 
+
+        /// <summary> Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras. </summary>
+        DoSetRoi, 
+
+        /// <summary> NOP - This command is only used to mark the upper limit of the DO commands in the enumeration </summary>
+        DoLast, 
+
+        /// <summary> Trigger calibration. This command will be only accepted if in pre-flight mode. </summary>
+        PreflightCalibration, 
+
+        /// <summary> Set sensor offsets. This command will be only accepted if in pre-flight mode. </summary>
+        PreflightSetSensorOffsets, 
+
+        /// <summary> Request storage of different parameter values and logs. This command will be only accepted if in pre-flight mode. </summary>
+        PreflightStorage, 
+
+        /// <summary> Request the reboot or shutdown of system components. </summary>
+        PreflightRebootShutdown, 
+
+        /// <summary> Hold / continue the current action </summary>
+        OverrideGoto, 
+
+        /// <summary> start running a mission </summary>
+        MissionStart, 
+
+        /// <summary> Arms / Disarms a component </summary>
+        ComponentArmDisarm, 
+
+        /// <summary> Starts receiver pairing </summary>
+        StartRxPair };
+
+    /// <summary>
+    /// Data stream IDs. A data stream is not a fixed set of messages, but rather a       recommendation to the autopilot software. Individual autopilots may or may not obey       the recommended messages.
+    /// </summary>
+    public enum MavDataStream { 
+
+        /// <summary> Enable all data streams </summary>
+        All, 
+
+        /// <summary> Enable IMU_RAW, GPS_RAW, GPS_STATUS packets. </summary>
+        RawSensors, 
+
+        /// <summary> Enable GPS_STATUS, CONTROL_STATUS, AUX_STATUS </summary>
+        ExtendedStatus, 
+
+        /// <summary> Enable RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW </summary>
+        RcChannels, 
+
+        /// <summary> Enable ATTITUDE_CONTROLLER_OUTPUT, POSITION_CONTROLLER_OUTPUT, NAV_CONTROLLER_OUTPUT. </summary>
+        RawController, 
+
+        /// <summary> Enable LOCAL_POSITION, GLOBAL_POSITION/GLOBAL_POSITION_INT messages. </summary>
+        Position, 
+
+        /// <summary> Dependent on the autopilot </summary>
+        Extra1, 
+
+        /// <summary> Dependent on the autopilot </summary>
+        Extra2, 
+
+        /// <summary> Dependent on the autopilot </summary>
+        Extra3 };
+
+    /// <summary>
+    ///  The ROI (region of interest) for the vehicle. This can be                  be used by the vehicle for camera/vehicle attitude alignment (see                  MAV_CMD_NAV_ROI).
+    /// </summary>
+    public enum MavRoi { 
+
+        /// <summary> No region of interest. </summary>
+        None, 
+
+        /// <summary> Point toward next MISSION. </summary>
+        Wpnext, 
+
+        /// <summary> Point toward given MISSION. </summary>
+        Wpindex, 
+
+        /// <summary> Point toward fixed location. </summary>
+        Location, 
+
+        /// <summary> Point toward of given id. </summary>
+        Target };
+
+    /// <summary>
+    /// ACK / NACK / ERROR values as a result of MAV_CMDs and for mission item transmission.
+    /// </summary>
+    public enum MavCmdAck { 
+
+        /// <summary> Command / mission item is ok. </summary>
+        Ok, 
+
+        /// <summary> Generic error message if none of the other reasons fails or if no detailed error reporting is implemented. </summary>
+        ErrFail, 
+
+        /// <summary> The system is refusing to accept this command from this source / communication partner. </summary>
+        ErrAccessDenied, 
+
+        /// <summary> Command or mission item is not supported, other commands would be accepted. </summary>
+        ErrNotSupported, 
+
+        /// <summary> The coordinate frame of this command / mission item is not supported. </summary>
+        ErrCoordinateFrameNotSupported, 
+
+        /// <summary> The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible. </summary>
+        ErrCoordinatesOutOfRange, 
+
+        /// <summary> The X or latitude value is out of range. </summary>
+        ErrXLatOutOfRange, 
+
+        /// <summary> The Y or longitude value is out of range. </summary>
+        ErrYLonOutOfRange, 
+
+        /// <summary> The Z or altitude value is out of range. </summary>
+        ErrZAltOutOfRange };
+
+    /// <summary>
+    /// Specifies the datatype of a MAVLink parameter.
+    /// </summary>
+    public enum MavParamType { 
+
+        /// <summary> 8-bit unsigned integer </summary>
+        Uint8, 
+
+        /// <summary> 8-bit signed integer </summary>
+        Int8, 
+
+        /// <summary> 16-bit unsigned integer </summary>
+        Uint16, 
+
+        /// <summary> 16-bit signed integer </summary>
+        Int16, 
+
+        /// <summary> 32-bit unsigned integer </summary>
+        Uint32, 
+
+        /// <summary> 32-bit signed integer </summary>
+        Int32, 
+
+        /// <summary> 64-bit unsigned integer </summary>
+        Uint64, 
+
+        /// <summary> 64-bit signed integer </summary>
+        Int64, 
+
+        /// <summary> 32-bit floating-point </summary>
+        Real32, 
+
+        /// <summary> 64-bit floating-point </summary>
+        Real64 };
+
+    /// <summary>
+    /// result from a mavlink command
+    /// </summary>
+    public enum MavResult { 
+
+        /// <summary> Command ACCEPTED and EXECUTED </summary>
+        Accepted, 
+
+        /// <summary> Command TEMPORARY REJECTED/DENIED </summary>
+        TemporarilyRejected, 
+
+        /// <summary> Command PERMANENTLY DENIED </summary>
+        Denied, 
+
+        /// <summary> Command UNKNOWN/UNSUPPORTED </summary>
+        Unsupported, 
+
+        /// <summary> Command executed, but failed </summary>
+        Failed };
+
+    /// <summary>
+    /// result in a mavlink mission ack
+    /// </summary>
+    public enum MavMissionResult { 
+
+        /// <summary> mission accepted OK </summary>
+        MavMissionAccepted, 
+
+        /// <summary> generic error / not accepting mission commands at all right now </summary>
+        MavMissionError, 
+
+        /// <summary> coordinate frame is not supported </summary>
+        MavMissionUnsupportedFrame, 
+
+        /// <summary> command is not supported </summary>
+        MavMissionUnsupported, 
+
+        /// <summary> mission item exceeds storage space </summary>
+        MavMissionNoSpace, 
+
+        /// <summary> one of the parameters has an invalid value </summary>
+        MavMissionInvalid, 
+
+        /// <summary> param1 has an invalid value </summary>
+        MavMissionInvalidParam1, 
+
+        /// <summary> param2 has an invalid value </summary>
+        MavMissionInvalidParam2, 
+
+        /// <summary> param3 has an invalid value </summary>
+        MavMissionInvalidParam3, 
+
+        /// <summary> param4 has an invalid value </summary>
+        MavMissionInvalidParam4, 
+
+        /// <summary> x/param5 has an invalid value </summary>
+        MavMissionInvalidParam5X, 
+
+        /// <summary> y/param6 has an invalid value </summary>
+        MavMissionInvalidParam6Y, 
+
+        /// <summary> param7 has an invalid value </summary>
+        MavMissionInvalidParam7, 
+
+        /// <summary> received waypoint out of sequence </summary>
+        MavMissionInvalidSequence, 
+
+        /// <summary> not accepting any mission commands from this communication partner </summary>
+        MavMissionDenied };
+
+    /// <summary>
+    /// Indicates the severity level, generally used for status messages to indicate their relative urgency. Based on RFC-5424 using expanded definitions at: http://www.kiwisyslog.com/kb/info:-syslog-message-levels/.
+    /// </summary>
+    public enum MavSeverity { 
+
+        /// <summary> System is unusable. This is a "panic" condition. </summary>
+        Emergency, 
+
+        /// <summary> Action should be taken immediately. Indicates error in non-critical systems. </summary>
+        Alert, 
+
+        /// <summary> Action must be taken immediately. Indicates failure in a primary system. </summary>
+        Critical, 
+
+        /// <summary> Indicates an error in secondary/redundant systems. </summary>
+        Error, 
+
+        /// <summary> Indicates about a possible future error if this is not resolved within a given timeframe. Example would be a low battery warning. </summary>
+        Warning, 
+
+        /// <summary> An unusual event has occured, though not an error condition. This should be investigated for the root cause. </summary>
+        Notice, 
+
+        /// <summary> Normal operational messages. Useful for logging. No action is required for these messages. </summary>
+        Info, 
+
+        /// <summary> Useful non-operational messages that can assist in debugging. These should not occur during normal operation. </summary>
+        Debug };
 
 
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The heartbeat message shows that a system is present and responding. The type of the MAV and Autopilot hardware allow the receiving system to treat further messages from this system appropriate (e.g. by laying out the user interface based on the autopilot).
+    /// </summary>
     public class UasHeartbeat: UasMessage
     {
+        /// <summary>
+        /// A bitfield for use for autopilot-specific flags.
+        /// </summary>
         public UInt32 CustomMode {
             get { return mCustomMode; }
             set { mCustomMode = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
+        /// </summary>
         public MavType Type {
             get { return mType; }
             set { mType = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
+        /// </summary>
         public MavAutopilot Autopilot {
             get { return mAutopilot; }
             set { mAutopilot = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System mode bitfield, see MAV_MODE_FLAGS ENUM in mavlink/include/mavlink_types.h
+        /// </summary>
         public MavModeFlag BaseMode {
             get { return mBaseMode; }
             set { mBaseMode = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System status flag, see MAV_STATE ENUM
+        /// </summary>
         public MavState SystemStatus {
             get { return mSystemStatus; }
             set { mSystemStatus = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version
+        /// </summary>
         public byte MavlinkVersion {
             get { return mMavlinkVersion; }
             set { mMavlinkVersion = value; NotifyUpdated(); }
@@ -110,68 +845,110 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows wether the system is currently active or not and if an emergency occured. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occured it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout.
+    /// </summary>
     public class UasSysStatus: UasMessage
     {
+        /// <summary>
+        /// Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// </summary>
         public MavSysStatusSensor OnboardControlSensorsPresent {
             get { return mOnboardControlSensorsPresent; }
             set { mOnboardControlSensorsPresent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// </summary>
         public MavSysStatusSensor OnboardControlSensorsEnabled {
             get { return mOnboardControlSensorsEnabled; }
             set { mOnboardControlSensorsEnabled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// </summary>
         public MavSysStatusSensor OnboardControlSensorsHealth {
             get { return mOnboardControlSensorsHealth; }
             set { mOnboardControlSensorsHealth = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000
+        /// </summary>
         public UInt16 Load {
             get { return mLoad; }
             set { mLoad = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage, in millivolts (1 = 1 millivolt)
+        /// </summary>
         public UInt16 VoltageBattery {
             get { return mVoltageBattery; }
             set { mVoltageBattery = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
+        /// </summary>
         public Int16 CurrentBattery {
             get { return mCurrentBattery; }
             set { mCurrentBattery = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
+        /// </summary>
         public UInt16 DropRateComm {
             get { return mDropRateComm; }
             set { mDropRateComm = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Communication errors (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
+        /// </summary>
         public UInt16 ErrorsComm {
             get { return mErrorsComm; }
             set { mErrorsComm = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Autopilot-specific errors
+        /// </summary>
         public UInt16 ErrorsCount1 {
             get { return mErrorsCount1; }
             set { mErrorsCount1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Autopilot-specific errors
+        /// </summary>
         public UInt16 ErrorsCount2 {
             get { return mErrorsCount2; }
             set { mErrorsCount2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Autopilot-specific errors
+        /// </summary>
         public UInt16 ErrorsCount3 {
             get { return mErrorsCount3; }
             set { mErrorsCount3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Autopilot-specific errors
+        /// </summary>
         public UInt16 ErrorsCount4 {
             get { return mErrorsCount4; }
             set { mErrorsCount4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
+        /// </summary>
         public SByte BatteryRemaining {
             get { return mBatteryRemaining; }
             set { mBatteryRemaining = value; NotifyUpdated(); }
@@ -230,13 +1007,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The system time is the time of the master clock, typically the computer clock of the main onboard computer.
+    /// </summary>
     public class UasSystemTime: UasMessage
     {
+        /// <summary>
+        /// Timestamp of the master clock in microseconds since UNIX epoch.
+        /// </summary>
         public UInt64 TimeUnixUsec {
             get { return mTimeUnixUsec; }
             set { mTimeUnixUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Timestamp of the component clock since boot time in milliseconds.
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
@@ -262,23 +1048,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// A ping message either requesting or responding to a ping. This allows to measure the system latencies, including serial port, radio modem and UDP connections.
+    /// </summary>
     public class UasPing: UasMessage
     {
+        /// <summary>
+        /// Unix timestamp in microseconds
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PING sequence
+        /// </summary>
         public UInt32 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: request ping from all receiving systems, if greater than 0: message is a ping response and number is the system id of the requesting system
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: request ping from all receiving components, if greater than 0: message is a ping response and number is the system id of the requesting system
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -310,23 +1111,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request to control this MAV
+    /// </summary>
     public class UasChangeOperatorControl: UasMessage
     {
+        /// <summary>
+        /// System the GCS requests control for
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: request control of this MAV, 1: Release control of this MAV
+        /// </summary>
         public byte ControlRequest {
             get { return mControlRequest; }
             set { mControlRequest = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: key as plaintext, 1-255: future, different hashing/encryption variants. The GCS should in general use the safest mode possible initially and then gradually move down the encryption level if it gets a NACK message indicating an encryption mismatch.
+        /// </summary>
         public byte Version {
             get { return mVersion; }
             set { mVersion = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Password / Key, depending on version plaintext or encrypted. 25 or less characters, NULL terminated. The characters may involve A-Z, a-z, 0-9, and "!?,.-"
+        /// </summary>
         public char[] Passkey {
             get { return mPasskey; }
             set { mPasskey = value; NotifyUpdated(); }
@@ -406,18 +1222,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Accept / deny control of this MAV
+    /// </summary>
     public class UasChangeOperatorControlAck: UasMessage
     {
+        /// <summary>
+        /// ID of the GCS this message 
+        /// </summary>
         public byte GcsSystemId {
             get { return mGcsSystemId; }
             set { mGcsSystemId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: request control of this MAV, 1: Release control of this MAV
+        /// </summary>
         public byte ControlRequest {
             get { return mControlRequest; }
             set { mControlRequest = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: ACK, 1: NACK: Wrong passkey, 2: NACK: Unsupported passkey encryption method, 3: NACK: Already under control
+        /// </summary>
         public byte Ack {
             get { return mAck; }
             set { mAck = value; NotifyUpdated(); }
@@ -446,8 +1274,14 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Emit an encrypted signature / key identifying this system. PLEASE NOTE: This protocol has been kept simple, so transmitting the key requires an encrypted channel for true safety.
+    /// </summary>
     public class UasAuthKey: UasMessage
     {
+        /// <summary>
+        /// key
+        /// </summary>
         public char[] Key {
             get { return mKey; }
             set { mKey = value; NotifyUpdated(); }
@@ -532,18 +1366,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component.
+    /// </summary>
     public class UasSetMode: UasMessage
     {
+        /// <summary>
+        /// The new autopilot-specific mode. This field can be ignored by an autopilot.
+        /// </summary>
         public UInt32 CustomMode {
             get { return mCustomMode; }
             set { mCustomMode = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The system setting the mode
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The new base mode
+        /// </summary>
         public byte BaseMode {
             get { return mBaseMode; }
             set { mBaseMode = value; NotifyUpdated(); }
@@ -572,23 +1418,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request to read the onboard parameter with the param_id string id. Onboard parameters are stored as key[const char*] -> value[float]. This allows to send a parameter to any other component (such as the GCS) without the need of previous knowledge of possible parameter names. Thus the same GCS can store different parameters for different autopilots. See also http://qgroundcontrol.org/parameter_interface for a full documentation of QGroundControl and IMU code.
+    /// </summary>
     public class UasParamRequestRead: UasMessage
     {
+        /// <summary>
+        /// Parameter index. Send -1 to use the param ID field as identifier (else the param id will be ignored)
+        /// </summary>
         public Int16 ParamIndex {
             get { return mParamIndex; }
             set { mParamIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
+        /// </summary>
         public char[] ParamId {
             get { return mParamId; }
             set { mParamId = value; NotifyUpdated(); }
@@ -650,13 +1511,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request all parameters of this component. After his request, all parameters are emitted.
+    /// </summary>
     public class UasParamRequestList: UasMessage
     {
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -682,28 +1552,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Emit the value of a onboard parameter. The inclusion of param_count and param_index in the message allows the recipient to keep track of received parameters and allows him to re-request missing parameters after a loss or timeout.
+    /// </summary>
     public class UasParamValue: UasMessage
     {
+        /// <summary>
+        /// Onboard parameter value
+        /// </summary>
         public float ParamValue {
             get { return mParamValue; }
             set { mParamValue = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Total number of onboard parameters
+        /// </summary>
         public UInt16 ParamCount {
             get { return mParamCount; }
             set { mParamCount = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Index of this onboard parameter
+        /// </summary>
         public UInt16 ParamIndex {
             get { return mParamIndex; }
             set { mParamIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
+        /// </summary>
         public char[] ParamId {
             get { return mParamId; }
             set { mParamId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
+        /// </summary>
         public MavParamType ParamType {
             get { return mParamType; }
             set { mParamType = value; NotifyUpdated(); }
@@ -768,28 +1656,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set a parameter value TEMPORARILY to RAM. It will be reset to default on system reboot. Send the ACTION MAV_ACTION_STORAGE_WRITE to PERMANENTLY write the RAM contents to EEPROM. IMPORTANT: The receiving component should acknowledge the new parameter value by sending a param_value message to all communication partners. This will also ensure that multiple GCS all have an up-to-date list of all parameters. If the sending GCS did not receive a PARAM_VALUE message within its timeout time, it should re-send the PARAM_SET message.
+    /// </summary>
     public class UasParamSet: UasMessage
     {
+        /// <summary>
+        /// Onboard parameter value
+        /// </summary>
         public float ParamValue {
             get { return mParamValue; }
             set { mParamValue = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
+        /// </summary>
         public char[] ParamId {
             get { return mParamId; }
             set { mParamId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
+        /// </summary>
         public MavParamType ParamType {
             get { return mParamType; }
             set { mParamType = value; NotifyUpdated(); }
@@ -854,53 +1760,86 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The global position, as returned by the Global Positioning System (GPS). This is                  NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+    /// </summary>
     public class UasGpsRawInt: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
+        /// </summary>
         public UInt16 Eph {
             get { return mEph; }
             set { mEph = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
+        /// </summary>
         public UInt16 Epv {
             get { return mEpv; }
             set { mEpv = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX
+        /// </summary>
         public UInt16 Vel {
             get { return mVel; }
             set { mVel = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// </summary>
         public UInt16 Cog {
             get { return mCog; }
             set { mCog = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.
+        /// </summary>
         public byte FixType {
             get { return mFixType; }
             set { mFixType = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Number of satellites visible. If unknown, set to 255
+        /// </summary>
         public byte SatellitesVisible {
             get { return mSatellitesVisible; }
             set { mSatellitesVisible = value; NotifyUpdated(); }
@@ -950,33 +1889,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The positioning status, as reported by GPS. This message is intended to display status information about each satellite visible to the receiver. See message GLOBAL_POSITION for the global position estimate. This message can contain information for up to 20 satellites.
+    /// </summary>
     public class UasGpsStatus: UasMessage
     {
+        /// <summary>
+        /// Number of satellites visible
+        /// </summary>
         public byte SatellitesVisible {
             get { return mSatellitesVisible; }
             set { mSatellitesVisible = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global satellite ID
+        /// </summary>
         public byte[] SatellitePrn {
             get { return mSatellitePrn; }
             set { mSatellitePrn = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: Satellite not used, 1: used for localization
+        /// </summary>
         public byte[] SatelliteUsed {
             get { return mSatelliteUsed; }
             set { mSatelliteUsed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Elevation (0: right on top of receiver, 90: on the horizon) of satellite
+        /// </summary>
         public byte[] SatelliteElevation {
             get { return mSatelliteElevation; }
             set { mSatelliteElevation = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Direction of satellite, 0: 0 deg, 255: 360 deg.
+        /// </summary>
         public byte[] SatelliteAzimuth {
             get { return mSatelliteAzimuth; }
             set { mSatelliteAzimuth = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Signal to noise ratio of satellite
+        /// </summary>
         public byte[] SatelliteSnr {
             get { return mSatelliteSnr; }
             set { mSatelliteSnr = value; NotifyUpdated(); }
@@ -1204,53 +2164,86 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW IMU readings for the usual 9DOF sensor setup. This message should contain the scaled values to the described units
+    /// </summary>
     public class UasScaledImu: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (mg)
+        /// </summary>
         public Int16 Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (mg)
+        /// </summary>
         public Int16 Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (mg)
+        /// </summary>
         public Int16 Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around X axis (millirad /sec)
+        /// </summary>
         public Int16 Xgyro {
             get { return mXgyro; }
             set { mXgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Y axis (millirad /sec)
+        /// </summary>
         public Int16 Ygyro {
             get { return mYgyro; }
             set { mYgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Z axis (millirad /sec)
+        /// </summary>
         public Int16 Zgyro {
             get { return mZgyro; }
             set { mZgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Magnetic field (milli tesla)
+        /// </summary>
         public Int16 Xmag {
             get { return mXmag; }
             set { mXmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Magnetic field (milli tesla)
+        /// </summary>
         public Int16 Ymag {
             get { return mYmag; }
             set { mYmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Magnetic field (milli tesla)
+        /// </summary>
         public Int16 Zmag {
             get { return mZmag; }
             set { mZmag = value; NotifyUpdated(); }
@@ -1300,53 +2293,86 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW IMU readings for the usual 9DOF sensor setup. This message should always contain the true raw values without any scaling to allow data capture and system debugging.
+    /// </summary>
     public class UasRawImu: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (raw)
+        /// </summary>
         public Int16 Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (raw)
+        /// </summary>
         public Int16 Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (raw)
+        /// </summary>
         public Int16 Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around X axis (raw)
+        /// </summary>
         public Int16 Xgyro {
             get { return mXgyro; }
             set { mXgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Y axis (raw)
+        /// </summary>
         public Int16 Ygyro {
             get { return mYgyro; }
             set { mYgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Z axis (raw)
+        /// </summary>
         public Int16 Zgyro {
             get { return mZgyro; }
             set { mZgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Magnetic field (raw)
+        /// </summary>
         public Int16 Xmag {
             get { return mXmag; }
             set { mXmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Magnetic field (raw)
+        /// </summary>
         public Int16 Ymag {
             get { return mYmag; }
             set { mYmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Magnetic field (raw)
+        /// </summary>
         public Int16 Zmag {
             get { return mZmag; }
             set { mZmag = value; NotifyUpdated(); }
@@ -1396,28 +2422,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW pressure readings for the typical setup of one absolute pressure and one differential pressure sensor. The sensor values should be the raw, UNSCALED ADC values.
+    /// </summary>
     public class UasRawPressure: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Absolute pressure (raw)
+        /// </summary>
         public Int16 PressAbs {
             get { return mPressAbs; }
             set { mPressAbs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Differential pressure 1 (raw)
+        /// </summary>
         public Int16 PressDiff1 {
             get { return mPressDiff1; }
             set { mPressDiff1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Differential pressure 2 (raw)
+        /// </summary>
         public Int16 PressDiff2 {
             get { return mPressDiff2; }
             set { mPressDiff2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Raw Temperature measurement (raw)
+        /// </summary>
         public Int16 Temperature {
             get { return mTemperature; }
             set { mTemperature = value; NotifyUpdated(); }
@@ -1452,23 +2496,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The pressure readings for the typical setup of one absolute and differential pressure sensor. The units are as specified in each field.
+    /// </summary>
     public class UasScaledPressure: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Absolute pressure (hectopascal)
+        /// </summary>
         public float PressAbs {
             get { return mPressAbs; }
             set { mPressAbs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Differential pressure 1 (hectopascal)
+        /// </summary>
         public float PressDiff {
             get { return mPressDiff; }
             set { mPressDiff = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Temperature measurement (0.01 degrees celsius)
+        /// </summary>
         public Int16 Temperature {
             get { return mTemperature; }
             set { mTemperature = value; NotifyUpdated(); }
@@ -1500,38 +2559,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The attitude in the aeronautical frame (right-handed, Z-down, X-front, Y-right).
+    /// </summary>
     public class UasAttitude: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angle (rad, -pi..+pi)
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angle (rad, -pi..+pi)
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angle (rad, -pi..+pi)
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angular speed (rad/s)
+        /// </summary>
         public float Rollspeed {
             get { return mRollspeed; }
             set { mRollspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angular speed (rad/s)
+        /// </summary>
         public float Pitchspeed {
             get { return mPitchspeed; }
             set { mPitchspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angular speed (rad/s)
+        /// </summary>
         public float Yawspeed {
             get { return mYawspeed; }
             set { mYawspeed = value; NotifyUpdated(); }
@@ -1572,43 +2655,70 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The attitude in the aeronautical frame (right-handed, Z-down, X-front, Y-right), expressed as quaternion.
+    /// </summary>
     public class UasAttitudeQuaternion: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Quaternion component 1
+        /// </summary>
         public float Q1 {
             get { return mQ1; }
             set { mQ1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Quaternion component 2
+        /// </summary>
         public float Q2 {
             get { return mQ2; }
             set { mQ2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Quaternion component 3
+        /// </summary>
         public float Q3 {
             get { return mQ3; }
             set { mQ3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Quaternion component 4
+        /// </summary>
         public float Q4 {
             get { return mQ4; }
             set { mQ4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angular speed (rad/s)
+        /// </summary>
         public float Rollspeed {
             get { return mRollspeed; }
             set { mRollspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angular speed (rad/s)
+        /// </summary>
         public float Pitchspeed {
             get { return mPitchspeed; }
             set { mPitchspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angular speed (rad/s)
+        /// </summary>
         public float Yawspeed {
             get { return mYawspeed; }
             set { mYawspeed = value; NotifyUpdated(); }
@@ -1652,38 +2762,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The filtered local position (e.g. fused computer vision and accelerometers). Coordinate frame is right-handed, Z-axis down (aeronautical frame, NED / north-east-down convention)
+    /// </summary>
     public class UasLocalPositionNed: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Speed
+        /// </summary>
         public float Vx {
             get { return mVx; }
             set { mVx = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Speed
+        /// </summary>
         public float Vy {
             get { return mVy; }
             set { mVy = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Speed
+        /// </summary>
         public float Vz {
             get { return mVz; }
             set { mVz = value; NotifyUpdated(); }
@@ -1724,48 +2858,78 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The filtered global position (e.g. fused GPS and accelerometers). The position is in GPS-frame (right-handed, Z-up). It                 is designed as scaled integer message since the resolution of float is not sufficient.
+    /// </summary>
     public class UasGlobalPositionInt: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude in meters, expressed as * 1000 (millimeters), above MSL
+        /// </summary>
         public Int32 Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude above ground in meters, expressed as * 1000 (millimeters)
+        /// </summary>
         public Int32 RelativeAlt {
             get { return mRelativeAlt; }
             set { mRelativeAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground X Speed (Latitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vx {
             get { return mVx; }
             set { mVx = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Y Speed (Longitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vy {
             get { return mVy; }
             set { mVy = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Z Speed (Altitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vz {
             get { return mVz; }
             set { mVz = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Compass heading in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// </summary>
         public UInt16 Hdg {
             get { return mHdg; }
             set { mHdg = value; NotifyUpdated(); }
@@ -1812,58 +2976,94 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The scaled values of the RC channels received. (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX.
+    /// </summary>
     public class UasRcChannelsScaled: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 1 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan1Scaled {
             get { return mChan1Scaled; }
             set { mChan1Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 2 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan2Scaled {
             get { return mChan2Scaled; }
             set { mChan2Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 3 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan3Scaled {
             get { return mChan3Scaled; }
             set { mChan3Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 4 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan4Scaled {
             get { return mChan4Scaled; }
             set { mChan4Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 5 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan5Scaled {
             get { return mChan5Scaled; }
             set { mChan5Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 6 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan6Scaled {
             get { return mChan6Scaled; }
             set { mChan6Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 7 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan7Scaled {
             get { return mChan7Scaled; }
             set { mChan7Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 8 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// </summary>
         public Int16 Chan8Scaled {
             get { return mChan8Scaled; }
             set { mChan8Scaled = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows for more than 8 servos.
+        /// </summary>
         public byte Port {
             get { return mPort; }
             set { mPort = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
+        /// </summary>
         public byte Rssi {
             get { return mRssi; }
             set { mRssi = value; NotifyUpdated(); }
@@ -1916,58 +3116,94 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// </summary>
     public class UasRcChannelsRaw: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan1Raw {
             get { return mChan1Raw; }
             set { mChan1Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan2Raw {
             get { return mChan2Raw; }
             set { mChan2Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan3Raw {
             get { return mChan3Raw; }
             set { mChan3Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan4Raw {
             get { return mChan4Raw; }
             set { mChan4Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan5Raw {
             get { return mChan5Raw; }
             set { mChan5Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan6Raw {
             get { return mChan6Raw; }
             set { mChan6Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan7Raw {
             get { return mChan7Raw; }
             set { mChan7Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// </summary>
         public UInt16 Chan8Raw {
             get { return mChan8Raw; }
             set { mChan8Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows for more than 8 servos.
+        /// </summary>
         public byte Port {
             get { return mPort; }
             set { mPort = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
+        /// </summary>
         public byte Rssi {
             get { return mRssi; }
             set { mRssi = value; NotifyUpdated(); }
@@ -2020,53 +3256,86 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW values of the servo outputs (for RC input from the remote, use the RC_CHANNELS messages). The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%.
+    /// </summary>
     public class UasServoOutputRaw: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since system boot)
+        /// </summary>
         public UInt32 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 1 value, in microseconds
+        /// </summary>
         public UInt16 Servo1Raw {
             get { return mServo1Raw; }
             set { mServo1Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 2 value, in microseconds
+        /// </summary>
         public UInt16 Servo2Raw {
             get { return mServo2Raw; }
             set { mServo2Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 3 value, in microseconds
+        /// </summary>
         public UInt16 Servo3Raw {
             get { return mServo3Raw; }
             set { mServo3Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 4 value, in microseconds
+        /// </summary>
         public UInt16 Servo4Raw {
             get { return mServo4Raw; }
             set { mServo4Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 5 value, in microseconds
+        /// </summary>
         public UInt16 Servo5Raw {
             get { return mServo5Raw; }
             set { mServo5Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 6 value, in microseconds
+        /// </summary>
         public UInt16 Servo6Raw {
             get { return mServo6Raw; }
             set { mServo6Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 7 value, in microseconds
+        /// </summary>
         public UInt16 Servo7Raw {
             get { return mServo7Raw; }
             set { mServo7Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output 8 value, in microseconds
+        /// </summary>
         public UInt16 Servo8Raw {
             get { return mServo8Raw; }
             set { mServo8Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows to encode more than 8 servos.
+        /// </summary>
         public byte Port {
             get { return mPort; }
             set { mPort = value; NotifyUpdated(); }
@@ -2116,23 +3385,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request a partial list of mission items from the system/component. http://qgroundcontrol.org/mavlink/waypoint_protocol. If start and end index are the same, just send one waypoint.
+    /// </summary>
     public class UasMissionRequestPartialList: UasMessage
     {
+        /// <summary>
+        /// Start index, 0 by default
+        /// </summary>
         public Int16 StartIndex {
             get { return mStartIndex; }
             set { mStartIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// End index, -1 by default (-1: send list to end). Else a valid index of the list
+        /// </summary>
         public Int16 EndIndex {
             get { return mEndIndex; }
             set { mEndIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2164,23 +3448,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// This message is sent to the MAV to write a partial list. If start index == end index, only one item will be transmitted / updated. If the start index is NOT 0 and above the current list size, this request should be REJECTED!
+    /// </summary>
     public class UasMissionWritePartialList: UasMessage
     {
+        /// <summary>
+        /// Start index, 0 by default and smaller / equal to the largest index of the current onboard list.
+        /// </summary>
         public Int16 StartIndex {
             get { return mStartIndex; }
             set { mStartIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// End index, equal or greater than start index.
+        /// </summary>
         public Int16 EndIndex {
             get { return mEndIndex; }
             set { mEndIndex = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2212,73 +3511,118 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Message encoding a mission item. This message is emitted to announce                  the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also http://qgroundcontrol.org/mavlink/waypoint_protocol.
+    /// </summary>
     public class UasMissionItem: UasMessage
     {
+        /// <summary>
+        /// PARAM1 / For NAV command MISSIONs: Radius in which the MISSION is accepted as reached, in meters
+        /// </summary>
         public float Param1 {
             get { return mParam1; }
             set { mParam1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM2 / For NAV command MISSIONs: Time that the MAV should stay inside the PARAM1 radius before advancing, in milliseconds
+        /// </summary>
         public float Param2 {
             get { return mParam2; }
             set { mParam2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM3 / For LOITER command MISSIONs: Orbit to circle around the MISSION, in meters. If positive the orbit direction should be clockwise, if negative the orbit direction should be counter-clockwise.
+        /// </summary>
         public float Param3 {
             get { return mParam3; }
             set { mParam3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM4 / For NAV and LOITER command MISSIONs: Yaw orientation in degrees, [0..360] 0 = NORTH
+        /// </summary>
         public float Param4 {
             get { return mParam4; }
             set { mParam4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM5 / local: x position, global: latitude
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM6 / y position: global: longitude
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// PARAM7 / z position: global: altitude
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Sequence
+        /// </summary>
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The scheduled action for the MISSION. see MAV_CMD in common.xml MAVLink specs
+        /// </summary>
         public MavCmd Command {
             get { return mCommand; }
             set { mCommand = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The coordinate system of the MISSION. see MAV_FRAME in mavlink_types.h
+        /// </summary>
         public MavFrame Frame {
             get { return mFrame; }
             set { mFrame = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// false:0, true:1
+        /// </summary>
         public byte Current {
             get { return mCurrent; }
             set { mCurrent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// autocontinue to next wp
+        /// </summary>
         public byte Autocontinue {
             get { return mAutocontinue; }
             set { mAutocontinue = value; NotifyUpdated(); }
@@ -2340,18 +3684,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM message. http://qgroundcontrol.org/mavlink/waypoint_protocol
+    /// </summary>
     public class UasMissionRequest: UasMessage
     {
+        /// <summary>
+        /// Sequence
+        /// </summary>
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2380,18 +3736,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the mission item with sequence number seq as current item. This means that the MAV will continue to this mission item on the shortest path (not following the mission items in-between).
+    /// </summary>
     public class UasMissionSetCurrent: UasMessage
     {
+        /// <summary>
+        /// Sequence
+        /// </summary>
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2420,8 +3788,14 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Message that announces the sequence number of the current active mission item. The MAV will fly towards this mission item.
+    /// </summary>
     public class UasMissionCurrent: UasMessage
     {
+        /// <summary>
+        /// Sequence
+        /// </summary>
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
@@ -2444,13 +3818,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Request the overall list of mission items from the system/component.
+    /// </summary>
     public class UasMissionRequestList: UasMessage
     {
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2476,18 +3859,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// This message is emitted as response to MISSION_REQUEST_LIST by the MAV and to initiate a write transaction. The GCS can then request the individual mission item based on the knowledge of the total number of MISSIONs.
+    /// </summary>
     public class UasMissionCount: UasMessage
     {
+        /// <summary>
+        /// Number of mission items in the sequence
+        /// </summary>
         public UInt16 Count {
             get { return mCount; }
             set { mCount = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2516,13 +3911,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Delete all mission items at once.
+    /// </summary>
     public class UasMissionClearAll: UasMessage
     {
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -2548,8 +3952,14 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// A certain mission item has been reached. The system will either hold this position (or circle on the orbit) or (if the autocontinue on the WP was set) continue to the next MISSION.
+    /// </summary>
     public class UasMissionItemReached: UasMessage
     {
+        /// <summary>
+        /// Sequence
+        /// </summary>
         public UInt16 Seq {
             get { return mSeq; }
             set { mSeq = value; NotifyUpdated(); }
@@ -2572,18 +3982,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Ack message during MISSION handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero).
+    /// </summary>
     public class UasMissionAck: UasMessage
     {
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// See MAV_MISSION_RESULT enum
+        /// </summary>
         public MavMissionResult Type {
             get { return mType; }
             set { mType = value; NotifyUpdated(); }
@@ -2612,23 +4034,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// As local waypoints exist, the global MISSION reference allows to transform between the local coordinate frame and the global (GPS) coordinate frame. This can be necessary when e.g. in- and outdoor settings are connected and the MAV should move from in- to outdoor.
+    /// </summary>
     public class UasSetGpsGlobalOrigin: UasMessage
     {
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84, in degrees * 1E7
+        /// </summary>
         public Int32 Longitude {
             get { return mLongitude; }
             set { mLongitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Altitude {
             get { return mAltitude; }
             set { mAltitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -2660,18 +4097,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Once the MAV sets a new GPS-Local correspondence, this message announces the origin (0,0,0) position
+    /// </summary>
     public class UasGpsGlobalOrigin: UasMessage
     {
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Longitude {
             get { return mLongitude; }
             set { mLongitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Altitude {
             get { return mAltitude; }
             set { mAltitude = value; NotifyUpdated(); }
@@ -2700,38 +4149,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the setpoint for a local position controller. This is the position in local coordinates the MAV should fly to. This message is sent by the path/MISSION planner to the onboard position controller. As some MAVs have a degree of freedom in yaw (e.g. all helicopters/quadrotors), the desired yaw angle is part of the message.
+    /// </summary>
     public class UasSetLocalPositionSetpoint: UasMessage
     {
+        /// <summary>
+        /// x position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame - valid values are only MAV_FRAME_LOCAL_NED or MAV_FRAME_LOCAL_ENU
+        /// </summary>
         public MavFrame CoordinateFrame {
             get { return mCoordinateFrame; }
             set { mCoordinateFrame = value; NotifyUpdated(); }
@@ -2772,28 +4245,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Transmit the current local setpoint of the controller to other MAVs (collision avoidance) and to the GCS.
+    /// </summary>
     public class UasLocalPositionSetpoint: UasMessage
     {
+        /// <summary>
+        /// x position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame - valid values are only MAV_FRAME_LOCAL_NED or MAV_FRAME_LOCAL_ENU
+        /// </summary>
         public MavFrame CoordinateFrame {
             get { return mCoordinateFrame; }
             set { mCoordinateFrame = value; NotifyUpdated(); }
@@ -2828,28 +4319,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Transmit the current local setpoint of the controller to other MAVs (collision avoidance) and to the GCS.
+    /// </summary>
     public class UasGlobalPositionSetpointInt: UasMessage
     {
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Longitude {
             get { return mLongitude; }
             set { mLongitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Altitude {
             get { return mAltitude; }
             set { mAltitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in degrees * 100
+        /// </summary>
         public Int16 Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame - valid values are only MAV_FRAME_GLOBAL or MAV_FRAME_GLOBAL_RELATIVE_ALT
+        /// </summary>
         public MavFrame CoordinateFrame {
             get { return mCoordinateFrame; }
             set { mCoordinateFrame = value; NotifyUpdated(); }
@@ -2884,28 +4393,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the current global position setpoint.
+    /// </summary>
     public class UasSetGlobalPositionSetpointInt: UasMessage
     {
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Latitude {
             get { return mLatitude; }
             set { mLatitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Longitude {
             get { return mLongitude; }
             set { mLongitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Altitude {
             get { return mAltitude; }
             set { mAltitude = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in degrees * 100
+        /// </summary>
         public Int16 Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame - valid values are only MAV_FRAME_GLOBAL or MAV_FRAME_GLOBAL_RELATIVE_ALT
+        /// </summary>
         public MavFrame CoordinateFrame {
             get { return mCoordinateFrame; }
             set { mCoordinateFrame = value; NotifyUpdated(); }
@@ -2940,48 +4467,78 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set a safety zone (volume), which is defined by two corners of a cube. This message can be used to tell the MAV which setpoints/MISSIONs to accept and which to reject. Safety areas are often enforced by national or competition regulations.
+    /// </summary>
     public class UasSafetySetAllowedArea: UasMessage
     {
+        /// <summary>
+        /// x position 1 / Latitude 1
+        /// </summary>
         public float P1x {
             get { return mP1x; }
             set { mP1x = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position 1 / Longitude 1
+        /// </summary>
         public float P1y {
             get { return mP1y; }
             set { mP1y = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position 1 / Altitude 1
+        /// </summary>
         public float P1z {
             get { return mP1z; }
             set { mP1z = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// x position 2 / Latitude 2
+        /// </summary>
         public float P2x {
             get { return mP2x; }
             set { mP2x = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position 2 / Longitude 2
+        /// </summary>
         public float P2y {
             get { return mP2y; }
             set { mP2y = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position 2 / Altitude 2
+        /// </summary>
         public float P2z {
             get { return mP2z; }
             set { mP2z = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// </summary>
         public MavFrame Frame {
             get { return mFrame; }
             set { mFrame = value; NotifyUpdated(); }
@@ -3028,38 +4585,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Read out the safety zone the MAV currently assumes.
+    /// </summary>
     public class UasSafetyAllowedArea: UasMessage
     {
+        /// <summary>
+        /// x position 1 / Latitude 1
+        /// </summary>
         public float P1x {
             get { return mP1x; }
             set { mP1x = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position 1 / Longitude 1
+        /// </summary>
         public float P1y {
             get { return mP1y; }
             set { mP1y = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position 1 / Altitude 1
+        /// </summary>
         public float P1z {
             get { return mP1z; }
             set { mP1z = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// x position 2 / Latitude 2
+        /// </summary>
         public float P2x {
             get { return mP2x; }
             set { mP2x = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position 2 / Longitude 2
+        /// </summary>
         public float P2y {
             get { return mP2y; }
             set { mP2y = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position 2 / Altitude 2
+        /// </summary>
         public float P2z {
             get { return mP2z; }
             set { mP2z = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// </summary>
         public MavFrame Frame {
             get { return mFrame; }
             set { mFrame = value; NotifyUpdated(); }
@@ -3100,33 +4681,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set roll, pitch and yaw.
+    /// </summary>
     public class UasSetRollPitchYawThrust: UasMessage
     {
+        /// <summary>
+        /// Desired roll angle in radians
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angle in radians
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in radians
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -3164,33 +4766,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set roll, pitch and yaw.
+    /// </summary>
     public class UasSetRollPitchYawSpeedThrust: UasMessage
     {
+        /// <summary>
+        /// Desired roll angular speed in rad/s
+        /// </summary>
         public float RollSpeed {
             get { return mRollSpeed; }
             set { mRollSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angular speed in rad/s
+        /// </summary>
         public float PitchSpeed {
             get { return mPitchSpeed; }
             set { mPitchSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angular speed in rad/s
+        /// </summary>
         public float YawSpeed {
             get { return mYawSpeed; }
             set { mYawSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -3228,28 +4851,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint in roll, pitch, yaw currently active on the system.
+    /// </summary>
     public class UasRollPitchYawThrustSetpoint: UasMessage
     {
+        /// <summary>
+        /// Timestamp in milliseconds since system boot
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired roll angle in radians
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angle in radians
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in radians
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
@@ -3284,28 +4925,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint in rollspeed, pitchspeed, yawspeed currently active on the system.
+    /// </summary>
     public class UasRollPitchYawSpeedThrustSetpoint: UasMessage
     {
+        /// <summary>
+        /// Timestamp in milliseconds since system boot
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired roll angular speed in rad/s
+        /// </summary>
         public float RollSpeed {
             get { return mRollSpeed; }
             set { mRollSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angular speed in rad/s
+        /// </summary>
         public float PitchSpeed {
             get { return mPitchSpeed; }
             set { mPitchSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angular speed in rad/s
+        /// </summary>
         public float YawSpeed {
             get { return mYawSpeed; }
             set { mYawSpeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
@@ -3340,28 +4999,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint in the four motor speeds
+    /// </summary>
     public class UasSetQuadMotorsSetpoint: UasMessage
     {
+        /// <summary>
+        /// Front motor in + configuration, front left motor in x configuration
+        /// </summary>
         public UInt16 MotorFrontNw {
             get { return mMotorFrontNw; }
             set { mMotorFrontNw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Right motor in + configuration, front right motor in x configuration
+        /// </summary>
         public UInt16 MotorRightNe {
             get { return mMotorRightNe; }
             set { mMotorRightNe = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Back motor in + configuration, back right motor in x configuration
+        /// </summary>
         public UInt16 MotorBackSe {
             get { return mMotorBackSe; }
             set { mMotorBackSe = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Left motor in + configuration, back left motor in x configuration
+        /// </summary>
         public UInt16 MotorLeftSw {
             get { return mMotorLeftSw; }
             set { mMotorLeftSw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID of the system that should set these motor commands
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -3396,33 +5073,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint for up to four quadrotors in a group / wing
+    /// </summary>
     public class UasSetQuadSwarmRollPitchYawThrust: UasMessage
     {
+        /// <summary>
+        /// Desired roll angle in radians +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angle in radians +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in radians, scaled to int16 +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, scaled to uint16 (0..UINT16_MAX)
+        /// </summary>
         public UInt16[] Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// ID of the quadrotor group (0 - 255, up to 256 groups supported)
+        /// </summary>
         public byte Group {
             get { return mGroup; }
             set { mGroup = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// ID of the flight mode (0 - 255, up to 256 modes supported)
+        /// </summary>
         public byte Mode {
             get { return mMode; }
             set { mMode = value; NotifyUpdated(); }
@@ -3484,43 +5182,70 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Outputs of the APM navigation controller. The primary use of this message is to check the response and signs of the controller before actual flight and to assist with tuning controller parameters.
+    /// </summary>
     public class UasNavControllerOutput: UasMessage
     {
+        /// <summary>
+        /// Current desired roll in degrees
+        /// </summary>
         public float NavRoll {
             get { return mNavRoll; }
             set { mNavRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current desired pitch in degrees
+        /// </summary>
         public float NavPitch {
             get { return mNavPitch; }
             set { mNavPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current altitude error in meters
+        /// </summary>
         public float AltError {
             get { return mAltError; }
             set { mAltError = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current airspeed error in meters/second
+        /// </summary>
         public float AspdError {
             get { return mAspdError; }
             set { mAspdError = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current crosstrack error on x-y plane in meters
+        /// </summary>
         public float XtrackError {
             get { return mXtrackError; }
             set { mXtrackError = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current desired heading in degrees
+        /// </summary>
         public Int16 NavBearing {
             get { return mNavBearing; }
             set { mNavBearing = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Bearing to current MISSION/target in degrees
+        /// </summary>
         public Int16 TargetBearing {
             get { return mTargetBearing; }
             set { mTargetBearing = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Distance to active MISSION in meters
+        /// </summary>
         public UInt16 WpDist {
             get { return mWpDist; }
             set { mWpDist = value; NotifyUpdated(); }
@@ -3564,48 +5289,78 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint for up to four quadrotors in a group / wing
+    /// </summary>
     public class UasSetQuadSwarmLedRollPitchYawThrust: UasMessage
     {
+        /// <summary>
+        /// Desired roll angle in radians +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch angle in radians +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw angle in radians, scaled to int16 +-PI (+-INT16_MAX)
+        /// </summary>
         public Int16[] Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, scaled to uint16 (0..UINT16_MAX)
+        /// </summary>
         public UInt16[] Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// ID of the quadrotor group (0 - 255, up to 256 groups supported)
+        /// </summary>
         public byte Group {
             get { return mGroup; }
             set { mGroup = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// ID of the flight mode (0 - 255, up to 256 modes supported)
+        /// </summary>
         public byte Mode {
             get { return mMode; }
             set { mMode = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RGB red channel (0-255)
+        /// </summary>
         public byte[] LedRed {
             get { return mLedRed; }
             set { mLedRed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RGB green channel (0-255)
+        /// </summary>
         public byte[] LedBlue {
             get { return mLedBlue; }
             set { mLedBlue = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RGB blue channel (0-255)
+        /// </summary>
         public byte[] LedGreen {
             get { return mLedGreen; }
             set { mLedGreen = value; NotifyUpdated(); }
@@ -3694,48 +5449,78 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Corrects the systems state by adding an error correction term to the position and velocity, and by rotating the attitude by a correction angle.
+    /// </summary>
     public class UasStateCorrection: UasMessage
     {
+        /// <summary>
+        /// x position error
+        /// </summary>
         public float Xerr {
             get { return mXerr; }
             set { mXerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y position error
+        /// </summary>
         public float Yerr {
             get { return mYerr; }
             set { mYerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z position error
+        /// </summary>
         public float Zerr {
             get { return mZerr; }
             set { mZerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// roll error (radians)
+        /// </summary>
         public float Rollerr {
             get { return mRollerr; }
             set { mRollerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// pitch error (radians)
+        /// </summary>
         public float Pitcherr {
             get { return mPitcherr; }
             set { mPitcherr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// yaw error (radians)
+        /// </summary>
         public float Yawerr {
             get { return mYawerr; }
             set { mYawerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// x velocity
+        /// </summary>
         public float Vxerr {
             get { return mVxerr; }
             set { mVxerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y velocity
+        /// </summary>
         public float Vyerr {
             get { return mVyerr; }
             set { mVyerr = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z velocity
+        /// </summary>
         public float Vzerr {
             get { return mVzerr; }
             set { mVzerr = value; NotifyUpdated(); }
@@ -3784,26 +5569,41 @@ namespace MavLinkNet
 
     public class UasRequestDataStream: UasMessage
     {
+        /// <summary>
+        /// The requested interval between two messages of this type
+        /// </summary>
         public UInt16 ReqMessageRate {
             get { return mReqMessageRate; }
             set { mReqMessageRate = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The target requested to send the message stream.
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The target requested to send the message stream.
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The ID of the requested data stream
+        /// </summary>
         public byte ReqStreamId {
             get { return mReqStreamId; }
             set { mReqStreamId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 1 to start sending, 0 to stop sending.
+        /// </summary>
         public byte StartStop {
             get { return mStartStop; }
             set { mStartStop = value; NotifyUpdated(); }
@@ -3840,16 +5640,25 @@ namespace MavLinkNet
 
     public class UasDataStream: UasMessage
     {
+        /// <summary>
+        /// The requested interval between two messages of this type
+        /// </summary>
         public UInt16 MessageRate {
             get { return mMessageRate; }
             set { mMessageRate = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The ID of the requested data stream
+        /// </summary>
         public byte StreamId {
             get { return mStreamId; }
             set { mStreamId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 1 stream is enabled, 0 stream is stopped.
+        /// </summary>
         public byte OnOff {
             get { return mOnOff; }
             set { mOnOff = value; NotifyUpdated(); }
@@ -3878,33 +5687,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// This message provides an API for manually controlling the vehicle using standard joystick axes nomenclature, along with a joystick-like input device. Unused axes can be disabled an buttons are also transmit as boolean values of their 
+    /// </summary>
     public class UasManualControl: UasMessage
     {
+        /// <summary>
+        /// X-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to forward(1000)-backward(-1000) movement on a joystick and the pitch of a vehicle.
+        /// </summary>
         public Int16 X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to left(-1000)-right(1000) movement on a joystick and the roll of a vehicle.
+        /// </summary>
         public Int16 Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to a separate slider movement with maximum being 1000 and minimum being -1000 on a joystick and the thrust of a vehicle.
+        /// </summary>
         public Int16 Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// R-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to a twisting of the joystick, with counter-clockwise being 1000 and clockwise being -1000, and the yaw of a vehicle.
+        /// </summary>
         public Int16 R {
             get { return mR; }
             set { mR = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// A bitfield corresponding to the joystick buttons' current state, 1 for pressed, 0 for released. The lowest bit corresponds to Button 1.
+        /// </summary>
         public UInt16 Buttons {
             get { return mButtons; }
             set { mButtons = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// The system to be controlled.
+        /// </summary>
         public byte Target {
             get { return mTarget; }
             set { mTarget = value; NotifyUpdated(); }
@@ -3942,53 +5772,86 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The RAW values of the RC channels sent to the MAV to override info received from the RC radio. A value of UINT16_MAX means no change to that channel. A value of 0 means control of that channel should be released back to the RC radio. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// </summary>
     public class UasRcChannelsOverride: UasMessage
     {
+        /// <summary>
+        /// RC channel 1 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan1Raw {
             get { return mChan1Raw; }
             set { mChan1Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 2 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan2Raw {
             get { return mChan2Raw; }
             set { mChan2Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 3 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan3Raw {
             get { return mChan3Raw; }
             set { mChan3Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 4 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan4Raw {
             get { return mChan4Raw; }
             set { mChan4Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 5 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan5Raw {
             get { return mChan5Raw; }
             set { mChan5Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 6 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan6Raw {
             get { return mChan6Raw; }
             set { mChan6Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 7 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan7Raw {
             get { return mChan7Raw; }
             set { mChan7Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 8 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// </summary>
         public UInt16 Chan8Raw {
             get { return mChan8Raw; }
             set { mChan8Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component ID
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
@@ -4038,33 +5901,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Metrics typically displayed on a HUD for fixed wing aircraft
+    /// </summary>
     public class UasVfrHud: UasMessage
     {
+        /// <summary>
+        /// Current airspeed in m/s
+        /// </summary>
         public float Airspeed {
             get { return mAirspeed; }
             set { mAirspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current ground speed in m/s
+        /// </summary>
         public float Groundspeed {
             get { return mGroundspeed; }
             set { mGroundspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current altitude (MSL), in meters
+        /// </summary>
         public float Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current climb rate in meters/second
+        /// </summary>
         public float Climb {
             get { return mClimb; }
             set { mClimb = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current heading in degrees, in compass units (0..360, 0=north)
+        /// </summary>
         public Int16 Heading {
             get { return mHeading; }
             set { mHeading = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Current throttle setting in integer percent, 0 to 100
+        /// </summary>
         public UInt16 Throttle {
             get { return mThrottle; }
             set { mThrottle = value; NotifyUpdated(); }
@@ -4102,58 +5986,94 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Send a command with up to seven parameters to the MAV
+    /// </summary>
     public class UasCommandLong: UasMessage
     {
+        /// <summary>
+        /// Parameter 1, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param1 {
             get { return mParam1; }
             set { mParam1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 2, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param2 {
             get { return mParam2; }
             set { mParam2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 3, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param3 {
             get { return mParam3; }
             set { mParam3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 4, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param4 {
             get { return mParam4; }
             set { mParam4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 5, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param5 {
             get { return mParam5; }
             set { mParam5 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 6, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param6 {
             get { return mParam6; }
             set { mParam6 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Parameter 7, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Param7 {
             get { return mParam7; }
             set { mParam7 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Command ID, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Command {
             get { return mCommand; }
             set { mCommand = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System which should execute the command
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Component which should execute the command, 0 for all components
+        /// </summary>
         public byte TargetComponent {
             get { return mTargetComponent; }
             set { mTargetComponent = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: First transmission of this command. 1-255: Confirmation transmissions (e.g. for kill command)
+        /// </summary>
         public byte Confirmation {
             get { return mConfirmation; }
             set { mConfirmation = value; NotifyUpdated(); }
@@ -4206,13 +6126,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Report status of a command. Includes feedback wether the command was executed.
+    /// </summary>
     public class UasCommandAck: UasMessage
     {
+        /// <summary>
+        /// Command ID, as defined by MAV_CMD enum.
+        /// </summary>
         public MavCmd Command {
             get { return mCommand; }
             set { mCommand = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// See MAV_RESULT enum
+        /// </summary>
         public MavResult Result {
             get { return mResult; }
             set { mResult = value; NotifyUpdated(); }
@@ -4238,28 +6167,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint in roll, pitch, yaw rates and thrust currently active on the system.
+    /// </summary>
     public class UasRollPitchYawRatesThrustSetpoint: UasMessage
     {
+        /// <summary>
+        /// Timestamp in milliseconds since system boot
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired roll rate in radians per second
+        /// </summary>
         public float RollRate {
             get { return mRollRate; }
             set { mRollRate = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch rate in radians per second
+        /// </summary>
         public float PitchRate {
             get { return mPitchRate; }
             set { mPitchRate = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw rate in radians per second
+        /// </summary>
         public float YawRate {
             get { return mYawRate; }
             set { mYawRate = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
@@ -4294,38 +6241,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Setpoint in roll, pitch, yaw and thrust from the operator
+    /// </summary>
     public class UasManualSetpoint: UasMessage
     {
+        /// <summary>
+        /// Timestamp in milliseconds since system boot
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired roll rate in radians per second
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired pitch rate in radians per second
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Desired yaw rate in radians per second
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Collective thrust, normalized to 0 .. 1
+        /// </summary>
         public float Thrust {
             get { return mThrust; }
             set { mThrust = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flight mode switch position, 0.. 255
+        /// </summary>
         public byte ModeSwitch {
             get { return mModeSwitch; }
             set { mModeSwitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Override mode switch position, 0.. 255
+        /// </summary>
         public byte ManualOverrideSwitch {
             get { return mManualOverrideSwitch; }
             set { mManualOverrideSwitch = value; NotifyUpdated(); }
@@ -4366,38 +6337,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The offset in X, Y, Z and yaw between the LOCAL_POSITION_NED messages of MAV X and the global coordinate frame in NED coordinates. Coordinate frame is right-handed, Z-axis down (aeronautical frame, NED / north-east-down convention)
+    /// </summary>
     public class UasLocalPositionNedSystemGlobalOffset: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
@@ -4438,83 +6433,134 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// DEPRECATED PACKET! Suffers from missing airspeed fields and singularities due to Euler angles. Please use HIL_STATE_QUATERNION instead. Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations.
+    /// </summary>
     public class UasHilState: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angle (rad)
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angle (rad)
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angle (rad)
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame roll / phi angular speed (rad/s)
+        /// </summary>
         public float Rollspeed {
             get { return mRollspeed; }
             set { mRollspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame pitch / theta angular speed (rad/s)
+        /// </summary>
         public float Pitchspeed {
             get { return mPitchspeed; }
             set { mPitchspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame yaw / psi angular speed (rad/s)
+        /// </summary>
         public float Yawspeed {
             get { return mYawspeed; }
             set { mYawspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude in meters, expressed as * 1000 (millimeters)
+        /// </summary>
         public Int32 Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground X Speed (Latitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vx {
             get { return mVx; }
             set { mVx = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Y Speed (Longitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vy {
             get { return mVy; }
             set { mVy = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Z Speed (Altitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vz {
             get { return mVz; }
             set { mVz = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (mg)
+        /// </summary>
         public Int16 Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (mg)
+        /// </summary>
         public Int16 Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (mg)
+        /// </summary>
         public Int16 Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
@@ -4582,58 +6628,94 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Sent from autopilot to simulation. Hardware in the loop control outputs
+    /// </summary>
     public class UasHilControls: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Control output -1 .. 1
+        /// </summary>
         public float RollAilerons {
             get { return mRollAilerons; }
             set { mRollAilerons = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Control output -1 .. 1
+        /// </summary>
         public float PitchElevator {
             get { return mPitchElevator; }
             set { mPitchElevator = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Control output -1 .. 1
+        /// </summary>
         public float YawRudder {
             get { return mYawRudder; }
             set { mYawRudder = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Throttle 0 .. 1
+        /// </summary>
         public float Throttle {
             get { return mThrottle; }
             set { mThrottle = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Aux 1, -1 .. 1
+        /// </summary>
         public float Aux1 {
             get { return mAux1; }
             set { mAux1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Aux 2, -1 .. 1
+        /// </summary>
         public float Aux2 {
             get { return mAux2; }
             set { mAux2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Aux 3, -1 .. 1
+        /// </summary>
         public float Aux3 {
             get { return mAux3; }
             set { mAux3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Aux 4, -1 .. 1
+        /// </summary>
         public float Aux4 {
             get { return mAux4; }
             set { mAux4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System mode (MAV_MODE)
+        /// </summary>
         public MavMode Mode {
             get { return mMode; }
             set { mMode = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Navigation mode (MAV_NAV_MODE)
+        /// </summary>
         public byte NavMode {
             get { return mNavMode; }
             set { mNavMode = value; NotifyUpdated(); }
@@ -4686,73 +6768,118 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Sent from simulation to autopilot. The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// </summary>
     public class UasHilRcInputsRaw: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 1 value, in microseconds
+        /// </summary>
         public UInt16 Chan1Raw {
             get { return mChan1Raw; }
             set { mChan1Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 2 value, in microseconds
+        /// </summary>
         public UInt16 Chan2Raw {
             get { return mChan2Raw; }
             set { mChan2Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 3 value, in microseconds
+        /// </summary>
         public UInt16 Chan3Raw {
             get { return mChan3Raw; }
             set { mChan3Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 4 value, in microseconds
+        /// </summary>
         public UInt16 Chan4Raw {
             get { return mChan4Raw; }
             set { mChan4Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 5 value, in microseconds
+        /// </summary>
         public UInt16 Chan5Raw {
             get { return mChan5Raw; }
             set { mChan5Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 6 value, in microseconds
+        /// </summary>
         public UInt16 Chan6Raw {
             get { return mChan6Raw; }
             set { mChan6Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 7 value, in microseconds
+        /// </summary>
         public UInt16 Chan7Raw {
             get { return mChan7Raw; }
             set { mChan7Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 8 value, in microseconds
+        /// </summary>
         public UInt16 Chan8Raw {
             get { return mChan8Raw; }
             set { mChan8Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 9 value, in microseconds
+        /// </summary>
         public UInt16 Chan9Raw {
             get { return mChan9Raw; }
             set { mChan9Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 10 value, in microseconds
+        /// </summary>
         public UInt16 Chan10Raw {
             get { return mChan10Raw; }
             set { mChan10Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 11 value, in microseconds
+        /// </summary>
         public UInt16 Chan11Raw {
             get { return mChan11Raw; }
             set { mChan11Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RC channel 12 value, in microseconds
+        /// </summary>
         public UInt16 Chan12Raw {
             get { return mChan12Raw; }
             set { mChan12Raw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Receive signal strength indicator, 0: 0%, 255: 100%
+        /// </summary>
         public byte Rssi {
             get { return mRssi; }
             set { mRssi = value; NotifyUpdated(); }
@@ -4814,43 +6941,70 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Optical flow from a flow sensor (e.g. optical mouse sensor)
+    /// </summary>
     public class UasOpticalFlow: UasMessage
     {
+        /// <summary>
+        /// Timestamp (UNIX)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in meters in x-sensor direction, angular-speed compensated
+        /// </summary>
         public float FlowCompMX {
             get { return mFlowCompMX; }
             set { mFlowCompMX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in meters in y-sensor direction, angular-speed compensated
+        /// </summary>
         public float FlowCompMY {
             get { return mFlowCompMY; }
             set { mFlowCompMY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground distance in meters. Positive value: distance known. Negative value: Unknown distance
+        /// </summary>
         public float GroundDistance {
             get { return mGroundDistance; }
             set { mGroundDistance = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in pixels * 10 in x-sensor direction (dezi-pixels)
+        /// </summary>
         public Int16 FlowX {
             get { return mFlowX; }
             set { mFlowX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in pixels * 10 in y-sensor direction (dezi-pixels)
+        /// </summary>
         public Int16 FlowY {
             get { return mFlowY; }
             set { mFlowY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Sensor ID
+        /// </summary>
         public byte SensorId {
             get { return mSensorId; }
             set { mSensorId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Optical flow quality / confidence. 0: bad, 255: maximum quality
+        /// </summary>
         public byte Quality {
             get { return mQuality; }
             set { mQuality = value; NotifyUpdated(); }
@@ -4896,36 +7050,57 @@ namespace MavLinkNet
 
     public class UasGlobalVisionPositionEstimate: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 Usec {
             get { return mUsec; }
             set { mUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global X position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Y position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Z position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angle in rad
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angle in rad
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angle in rad
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
@@ -4968,36 +7143,57 @@ namespace MavLinkNet
 
     public class UasVisionPositionEstimate: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 Usec {
             get { return mUsec; }
             set { mUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global X position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Y position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Z position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angle in rad
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angle in rad
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angle in rad
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
@@ -5040,21 +7236,33 @@ namespace MavLinkNet
 
     public class UasVisionSpeedEstimate: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 Usec {
             get { return mUsec; }
             set { mUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global X speed
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Y speed
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Z speed
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
@@ -5088,36 +7296,57 @@ namespace MavLinkNet
 
     public class UasViconPositionEstimate: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 Usec {
             get { return mUsec; }
             set { mUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global X position
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Y position
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Global Z position
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Roll angle in rad
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Pitch angle in rad
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Yaw angle in rad
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
@@ -5158,78 +7387,126 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The IMU readings in SI units in NED body frame
+    /// </summary>
     public class UasHighresImu: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (m/s^2)
+        /// </summary>
         public float Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (m/s^2)
+        /// </summary>
         public float Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (m/s^2)
+        /// </summary>
         public float Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around X axis (rad / sec)
+        /// </summary>
         public float Xgyro {
             get { return mXgyro; }
             set { mXgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Y axis (rad / sec)
+        /// </summary>
         public float Ygyro {
             get { return mYgyro; }
             set { mYgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Z axis (rad / sec)
+        /// </summary>
         public float Zgyro {
             get { return mZgyro; }
             set { mZgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Magnetic field (Gauss)
+        /// </summary>
         public float Xmag {
             get { return mXmag; }
             set { mXmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Magnetic field (Gauss)
+        /// </summary>
         public float Ymag {
             get { return mYmag; }
             set { mYmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Magnetic field (Gauss)
+        /// </summary>
         public float Zmag {
             get { return mZmag; }
             set { mZmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Absolute pressure in millibar
+        /// </summary>
         public float AbsPressure {
             get { return mAbsPressure; }
             set { mAbsPressure = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Differential pressure in millibar
+        /// </summary>
         public float DiffPressure {
             get { return mDiffPressure; }
             set { mDiffPressure = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude calculated from pressure
+        /// </summary>
         public float PressureAlt {
             get { return mPressureAlt; }
             set { mPressureAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Temperature in degrees celsius
+        /// </summary>
         public float Temperature {
             get { return mTemperature; }
             set { mTemperature = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
+        /// </summary>
         public UInt16 FieldsUpdated {
             get { return mFieldsUpdated; }
             set { mFieldsUpdated = value; NotifyUpdated(); }
@@ -5294,33 +7571,54 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Optical flow from an omnidirectional flow sensor (e.g. PX4FLOW with wide angle lens)
+    /// </summary>
     public class UasOmnidirectionalFlow: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Front distance in meters. Positive value (including zero): distance known. Negative value: Unknown distance
+        /// </summary>
         public float FrontDistanceM {
             get { return mFrontDistanceM; }
             set { mFrontDistanceM = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in deci pixels (1 = 0.1 pixel) on left hemisphere
+        /// </summary>
         public Int16[] Left {
             get { return mLeft; }
             set { mLeft = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in deci pixels (1 = 0.1 pixel) on right hemisphere
+        /// </summary>
         public Int16[] Right {
             get { return mRight; }
             set { mRight = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Sensor ID
+        /// </summary>
         public byte SensorId {
             get { return mSensorId; }
             set { mSensorId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Optical flow quality / confidence. 0: bad, 255: maximum quality
+        /// </summary>
         public byte Quality {
             get { return mQuality; }
             set { mQuality = value; NotifyUpdated(); }
@@ -5394,78 +7692,126 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The IMU readings in SI units in NED body frame
+    /// </summary>
     public class UasHilSensor: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (m/s^2)
+        /// </summary>
         public float Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (m/s^2)
+        /// </summary>
         public float Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (m/s^2)
+        /// </summary>
         public float Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around X axis in body frame (rad / sec)
+        /// </summary>
         public float Xgyro {
             get { return mXgyro; }
             set { mXgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Y axis in body frame (rad / sec)
+        /// </summary>
         public float Ygyro {
             get { return mYgyro; }
             set { mYgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Z axis in body frame (rad / sec)
+        /// </summary>
         public float Zgyro {
             get { return mZgyro; }
             set { mZgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X Magnetic field (Gauss)
+        /// </summary>
         public float Xmag {
             get { return mXmag; }
             set { mXmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y Magnetic field (Gauss)
+        /// </summary>
         public float Ymag {
             get { return mYmag; }
             set { mYmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z Magnetic field (Gauss)
+        /// </summary>
         public float Zmag {
             get { return mZmag; }
             set { mZmag = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Absolute pressure in millibar
+        /// </summary>
         public float AbsPressure {
             get { return mAbsPressure; }
             set { mAbsPressure = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Differential pressure (airspeed) in millibar
+        /// </summary>
         public float DiffPressure {
             get { return mDiffPressure; }
             set { mDiffPressure = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude calculated from pressure
+        /// </summary>
         public float PressureAlt {
             get { return mPressureAlt; }
             set { mPressureAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Temperature in degrees celsius
+        /// </summary>
         public float Temperature {
             get { return mTemperature; }
             set { mTemperature = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
+        /// </summary>
         public UInt32 FieldsUpdated {
             get { return mFieldsUpdated; }
             set { mFieldsUpdated = value; NotifyUpdated(); }
@@ -5530,108 +7876,174 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Status of simulation environment, if used
+    /// </summary>
     public class UasSimState: UasMessage
     {
+        /// <summary>
+        /// True attitude quaternion component 1
+        /// </summary>
         public float Q1 {
             get { return mQ1; }
             set { mQ1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True attitude quaternion component 2
+        /// </summary>
         public float Q2 {
             get { return mQ2; }
             set { mQ2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True attitude quaternion component 3
+        /// </summary>
         public float Q3 {
             get { return mQ3; }
             set { mQ3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True attitude quaternion component 4
+        /// </summary>
         public float Q4 {
             get { return mQ4; }
             set { mQ4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Attitude roll expressed as Euler angles, not recommended except for human-readable outputs
+        /// </summary>
         public float Roll {
             get { return mRoll; }
             set { mRoll = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Attitude pitch expressed as Euler angles, not recommended except for human-readable outputs
+        /// </summary>
         public float Pitch {
             get { return mPitch; }
             set { mPitch = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Attitude yaw expressed as Euler angles, not recommended except for human-readable outputs
+        /// </summary>
         public float Yaw {
             get { return mYaw; }
             set { mYaw = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration m/s/s
+        /// </summary>
         public float Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration m/s/s
+        /// </summary>
         public float Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration m/s/s
+        /// </summary>
         public float Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around X axis rad/s
+        /// </summary>
         public float Xgyro {
             get { return mXgyro; }
             set { mXgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Y axis rad/s
+        /// </summary>
         public float Ygyro {
             get { return mYgyro; }
             set { mYgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Angular speed around Z axis rad/s
+        /// </summary>
         public float Zgyro {
             get { return mZgyro; }
             set { mZgyro = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude in degrees
+        /// </summary>
         public float Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude in degrees
+        /// </summary>
         public float Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude in meters
+        /// </summary>
         public float Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Horizontal position standard deviation
+        /// </summary>
         public float StdDevHorz {
             get { return mStdDevHorz; }
             set { mStdDevHorz = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Vertical position standard deviation
+        /// </summary>
         public float StdDevVert {
             get { return mStdDevVert; }
             set { mStdDevVert = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True velocity in m/s in NORTH direction in earth-fixed NED frame
+        /// </summary>
         public float Vn {
             get { return mVn; }
             set { mVn = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True velocity in m/s in EAST direction in earth-fixed NED frame
+        /// </summary>
         public float Ve {
             get { return mVe; }
             set { mVe = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True velocity in m/s in DOWN direction in earth-fixed NED frame
+        /// </summary>
         public float Vd {
             get { return mVd; }
             set { mVd = value; NotifyUpdated(); }
@@ -5714,38 +8126,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Status generated by radio
+    /// </summary>
     public class UasRadioStatus: UasMessage
     {
+        /// <summary>
+        /// receive errors
+        /// </summary>
         public UInt16 Rxerrors {
             get { return mRxerrors; }
             set { mRxerrors = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// count of error corrected packets
+        /// </summary>
         public UInt16 Fixed {
             get { return mFixed; }
             set { mFixed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// local signal strength
+        /// </summary>
         public byte Rssi {
             get { return mRssi; }
             set { mRssi = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// remote signal strength
+        /// </summary>
         public byte Remrssi {
             get { return mRemrssi; }
             set { mRemrssi = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// how full the tx buffer is as a percentage
+        /// </summary>
         public byte Txbuf {
             get { return mTxbuf; }
             set { mTxbuf = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// background noise level
+        /// </summary>
         public byte Noise {
             get { return mNoise; }
             set { mNoise = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// remote background noise level
+        /// </summary>
         public byte Remnoise {
             get { return mRemnoise; }
             set { mRemnoise = value; NotifyUpdated(); }
@@ -5786,28 +8222,46 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Begin file transfer
+    /// </summary>
     public class UasFileTransferStart: UasMessage
     {
+        /// <summary>
+        /// Unique transfer ID
+        /// </summary>
         public UInt64 TransferUid {
             get { return mTransferUid; }
             set { mTransferUid = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// File size in bytes
+        /// </summary>
         public UInt32 FileSize {
             get { return mFileSize; }
             set { mFileSize = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Destination path
+        /// </summary>
         public char[] DestPath {
             get { return mDestPath; }
             set { mDestPath = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Transfer direction: 0: from requester, 1: to requester
+        /// </summary>
         public byte Direction {
             get { return mDirection; }
             set { mDirection = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RESERVED
+        /// </summary>
         public byte Flags {
             get { return mFlags; }
             set { mFlags = value; NotifyUpdated(); }
@@ -6320,18 +8774,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Get directory listing
+    /// </summary>
     public class UasFileTransferDirList: UasMessage
     {
+        /// <summary>
+        /// Unique transfer ID
+        /// </summary>
         public UInt64 TransferUid {
             get { return mTransferUid; }
             set { mTransferUid = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Directory path to list
+        /// </summary>
         public char[] DirPath {
             get { return mDirPath; }
             set { mDirPath = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// RESERVED
+        /// </summary>
         public byte Flags {
             get { return mFlags; }
             set { mFlags = value; NotifyUpdated(); }
@@ -6838,13 +9304,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// File transfer result
+    /// </summary>
     public class UasFileTransferRes: UasMessage
     {
+        /// <summary>
+        /// Unique transfer ID
+        /// </summary>
         public UInt64 TransferUid {
             get { return mTransferUid; }
             set { mTransferUid = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0: OK, 1: not permitted, 2: bad path / file name, 3: no space left on device
+        /// </summary>
         public byte Result {
             get { return mResult; }
             set { mResult = value; NotifyUpdated(); }
@@ -6870,68 +9345,110 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// The global position, as returned by the Global Positioning System (GPS). This is                   NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame).
+    /// </summary>
     public class UasHilGps: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude (WGS84), in degrees * 1E7
+        /// </summary>
         public Int32 Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude (WGS84), in meters * 1000 (positive for up)
+        /// </summary>
         public Int32 Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
+        /// </summary>
         public UInt16 Eph {
             get { return mEph; }
             set { mEph = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
+        /// </summary>
         public UInt16 Epv {
             get { return mEpv; }
             set { mEpv = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS ground speed (m/s * 100). If unknown, set to: 65535
+        /// </summary>
         public UInt16 Vel {
             get { return mVel; }
             set { mVel = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS velocity in cm/s in NORTH direction in earth-fixed NED frame
+        /// </summary>
         public Int16 Vn {
             get { return mVn; }
             set { mVn = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS velocity in cm/s in EAST direction in earth-fixed NED frame
+        /// </summary>
         public Int16 Ve {
             get { return mVe; }
             set { mVe = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// GPS velocity in cm/s in DOWN direction in earth-fixed NED frame
+        /// </summary>
         public Int16 Vd {
             get { return mVd; }
             set { mVd = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: 65535
+        /// </summary>
         public UInt16 Cog {
             get { return mCog; }
             set { mCog = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// 0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.
+        /// </summary>
         public byte FixType {
             get { return mFixType; }
             set { mFixType = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Number of satellites visible. If unknown, set to 255
+        /// </summary>
         public byte SatellitesVisible {
             get { return mSatellitesVisible; }
             set { mSatellitesVisible = value; NotifyUpdated(); }
@@ -6990,43 +9507,70 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Simulated optical flow from a flow sensor (e.g. optical mouse sensor)
+    /// </summary>
     public class UasHilOpticalFlow: UasMessage
     {
+        /// <summary>
+        /// Timestamp (UNIX)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in meters in x-sensor direction, angular-speed compensated
+        /// </summary>
         public float FlowCompMX {
             get { return mFlowCompMX; }
             set { mFlowCompMX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in meters in y-sensor direction, angular-speed compensated
+        /// </summary>
         public float FlowCompMY {
             get { return mFlowCompMY; }
             set { mFlowCompMY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground distance in meters. Positive value: distance known. Negative value: Unknown distance
+        /// </summary>
         public float GroundDistance {
             get { return mGroundDistance; }
             set { mGroundDistance = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in pixels in x-sensor direction
+        /// </summary>
         public Int16 FlowX {
             get { return mFlowX; }
             set { mFlowX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Flow in pixels in y-sensor direction
+        /// </summary>
         public Int16 FlowY {
             get { return mFlowY; }
             set { mFlowY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Sensor ID
+        /// </summary>
         public byte SensorId {
             get { return mSensorId; }
             set { mSensorId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Optical flow quality / confidence. 0: bad, 255: maximum quality
+        /// </summary>
         public byte Quality {
             get { return mQuality; }
             set { mQuality = value; NotifyUpdated(); }
@@ -7070,83 +9614,134 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Sent from simulation to autopilot, avoids in contrast to HIL_STATE singularities. This packet is useful for high throughput applications such as hardware in the loop simulations.
+    /// </summary>
     public class UasHilStateQuaternion: UasMessage
     {
+        /// <summary>
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Vehicle attitude expressed as normalized quaternion
+        /// </summary>
         public float[] AttitudeQuaternion {
             get { return mAttitudeQuaternion; }
             set { mAttitudeQuaternion = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame roll / phi angular speed (rad/s)
+        /// </summary>
         public float Rollspeed {
             get { return mRollspeed; }
             set { mRollspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame pitch / theta angular speed (rad/s)
+        /// </summary>
         public float Pitchspeed {
             get { return mPitchspeed; }
             set { mPitchspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Body frame yaw / psi angular speed (rad/s)
+        /// </summary>
         public float Yawspeed {
             get { return mYawspeed; }
             set { mYawspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Latitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lat {
             get { return mLat; }
             set { mLat = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Longitude, expressed as * 1E7
+        /// </summary>
         public Int32 Lon {
             get { return mLon; }
             set { mLon = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Altitude in meters, expressed as * 1000 (millimeters)
+        /// </summary>
         public Int32 Alt {
             get { return mAlt; }
             set { mAlt = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground X Speed (Latitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vx {
             get { return mVx; }
             set { mVx = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Y Speed (Longitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vy {
             get { return mVy; }
             set { mVy = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Ground Z Speed (Altitude), expressed as m/s * 100
+        /// </summary>
         public Int16 Vz {
             get { return mVz; }
             set { mVz = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Indicated airspeed, expressed as m/s * 100
+        /// </summary>
         public UInt16 IndAirspeed {
             get { return mIndAirspeed; }
             set { mIndAirspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// True airspeed, expressed as m/s * 100
+        /// </summary>
         public UInt16 TrueAirspeed {
             get { return mTrueAirspeed; }
             set { mTrueAirspeed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// X acceleration (mg)
+        /// </summary>
         public Int16 Xacc {
             get { return mXacc; }
             set { mXacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Y acceleration (mg)
+        /// </summary>
         public Int16 Yacc {
             get { return mYacc; }
             set { mYacc = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Z acceleration (mg)
+        /// </summary>
         public Int16 Zacc {
             get { return mZacc; }
             set { mZacc = value; NotifyUpdated(); }
@@ -7220,58 +9815,94 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Transmitte battery informations for a accu pack.
+    /// </summary>
     public class UasBatteryStatus: UasMessage
     {
+        /// <summary>
+        /// Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate
+        /// </summary>
         public Int32 CurrentConsumed {
             get { return mCurrentConsumed; }
             set { mCurrentConsumed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Consumed energy, in 100*Joules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate
+        /// </summary>
         public Int32 EnergyConsumed {
             get { return mEnergyConsumed; }
             set { mEnergyConsumed = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 1, in millivolts (1 = 1 millivolt)
+        /// </summary>
         public UInt16 VoltageCell1 {
             get { return mVoltageCell1; }
             set { mVoltageCell1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 2, in millivolts (1 = 1 millivolt), -1: no cell
+        /// </summary>
         public UInt16 VoltageCell2 {
             get { return mVoltageCell2; }
             set { mVoltageCell2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 3, in millivolts (1 = 1 millivolt), -1: no cell
+        /// </summary>
         public UInt16 VoltageCell3 {
             get { return mVoltageCell3; }
             set { mVoltageCell3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 4, in millivolts (1 = 1 millivolt), -1: no cell
+        /// </summary>
         public UInt16 VoltageCell4 {
             get { return mVoltageCell4; }
             set { mVoltageCell4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 5, in millivolts (1 = 1 millivolt), -1: no cell
+        /// </summary>
         public UInt16 VoltageCell5 {
             get { return mVoltageCell5; }
             set { mVoltageCell5 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery voltage of cell 6, in millivolts (1 = 1 millivolt), -1: no cell
+        /// </summary>
         public UInt16 VoltageCell6 {
             get { return mVoltageCell6; }
             set { mVoltageCell6 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
+        /// </summary>
         public Int16 CurrentBattery {
             get { return mCurrentBattery; }
             set { mCurrentBattery = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Accupack ID
+        /// </summary>
         public byte AccuId {
             get { return mAccuId; }
             set { mAccuId = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery
+        /// </summary>
         public SByte BatteryRemaining {
             get { return mBatteryRemaining; }
             set { mBatteryRemaining = value; NotifyUpdated(); }
@@ -7324,48 +9955,78 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the 8 DOF setpoint for a controller.
+    /// </summary>
     public class UasSetpoint8dof: UasMessage
     {
+        /// <summary>
+        /// Value 1
+        /// </summary>
         public float Val1 {
             get { return mVal1; }
             set { mVal1 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 2
+        /// </summary>
         public float Val2 {
             get { return mVal2; }
             set { mVal2 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 3
+        /// </summary>
         public float Val3 {
             get { return mVal3; }
             set { mVal3 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 4
+        /// </summary>
         public float Val4 {
             get { return mVal4; }
             set { mVal4 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 5
+        /// </summary>
         public float Val5 {
             get { return mVal5; }
             set { mVal5 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 6
+        /// </summary>
         public float Val6 {
             get { return mVal6; }
             set { mVal6 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 7
+        /// </summary>
         public float Val7 {
             get { return mVal7; }
             set { mVal7 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Value 8
+        /// </summary>
         public float Val8 {
             get { return mVal8; }
             set { mVal8 = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -7412,38 +10073,62 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Set the 6 DOF setpoint for a attitude and position controller.
+    /// </summary>
     public class UasSetpoint6dof: UasMessage
     {
+        /// <summary>
+        /// Translational Component in x
+        /// </summary>
         public float TransX {
             get { return mTransX; }
             set { mTransX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Translational Component in y
+        /// </summary>
         public float TransY {
             get { return mTransY; }
             set { mTransY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Translational Component in z
+        /// </summary>
         public float TransZ {
             get { return mTransZ; }
             set { mTransZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Rotational Component in x
+        /// </summary>
         public float RotX {
             get { return mRotX; }
             set { mRotX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Rotational Component in y
+        /// </summary>
         public float RotY {
             get { return mRotY; }
             set { mRotY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Rotational Component in z
+        /// </summary>
         public float RotZ {
             get { return mRotZ; }
             set { mRotZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// System ID
+        /// </summary>
         public byte TargetSystem {
             get { return mTargetSystem; }
             set { mTargetSystem = value; NotifyUpdated(); }
@@ -7484,23 +10169,38 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Send raw controller memory. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output.
+    /// </summary>
     public class UasMemoryVect: UasMessage
     {
+        /// <summary>
+        /// Starting address of the debug variables
+        /// </summary>
         public UInt16 Address {
             get { return mAddress; }
             set { mAddress = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Version code of the type variable. 0=unknown, type ignored and assumed int16_t. 1=as below
+        /// </summary>
         public byte Ver {
             get { return mVer; }
             set { mVer = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Type code of the memory variables. for ver = 1: 0=16 x int16_t, 1=16 x uint16_t, 2=16 x Q15, 3=16 x 1Q14
+        /// </summary>
         public byte Type {
             get { return mType; }
             set { mType = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Memory contents at specified address
+        /// </summary>
         public SByte[] Value {
             get { return mValue; }
             set { mValue = value; NotifyUpdated(); }
@@ -7596,26 +10296,41 @@ namespace MavLinkNet
 
     public class UasDebugVect: UasMessage
     {
+        /// <summary>
+        /// Timestamp
+        /// </summary>
         public UInt64 TimeUsec {
             get { return mTimeUsec; }
             set { mTimeUsec = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// x
+        /// </summary>
         public float X {
             get { return mX; }
             set { mX = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// y
+        /// </summary>
         public float Y {
             get { return mY; }
             set { mY = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// z
+        /// </summary>
         public float Z {
             get { return mZ; }
             set { mZ = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public char[] Name {
             get { return mName; }
             set { mName = value; NotifyUpdated(); }
@@ -7668,18 +10383,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Send a key-value pair as float. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output.
+    /// </summary>
     public class UasNamedValueFloat: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Floating point value
+        /// </summary>
         public float Value {
             get { return mValue; }
             set { mValue = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Name of the debug variable
+        /// </summary>
         public char[] Name {
             get { return mName; }
             set { mName = value; NotifyUpdated(); }
@@ -7726,18 +10453,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Send a key-value pair as integer. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output.
+    /// </summary>
     public class UasNamedValueInt: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Signed integer value
+        /// </summary>
         public Int32 Value {
             get { return mValue; }
             set { mValue = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Name of the debug variable
+        /// </summary>
         public char[] Name {
             get { return mName; }
             set { mName = value; NotifyUpdated(); }
@@ -7784,13 +10523,22 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Status text message. These messages are printed in yellow in the COMM console of QGroundControl. WARNING: They consume quite some bandwidth, so use only for important status and error messages. If implemented wisely, these messages are buffered on the MCU and sent only at a limited rate (e.g. 10 Hz).
+    /// </summary>
     public class UasStatustext: UasMessage
     {
+        /// <summary>
+        /// Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.
+        /// </summary>
         public MavSeverity Severity {
             get { return mSeverity; }
             set { mSeverity = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// Status text message, without null termination character
+        /// </summary>
         public char[] Text {
             get { return mText; }
             set { mText = value; NotifyUpdated(); }
@@ -7914,18 +10662,30 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Send a debug value. The index is used to discriminate between values. These values show up in the plot of QGroundControl as DEBUG N.
+    /// </summary>
     public class UasDebug: UasMessage
     {
+        /// <summary>
+        /// Timestamp (milliseconds since system boot)
+        /// </summary>
         public UInt32 TimeBootMs {
             get { return mTimeBootMs; }
             set { mTimeBootMs = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// index of debug variable
+        /// </summary>
         public byte Ind {
             get { return mInd; }
             set { mInd = value; NotifyUpdated(); }
         }
 
+        /// <summary>
+        /// DEBUG value
+        /// </summary>
         public float Value {
             get { return mValue; }
             set { mValue = value; NotifyUpdated(); }

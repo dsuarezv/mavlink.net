@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlinkobjectgenerator", "m
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlinkgen", "mavlinkgen\mavlinkgen.csproj", "{D865FF9A-5D23-4E9D-818C-AAA7DCD54955}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "mavlinkprotocol\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "mavlink.net\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

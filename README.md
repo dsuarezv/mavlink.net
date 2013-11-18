@@ -39,7 +39,18 @@ Now, here is how the same code looks with the MavLink.NET classes:
 
 With the added benefit of safe types and code completion. 
 
-MavLink.NET tries to solve those problems, at the expense of **not being API compatible** with the original MAVLink generated classes. This is intended, as a way to make the code that uses the protocol easier to read. If this isn't a reason good enough for you, that's fine, go ahead and use the generated classes from the python Mavlink generator. This classes are intended for new code more than changing existing code. 
+MavLink.NET tries to solve those problems, at the expense of **not being API compatible** with the original MAVLink generated classes. This is intended, as a way to make the code that uses the protocol easier to read. If this isn't a reason good enough for you, that's fine, go ahead and use the generated classes from the python Mavlink generator. These classes are intended for new code more than changing existing code. 
+
+# Usage
+
+* mavlinkobjectgenerator is the library containing the generator. 
+* mavlinkgen is the executable that generates the classes. 
+* mavlink.net is the library that holds the generated code and the protocol parsing logic. 
+
+To generate the classes, first download the Mavlink definitions from <https://github.com/mavlink/mavlink>. Build the solution and run mavlinkgen like this (choose the XML definition file that you prefer):
+
+    mavlinkgen --output="mavlink.net\messages.cs" c:\path to the mavlink repo\message_definitions\v1.0\ardupilotmega.xml
+    
 
 # License
 

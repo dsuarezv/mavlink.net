@@ -50,7 +50,8 @@ MavLink.NET tries to solve those problems, at the expense of **not being API com
 To generate the classes, first download the Mavlink definitions from <https://github.com/mavlink/mavlink>. Build the solution and run mavlinkgen like this (choose the XML definition file that you prefer):
 
     mavlinkgen --output="mavlink.net\messages.cs" c:\path to the mavlink repo\message_definitions\v1.0\ardupilotmega.xml
-    
+
+Build again and the mavlink.net.dll assembly has everything you need. Enjoy!
 
 # License
 

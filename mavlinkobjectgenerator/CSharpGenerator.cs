@@ -231,7 +231,6 @@ namespace MavLinkObjectGenerator
                     WL("            sb.Append(\"    {0}\\n\");", GetFieldName(f));
                     for (int i = 0; i < f.NumElements; ++i)
                     {
-                        //string elemName = (f.ElementNames.Count == f.NumElements) ? f.ElementNames[i] : "";
                         WL("            sb.AppendFormat(\"        [{1}]: {{0}}\\n\", {2}[{1}]);", GetFieldName(f), i, GetPrivateFieldName(f));
                     }
                 }
@@ -323,66 +322,6 @@ namespace MavLinkObjectGenerator
 
             return "";
         }
-
-        //private static string GetFormattedDefaultValue(ProtocolData obj, FieldData f, int index)
-        //{
-        //    if (f.IsEnum)
-        //    {
-        //        return string.Format("{0}.{1}", GetEnumName(obj, f, false), FieldData.GetEscapedItemName(f.DefaultValues[index]));
-        //    }
-        //    else
-        //    {
-        //        return string.Format("{0}{1}", f.DefaultValues[index], GetFieldTypeSuffix(f));
-        //    }
-        //}
-
-        //private static string GetBracketedString(string s)
-        //{
-        //    return string.Format("{{ {0} }}", s);
-        //}
-
-        //private static string GetDefaultValuesList(ProtocolData obj, FieldData f)
-        //{
-
-        //    // Case 0: No default values: just return empty.
-
-        //    if (f.DefaultValues.Count == 0) return "";
-
-        //    // Case 1: there is a default value for every item
-
-        //    if (f.DefaultValues.Count == f.NumElements)
-        //    {
-        //        if (f.IsEnum)
-        //            return GetBracketedString(GetEnumCommaSeparatedValues(GetEnumName(obj, f, false), f.DefaultValues));
-        //        else
-        //            return GetBracketedString(GetCommaSeparatedValues(f.DefaultValues, GetFieldTypeSuffix(f)));
-        //    }
-
-        //    return "";
-        //}
-
-        //private static string GetFieldTypeSuffix(FieldData f)
-        //{
-        //    switch (f.Type)
-        //    {
-        //        case FieldDataType.FLOAT32:
-        //            return "f";
-        //        default:
-        //            return "";
-        //    }
-        //}
-
-        //private static string GetEnumCommaSeparatedValues(string enumName, List<string> list)
-        //{
-        //    List<string> result = new List<string>();
-
-        //    for (int i = 0; i < list.Count; ++i)
-        //    {
-        //        result.Add(string.Format("{0}.{1}", enumName, FieldData.GetEscapedItemName(list[i])));
-        //    }
-
-        //    return GetCommaSeparatedValues(result, "");
-        //}
 
         private static string GetFieldName(FieldData f)
         {

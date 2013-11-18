@@ -816,6 +816,7 @@ namespace MavLinkNet
         public UasHeartbeat()
         {
             mMessageId = 0;
+            CrcExtra = 50;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -977,6 +978,7 @@ namespace MavLinkNet
         public UasSysStatus()
         {
             mMessageId = 1;
+            CrcExtra = 124;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1078,6 +1080,7 @@ namespace MavLinkNet
         public UasSystemTime()
         {
             mMessageId = 2;
+            CrcExtra = 137;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1151,6 +1154,7 @@ namespace MavLinkNet
         public UasPing()
         {
             mMessageId = 4;
+            CrcExtra = 237;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1232,6 +1236,7 @@ namespace MavLinkNet
         public UasChangeOperatorControl()
         {
             mMessageId = 5;
+            CrcExtra = 217;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1378,6 +1383,7 @@ namespace MavLinkNet
         public UasChangeOperatorControlAck()
         {
             mMessageId = 6;
+            CrcExtra = 104;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1431,6 +1437,7 @@ namespace MavLinkNet
         public UasAuthKey()
         {
             mMessageId = 7;
+            CrcExtra = 119;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1586,6 +1593,7 @@ namespace MavLinkNet
         public UasSetMode()
         {
             mMessageId = 11;
+            CrcExtra = 89;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1663,6 +1671,7 @@ namespace MavLinkNet
         public UasParamRequestRead()
         {
             mMessageId = 20;
+            CrcExtra = 214;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1774,6 +1783,7 @@ namespace MavLinkNet
         public UasParamRequestList()
         {
             mMessageId = 21;
+            CrcExtra = 159;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1855,6 +1865,7 @@ namespace MavLinkNet
         public UasParamValue()
         {
             mMessageId = 22;
+            CrcExtra = 220;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -1994,6 +2005,7 @@ namespace MavLinkNet
         public UasParamSet()
         {
             mMessageId = 23;
+            CrcExtra = 168;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2173,6 +2185,7 @@ namespace MavLinkNet
         public UasGpsRawInt()
         {
             mMessageId = 24;
+            CrcExtra = 24;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2294,6 +2307,7 @@ namespace MavLinkNet
         public UasGpsStatus()
         {
             mMessageId = 25;
+            CrcExtra = 23;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2721,6 +2735,7 @@ namespace MavLinkNet
         public UasScaledImu()
         {
             mMessageId = 26;
+            CrcExtra = 170;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2874,6 +2889,7 @@ namespace MavLinkNet
         public UasRawImu()
         {
             mMessageId = 27;
+            CrcExtra = 144;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -2987,6 +3003,7 @@ namespace MavLinkNet
         public UasRawPressure()
         {
             mMessageId = 28;
+            CrcExtra = 67;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3072,6 +3089,7 @@ namespace MavLinkNet
         public UasScaledPressure()
         {
             mMessageId = 29;
+            CrcExtra = 115;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3177,6 +3195,7 @@ namespace MavLinkNet
         public UasAttitude()
         {
             mMessageId = 30;
+            CrcExtra = 39;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3302,6 +3321,7 @@ namespace MavLinkNet
         public UasAttitudeQuaternion()
         {
             mMessageId = 31;
+            CrcExtra = 246;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3423,6 +3443,7 @@ namespace MavLinkNet
         public UasLocalPositionNed()
         {
             mMessageId = 32;
+            CrcExtra = 185;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3556,6 +3577,7 @@ namespace MavLinkNet
         public UasGlobalPositionInt()
         {
             mMessageId = 33;
+            CrcExtra = 104;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3713,6 +3735,7 @@ namespace MavLinkNet
         public UasRcChannelsScaled()
         {
             mMessageId = 34;
+            CrcExtra = 237;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -3878,6 +3901,7 @@ namespace MavLinkNet
         public UasRcChannelsRaw()
         {
             mMessageId = 35;
+            CrcExtra = 244;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4035,6 +4059,7 @@ namespace MavLinkNet
         public UasServoOutputRaw()
         {
             mMessageId = 36;
+            CrcExtra = 222;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4140,6 +4165,7 @@ namespace MavLinkNet
         public UasMissionRequestPartialList()
         {
             mMessageId = 37;
+            CrcExtra = 212;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4221,6 +4247,7 @@ namespace MavLinkNet
         public UasMissionWritePartialList()
         {
             mMessageId = 38;
+            CrcExtra = 9;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4382,6 +4409,7 @@ namespace MavLinkNet
         public UasMissionItem()
         {
             mMessageId = 39;
+            CrcExtra = 254;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4495,6 +4523,7 @@ namespace MavLinkNet
         public UasMissionRequest()
         {
             mMessageId = 40;
+            CrcExtra = 230;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4564,6 +4593,7 @@ namespace MavLinkNet
         public UasMissionSetCurrent()
         {
             mMessageId = 41;
+            CrcExtra = 28;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4617,6 +4647,7 @@ namespace MavLinkNet
         public UasMissionCurrent()
         {
             mMessageId = 42;
+            CrcExtra = 28;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4670,6 +4701,7 @@ namespace MavLinkNet
         public UasMissionRequestList()
         {
             mMessageId = 43;
+            CrcExtra = 132;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4735,6 +4767,7 @@ namespace MavLinkNet
         public UasMissionCount()
         {
             mMessageId = 44;
+            CrcExtra = 221;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4796,6 +4829,7 @@ namespace MavLinkNet
         public UasMissionClearAll()
         {
             mMessageId = 45;
+            CrcExtra = 232;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4845,6 +4879,7 @@ namespace MavLinkNet
         public UasMissionItemReached()
         {
             mMessageId = 46;
+            CrcExtra = 11;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4906,6 +4941,7 @@ namespace MavLinkNet
         public UasMissionAck()
         {
             mMessageId = 47;
+            CrcExtra = 153;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -4983,6 +5019,7 @@ namespace MavLinkNet
         public UasSetGpsGlobalOrigin()
         {
             mMessageId = 48;
+            CrcExtra = 41;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5056,6 +5093,7 @@ namespace MavLinkNet
         public UasGpsGlobalOrigin()
         {
             mMessageId = 49;
+            CrcExtra = 39;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5157,6 +5195,7 @@ namespace MavLinkNet
         public UasSetLocalPositionSetpoint()
         {
             mMessageId = 50;
+            CrcExtra = 214;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5258,6 +5297,7 @@ namespace MavLinkNet
         public UasLocalPositionSetpoint()
         {
             mMessageId = 51;
+            CrcExtra = 223;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5351,6 +5391,7 @@ namespace MavLinkNet
         public UasGlobalPositionSetpointInt()
         {
             mMessageId = 52;
+            CrcExtra = 141;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5444,6 +5485,7 @@ namespace MavLinkNet
         public UasSetGlobalPositionSetpointInt()
         {
             mMessageId = 53;
+            CrcExtra = 33;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5569,6 +5611,7 @@ namespace MavLinkNet
         public UasSafetySetAllowedArea()
         {
             mMessageId = 54;
+            CrcExtra = 15;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5694,6 +5737,7 @@ namespace MavLinkNet
         public UasSafetyAllowedArea()
         {
             mMessageId = 55;
+            CrcExtra = 3;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5803,6 +5847,7 @@ namespace MavLinkNet
         public UasSetRollPitchYawThrust()
         {
             mMessageId = 56;
+            CrcExtra = 100;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -5908,6 +5953,7 @@ namespace MavLinkNet
         public UasSetRollPitchYawSpeedThrust()
         {
             mMessageId = 57;
+            CrcExtra = 24;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6005,6 +6051,7 @@ namespace MavLinkNet
         public UasRollPitchYawThrustSetpoint()
         {
             mMessageId = 58;
+            CrcExtra = 239;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6098,6 +6145,7 @@ namespace MavLinkNet
         public UasRollPitchYawSpeedThrustSetpoint()
         {
             mMessageId = 59;
+            CrcExtra = 238;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6191,6 +6239,7 @@ namespace MavLinkNet
         public UasSetQuadMotorsSetpoint()
         {
             mMessageId = 60;
+            CrcExtra = 30;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6292,6 +6341,7 @@ namespace MavLinkNet
         public UasSetQuadSwarmRollPitchYawThrust()
         {
             mMessageId = 61;
+            CrcExtra = 240;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6453,6 +6503,7 @@ namespace MavLinkNet
         public UasNavControllerOutput()
         {
             mMessageId = 62;
+            CrcExtra = 183;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6590,6 +6641,7 @@ namespace MavLinkNet
         public UasSetQuadSwarmLedRollPitchYawThrust()
         {
             mMessageId = 63;
+            CrcExtra = 130;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6801,6 +6853,7 @@ namespace MavLinkNet
         public UasStateCorrection()
         {
             mMessageId = 64;
+            CrcExtra = 130;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6907,6 +6960,7 @@ namespace MavLinkNet
         public UasRequestDataStream()
         {
             mMessageId = 66;
+            CrcExtra = 148;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -6981,6 +7035,7 @@ namespace MavLinkNet
         public UasDataStream()
         {
             mMessageId = 67;
+            CrcExtra = 21;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7074,6 +7129,7 @@ namespace MavLinkNet
         public UasManualControl()
         {
             mMessageId = 69;
+            CrcExtra = 243;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7211,6 +7267,7 @@ namespace MavLinkNet
         public UasRcChannelsOverride()
         {
             mMessageId = 70;
+            CrcExtra = 124;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7332,6 +7389,7 @@ namespace MavLinkNet
         public UasVfrHud()
         {
             mMessageId = 74;
+            CrcExtra = 20;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7477,6 +7535,7 @@ namespace MavLinkNet
         public UasCommandLong()
         {
             mMessageId = 76;
+            CrcExtra = 152;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7570,6 +7629,7 @@ namespace MavLinkNet
         public UasCommandAck()
         {
             mMessageId = 77;
+            CrcExtra = 143;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7651,6 +7711,7 @@ namespace MavLinkNet
         public UasRollPitchYawRatesThrustSetpoint()
         {
             mMessageId = 80;
+            CrcExtra = 127;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7760,6 +7821,7 @@ namespace MavLinkNet
         public UasManualSetpoint()
         {
             mMessageId = 81;
+            CrcExtra = 106;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -7877,6 +7939,7 @@ namespace MavLinkNet
         public UasLocalPositionNedSystemGlobalOffset()
         {
             mMessageId = 89;
+            CrcExtra = 231;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8066,6 +8129,7 @@ namespace MavLinkNet
         public UasHilState()
         {
             mMessageId = 90;
+            CrcExtra = 183;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8251,6 +8315,7 @@ namespace MavLinkNet
         public UasHilControls()
         {
             mMessageId = 91;
+            CrcExtra = 63;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8440,6 +8505,7 @@ namespace MavLinkNet
         public UasHilRcInputsRaw()
         {
             mMessageId = 92;
+            CrcExtra = 54;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8593,6 +8659,7 @@ namespace MavLinkNet
         public UasOpticalFlow()
         {
             mMessageId = 100;
+            CrcExtra = 175;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8711,6 +8778,7 @@ namespace MavLinkNet
         public UasGlobalVisionPositionEstimate()
         {
             mMessageId = 101;
+            CrcExtra = 102;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8825,6 +8893,7 @@ namespace MavLinkNet
         public UasVisionPositionEstimate()
         {
             mMessageId = 102;
+            CrcExtra = 158;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -8915,6 +8984,7 @@ namespace MavLinkNet
         public UasVisionSpeedEstimate()
         {
             mMessageId = 103;
+            CrcExtra = 208;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9017,6 +9087,7 @@ namespace MavLinkNet
         public UasViconPositionEstimate()
         {
             mMessageId = 104;
+            CrcExtra = 56;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9198,6 +9269,7 @@ namespace MavLinkNet
         public UasHighresImu()
         {
             mMessageId = 105;
+            CrcExtra = 93;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9339,6 +9411,7 @@ namespace MavLinkNet
         public UasOmnidirectionalFlow()
         {
             mMessageId = 106;
+            CrcExtra = 211;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9572,6 +9645,7 @@ namespace MavLinkNet
         public UasHilSensor()
         {
             mMessageId = 107;
+            CrcExtra = 108;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -9833,6 +9907,7 @@ namespace MavLinkNet
         public UasSimState()
         {
             mMessageId = 108;
+            CrcExtra = 32;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -10006,6 +10081,7 @@ namespace MavLinkNet
         public UasRadioStatus()
         {
             mMessageId = 109;
+            CrcExtra = 185;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -10107,6 +10183,7 @@ namespace MavLinkNet
         public UasFileTransferStart()
         {
             mMessageId = 110;
+            CrcExtra = 235;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -10902,6 +10979,7 @@ namespace MavLinkNet
         public UasFileTransferDirList()
         {
             mMessageId = 111;
+            CrcExtra = 93;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11681,6 +11759,7 @@ namespace MavLinkNet
         public UasFileTransferRes()
         {
             mMessageId = 112;
+            CrcExtra = 124;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11826,6 +11905,7 @@ namespace MavLinkNet
         public UasHilGps()
         {
             mMessageId = 113;
+            CrcExtra = 124;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -11975,6 +12055,7 @@ namespace MavLinkNet
         public UasHilOpticalFlow()
         {
             mMessageId = 114;
+            CrcExtra = 119;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12168,6 +12249,7 @@ namespace MavLinkNet
         public UasHilStateQuaternion()
         {
             mMessageId = 115;
+            CrcExtra = 4;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12363,6 +12445,7 @@ namespace MavLinkNet
         public UasBatteryStatus()
         {
             mMessageId = 147;
+            CrcExtra = 177;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12512,6 +12595,7 @@ namespace MavLinkNet
         public UasSetpoint8dof()
         {
             mMessageId = 148;
+            CrcExtra = 241;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12637,6 +12721,7 @@ namespace MavLinkNet
         public UasSetpoint6dof()
         {
             mMessageId = 149;
+            CrcExtra = 15;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12730,6 +12815,7 @@ namespace MavLinkNet
         public UasMemoryVect()
         {
             mMessageId = 249;
+            CrcExtra = 204;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -12910,6 +12996,7 @@ namespace MavLinkNet
         public UasDebugVect()
         {
             mMessageId = 250;
+            CrcExtra = 49;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -13015,6 +13102,7 @@ namespace MavLinkNet
         public UasNamedValueFloat()
         {
             mMessageId = 251;
+            CrcExtra = 170;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -13112,6 +13200,7 @@ namespace MavLinkNet
         public UasNamedValueInt()
         {
             mMessageId = 252;
+            CrcExtra = 44;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -13201,6 +13290,7 @@ namespace MavLinkNet
         public UasStatustext()
         {
             mMessageId = 253;
+            CrcExtra = 83;
         }
 
         internal override void SerializeBody(BinaryWriter s)
@@ -13414,6 +13504,7 @@ namespace MavLinkNet
         public UasDebug()
         {
             mMessageId = 254;
+            CrcExtra = 86;
         }
 
         internal override void SerializeBody(BinaryWriter s)

@@ -125,10 +125,10 @@ namespace MavLinkObjectGenerator
         public static FieldDataType GetFieldTypeFromString(string t)
         {
             // Take the basic type, remove array qualifier if present
-            string[] tt = t.Split('[', ']');
-            if (tt.Length == 0) return FieldDataType.NONE;
 
-            switch (tt[0])
+            string basicType = GetBasicFieldTypeFromString(t);
+
+            switch (basicType)
             {
                 case "float": return FieldDataType.FLOAT32;
                 case "int8_t": return FieldDataType.INT8;
@@ -140,17 +140,29 @@ namespace MavLinkObjectGenerator
                 case "int64_t": return FieldDataType.INT64;
                 case "uint64_t": return FieldDataType.UINT64;
                 case "char": return FieldDataType.CHAR;
-                case "uint8_t_mavlink_version": return FieldDataType.UINT8;
                 default:
                     Console.Error.WriteLine("Unknown type: " + t);
                     return FieldDataType.NONE;
             }
         }
 
+        public static string GetBasicFieldTypeFromString(string t)
+        {
+            string[] tt = t.Split('[', ']');
+            
+            if (tt.Length == 0) 
+                return "";
+
+            string result = tt[0];
+
+            if (result == "uint8_t_mavlink_version") 
+                result = "uint8_t";
+
+            return result;
+        }
+
         private static int GetFieldTypeNumElements(string t)
         {
-            //if (t.IndexOf('[') != -1) System.Diagnostics.Debugger.Break();
-
             string[] tt = t.Split('[', ']');
             if (tt.Length > 1) 
                 return GetIntFromString(tt[1]);

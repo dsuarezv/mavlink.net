@@ -155,6 +155,7 @@ namespace MavLinkObjectGenerator
             WL("        public {0}()", GetClassName(m));
             WL("        {");
             WL("            mMessageId = {0};", m.Id);
+            WL("            CrcExtra = {0};", GenericGenerator.GetMessageExtraCrc(m));
             WL("        }");
             WL();
         }

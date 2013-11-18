@@ -7,6 +7,8 @@ namespace MavLinkNet
 {
     public class UasMessage
     {
+        public byte CrcExtra { get; protected set; }
+
         public byte MessageId
         {
             get { return mMessageId; }

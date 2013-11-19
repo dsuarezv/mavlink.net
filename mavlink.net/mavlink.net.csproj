@@ -34,12 +34,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CircularBuffer.cs" />
     <Compile Include="CircularStream.cs" />
     <Compile Include="MavLinkPacket.cs" />
     <Compile Include="MavLinkUdpTransport.cs" />
     <Compile Include="MavLinkWalker.cs" />
-    <Compile Include="messages.cs" />
+    <Compile Include="GeneratedMessages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UasMessage.cs" />
     <Compile Include="MavLinkState.cs" />

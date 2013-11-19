@@ -30,10 +30,16 @@ namespace MavLinkNet
 
     public class MavLinkWalker
     {
+        private CircularStream mProcessStream = new CircularStream(4096);
+
         public event PacketReceivedDelegate PacketReceived;
 
+        public void ProcessReceivedBytes(byte[] buffer)
+        {
+            mProcessStream.Write(buffer, 0, buffer.Length);
+        }
 
-        public MavLinkPacket GetNextPacket(BinaryReader s)
+        private MavLinkPacket GetNextPacket(BinaryReader s)
         {
             while (true)
             {

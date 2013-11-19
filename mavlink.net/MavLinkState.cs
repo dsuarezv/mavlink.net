@@ -36,7 +36,7 @@ namespace MavLinkNet
 
         public MavLinkState()
         {
-            mState.Add("HEARTBEAT", new UasHeartbeat
+            mState.Add("Heartbeat", new UasHeartbeat
             {
                 Type = MavType.Quadrotor,
                 Autopilot = MavAutopilot.Ardupilotmega,
@@ -46,7 +46,7 @@ namespace MavLinkNet
                 MavlinkVersion = (byte)3,
             });
 
-            mState.Add("SYS_STATUS", new UasSysStatus
+            mState.Add("SysStatus", new UasSysStatus
             {
                 Load = 500,
                 VoltageBattery = 11000,
@@ -54,9 +54,9 @@ namespace MavLinkNet
                 BatteryRemaining = -1
             });
 
-            mState.Add("LOCAL_POSITION_NED", new UasLocalPositionNed());
+            mState.Add("LocalPositionNed", new UasLocalPositionNed());
 
-            mState.Add("ATTITUDE", new UasAttitude());
+            mState.Add("Attitude", new UasAttitude());
         }
 
         public UasMessage Get(string mavlinkObjectName)
@@ -68,10 +68,10 @@ namespace MavLinkNet
         {
             if (mHeartBeatMessages.Count == 0)
             {
-                mHeartBeatMessages.Add(Get("HEARTBEAT"));
-                mHeartBeatMessages.Add(Get("SYS_STATUS"));
-                mHeartBeatMessages.Add(Get("LOCAL_POSITION_NED"));
-                mHeartBeatMessages.Add(Get("ATTITUDE"));
+                mHeartBeatMessages.Add(Get("Heartbeat"));
+                mHeartBeatMessages.Add(Get("SysStatus"));
+                mHeartBeatMessages.Add(Get("LocalPositionNed"));
+                mHeartBeatMessages.Add(Get("Attitude"));
             }
 
             return mHeartBeatMessages;

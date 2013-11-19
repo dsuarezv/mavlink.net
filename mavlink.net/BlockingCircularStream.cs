@@ -1,24 +1,59 @@
-﻿using System;
-using System.IO;
+﻿/*
+The MIT License (MIT)
+
+Copyright (c) 2013, David Suarez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+using System;
+using System.Threading;
 using System.Collections.Generic;
 
 
-namespace CircularStreamSample
+namespace System.IO
 {
-    public class CircularStream : Stream
+    /// <summary>
+    /// A blocking circular stream is an in-memory circular buffer that provides
+    /// Stream methods to read and write. "Blocking" means that it will block the Read thread
+    /// until the requested buffer length is filled (by writing from a different thread).
+    /// </summary>
+    public class BlockingCircularStream : Stream
     {
         private byte[] mBuffer;
         private int mWritePosition;
         private int mReadPosition;
         private int mCapacity;
+        private AutoResetEvent mBlockSignal = new AutoResetEvent(false);
 
 
-        public CircularStream(int bufferCapacity)
+        public BlockingCircularStream(int bufferCapacity)
         {
             mCapacity = bufferCapacity;
             mBuffer = new byte[bufferCapacity];
-
+            BlockingTimeoutMs = 1000;
+            
             Reset();
+        }
+
+        public int BlockingTimeoutMs
+        {
+            get; set;
         }
 
         public override bool CanRead
@@ -73,19 +108,23 @@ namespace CircularStreamSample
             if (count > mCapacity)
                 throw new IndexOutOfRangeException("Tried to read more bytes than the capacity of the circular buffer.");
 
-            int bytesToCopy = (Length <= count) ? count : (int)Length;
+            // wait until the buffer has enough bytes available
+            while (Length < count)
+            {
+                mBlockSignal.WaitOne(BlockingTimeoutMs);
+            }
 
-            if (mReadPosition + bytesToCopy <= mCapacity)
+            if (mReadPosition + count <= mCapacity)
             {
                 // Direct copy
-                CopyBytes(mBuffer, buffer, mReadPosition, offset, bytesToCopy);
-                mReadPosition += bytesToCopy;
+                CopyBytes(mBuffer, buffer, mReadPosition, offset, count);
+                mReadPosition += count;
             }
             else
             {
                 // Split buffer (new round)
                 int len1 = mCapacity - mReadPosition;
-                int len2 = bytesToCopy - len1;
+                int len2 = count - len1;
 
                 CopyBytes(mBuffer, buffer, mReadPosition, offset, len1);
                 CopyBytes(mBuffer, buffer, 0, offset + len1, len2);
@@ -93,7 +132,7 @@ namespace CircularStreamSample
                 mReadPosition = len2;
             }
 
-            return bytesToCopy;
+            return count;
         }
 
         public override int ReadByte()
@@ -139,15 +178,8 @@ namespace CircularStreamSample
 
                 mWritePosition = len2;
             }
-        }
 
-        public override string ToString()
-        {
-            return string.Format("{0}: r:{1} w:{2} l:{3}",
-                System.Text.Encoding.UTF8.GetString(mBuffer),
-                mReadPosition,
-                mWritePosition,
-                Length);
+            mBlockSignal.Set();
         }
 
 

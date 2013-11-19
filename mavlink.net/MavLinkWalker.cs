@@ -23,6 +23,7 @@ THE SOFTWARE.
 */
 using System;
 using System.IO;
+using System.Threading;
 
 namespace MavLinkNet
 {
@@ -30,13 +31,27 @@ namespace MavLinkNet
 
     public class MavLinkWalker
     {
-        private CircularStream mProcessStream = new CircularStream(4096);
+        private BlockingCircularStream mProcessStream;
+        private BinaryReader mReader;
 
         public event PacketReceivedDelegate PacketReceived;
+
+        public MavLinkWalker()
+        {
+            mProcessStream = new BlockingCircularStream(4096);
+            mReader = new BinaryReader(mProcessStream);
+        }
 
         public void ProcessReceivedBytes(byte[] buffer)
         {
             mProcessStream.Write(buffer, 0, buffer.Length);
+
+
+        }
+
+        public byte[] SerializePacket(MavLinkPacket packet)
+        {
+            throw new NotImplementedException();
         }
 
         private MavLinkPacket GetNextPacket(BinaryReader s)
@@ -63,6 +78,13 @@ namespace MavLinkNet
             {
                 // Skip bytes until a packet start is found
             }
+        }
+
+        private void NotifyPacketReceived(MavLinkPacket packet)
+        {
+            if (packet == null || PacketReceived == null) return;
+
+            PacketReceived(this, packet);
         }
     }
 }

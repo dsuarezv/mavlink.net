@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 using System;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Net.Sockets;
@@ -102,7 +103,7 @@ namespace MavLinkNet
 
                 if (mReceiveQueue.TryDequeue(out buffer))
                 {
-                    mMavLink.ParseBytes(buffer);
+                    mMavLink.ProcessReceivedBytes(buffer);
                 }
                 else
                 {
@@ -137,8 +138,11 @@ namespace MavLinkNet
         private void SendMavlinkMessage(IPEndPoint ep, UasMessage msg)
         {
             MavLinkPacket p = GetPacketFromMsg(msg);
-            byte[] buffer = mMavLink.Send(p);
 
+            throw new NotImplementedException("GetPacketFromMsg is the job of the link layer in MavLinkWalker.");
+
+            byte[] buffer = mMavLink.SerializePacket(p);
+            
             mUdpClient.Send(buffer, buffer.Length, ep);
         }
 

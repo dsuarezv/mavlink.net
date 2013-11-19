@@ -34,7 +34,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CircularStream.cs" />
+    <Compile Include="BlockingCircularStream.cs" />
     <Compile Include="MavLinkPacket.cs" />
     <Compile Include="MavLinkUdpTransport.cs" />
     <Compile Include="MavLinkWalker.cs" />

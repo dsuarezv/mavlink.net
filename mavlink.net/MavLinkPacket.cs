@@ -1,4 +1,27 @@
-﻿using System;
+﻿/*
+The MIT License (MIT)
+
+Copyright (c) 2013, David Suarez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+using System;
 using System.IO;
 
 namespace MavLinkNet
@@ -59,9 +82,10 @@ namespace MavLinkNet
 
         private bool IsValidCrc()
         {
-            // Validate checksum
+            UInt16 crc = GetPacketCrc(this);
 
-            return true;
+            return ( ((byte)(crc & 0xFF) == Checksum1) &&
+                     ((byte)(crc >> 8) == Checksum2) );
         }
 
         private void DeserializeMessage()
@@ -127,19 +151,41 @@ namespace MavLinkNet
 
         private void UpdateCrc()
         {
-            // Updates the CRC field using the other packet fields and payload.
-            throw new NotImplementedException("CRC calculation not implemented yet");
+            UInt16 crc = GetPacketCrc(this);
+            Checksum1 = (byte)(crc & 0xFF);
+            Checksum2 = (byte)(crc >> 8);
+        }
+
+        public static UInt16 GetPacketCrc(MavLinkPacket p)
+        {
+            UInt16 crc = X25CrcSeed;
+
+            crc = X25CrcAccumulate(p.PayLoadLength, crc);
+            crc = X25CrcAccumulate(p.PacketSequenceNumber, crc);
+            crc = X25CrcAccumulate(p.SystemId, crc);
+            crc = X25CrcAccumulate(p.ComponentId, crc);
+            crc = X25CrcAccumulate(p.MessageId, crc);
+
+            for (int i = 0; i < p.Payload.Length; ++i)
+            {
+                crc = X25CrcAccumulate(p.Payload[i], crc);
+            }
+
+            crc = X25CrcAccumulate(p.Message.CrcExtra, crc);
+
+            return crc;
         }
 
 
+
         // __ CRC _____________________________________________________________
-        
 
-        // Crc code copied/adapted from ardumega planner code
 
-        const UInt16 X25_INIT_CRC = 0xffff;
+        // CRC code adapted from Mavlink C# generator (https://github.com/mavlink/mavlink)
 
-        public static UInt16 CrcAccumulate(byte b, UInt16 crc)
+        const UInt16 X25CrcSeed = 0xffff;
+
+        public static UInt16 X25CrcAccumulate(byte b, UInt16 crc)
         {
             unchecked
             {
@@ -148,19 +194,5 @@ namespace MavLinkNet
                 return (UInt16)((crc >> 8) ^ (ch << 8) ^ (ch << 3) ^ (ch >> 4));
             }
         }
-
-
-        // For a "message" of length bytes contained in the byte array
-        // pointed to by buffer, calculate the CRC
-        public static UInt16 Calculate(byte[] buffer, UInt16 start, UInt16 length)
-        {
-            UInt16 crcTmp = X25_INIT_CRC;
-
-            for (int i = start; i < start + length; i++)
-                crcTmp = CrcAccumulate(buffer[i], crcTmp);
-
-            return crcTmp;
-        }
-
     }
 }

@@ -29,29 +29,52 @@ namespace MavLinkNet
 {
     public delegate void PacketReceivedDelegate(object sender, MavLinkPacket packet);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// This class maintains a circular buffer that gets the input, and 
+    /// a background thread that processes the circular buffer as soon
+    /// as data is received.
+    /// </remarks>
     public class MavLinkWalker
     {
         private BlockingCircularStream mProcessStream;
-        private BinaryReader mReader;
+        //private BinaryReader mReader;
 
         public event PacketReceivedDelegate PacketReceived;
+        public event PacketReceivedDelegate PacketDiscarded;
 
         public MavLinkWalker()
         {
             mProcessStream = new BlockingCircularStream(4096);
-            mReader = new BinaryReader(mProcessStream);
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(PacketProcessingWorker));
         }
 
         public void ProcessReceivedBytes(byte[] buffer)
         {
             mProcessStream.Write(buffer, 0, buffer.Length);
-
-
         }
 
         public byte[] SerializePacket(MavLinkPacket packet)
         {
             throw new NotImplementedException();
+        }
+
+
+        // __ Impl ____________________________________________________________
+
+
+        private void PacketProcessingWorker(object state)
+        {
+            using (BinaryReader reader = new BinaryReader(mProcessStream))
+            {
+                while (true)
+                {
+                    GetNextPacket(reader);
+                }
+            }
         }
 
         private MavLinkPacket GetNextPacket(BinaryReader s)
@@ -63,11 +86,11 @@ namespace MavLinkNet
 
                 if (packet.IsValid)
                 {
-                    return packet;
+                    NotifyPacketReceived(packet);
                 }
                 else
-                { 
-                    // notify discarded packet. Keep going.
+                {
+                    NotifyPacketDiscarded(packet);
                 }
             }
         }
@@ -85,6 +108,13 @@ namespace MavLinkNet
             if (packet == null || PacketReceived == null) return;
 
             PacketReceived(this, packet);
+        }
+
+        private void NotifyPacketDiscarded(MavLinkPacket packet)
+        {
+            if (packet == null || PacketDiscarded == null) return;
+
+            PacketDiscarded(this, packet);            
         }
     }
 }

@@ -203,7 +203,7 @@ namespace MavLinkNet
                 crc = X25CrcAccumulate(p.Payload[i], crc);
             }
 
-            crc = X25CrcAccumulate(p.Message.CrcExtra, crc);
+            crc = X25CrcAccumulate(UasSummary.GetCrcExtraForId(p.MessageId), crc);
 
             return crc;
         }

@@ -120,7 +120,21 @@ namespace MavLinkObjectGenerator
             {
                 WL("               case {0}: return new {1}();", m.Id, GetClassName(m));
             }
+            
             WL("               default: return null;");
+            WL("            }");
+            WL("        }");
+            WL();
+            WL("        public static byte GetCrcExtraForId(byte id)");
+            WL("        {");
+            WL("            switch (id)");
+            WL("            {");
+            
+            foreach (MessageData m in mProtocolData.Messages.Values)
+            {
+                WL("               case {0}: return {1};", m.Id, GetMessageExtraCrc(m));
+            }
+            WL("               default: return 0;");
             WL("            }");
             WL("        }");
             WL("    }");

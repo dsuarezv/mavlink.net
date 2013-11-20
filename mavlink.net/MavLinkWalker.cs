@@ -30,36 +30,68 @@ namespace MavLinkNet
     public delegate void PacketReceivedDelegate(object sender, MavLinkPacket packet);
 
     /// <summary>
-    /// 
+    /// Process incoming packets and prepare outgoing messages for sending.
     /// </summary>
     /// <remarks>
-    /// This class maintains a circular buffer that gets the input, and 
-    /// a background thread that processes the circular buffer as soon
-    /// as data is received.
+    /// This class maintains a circular buffer that gets the byte input from the wire,
+    /// and a background thread that processes the circular buffer as soon as data 
+    /// is received.
     /// </remarks>
     public class MavLinkWalker
     {
-        private BlockingCircularStream mProcessStream;
-        //private BinaryReader mReader;
+        public const int DefaultCircularBufferSize = 4096;
+        public const byte PacketSignalByte = 0xFE;
+        
+        private const int MaxPacketSize = 270;
 
+        private BlockingCircularStream mProcessStream;
+
+        /// <summary>
+        /// Event raised everytime a packet is received. This event is synchronous, 
+        /// no further packet processing occurs until the event handler returns.
+        /// </summary>
         public event PacketReceivedDelegate PacketReceived;
+
+        /// <summary>
+        /// Event raised everytime a stream of data fails a CRC check. 
+        /// This event is synchronous, no further packet processing occurs until 
+        /// the event handler returns.
+        /// </summary>
         public event PacketReceivedDelegate PacketDiscarded;
 
         public MavLinkWalker()
         {
-            mProcessStream = new BlockingCircularStream(4096);
+            mProcessStream = new BlockingCircularStream(DefaultCircularBufferSize);
 
             ThreadPool.QueueUserWorkItem(new WaitCallback(PacketProcessingWorker));
         }
 
+        /// <summary>
+        /// Add bytes to the processing queue.
+        /// </summary>
+        /// <param name="buffer">The buffer to process</param>
         public void ProcessReceivedBytes(byte[] buffer)
         {
             mProcessStream.Write(buffer, 0, buffer.Length);
         }
 
-        public byte[] SerializePacket(MavLinkPacket packet)
+        /// <summary>
+        /// Generates the buffer bytes to be sent on the wire for given message.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="systemId"></param>
+        /// <param name="componentId"></param>
+        /// <param name="includeSignalMark">Whether to include the Packet signal in the buffer or not.</param>
+        /// <param name="sequenceNumber">A sequence number for the message, if needed.</param>
+        /// <returns></returns>
+        public byte[] SerializeMessage(
+            UasMessage msg, byte systemId, byte componentId, 
+            bool includeSignalMark, byte sequenceNumber = 1)
         {
-            throw new NotImplementedException();
+            byte mark = includeSignalMark ? PacketSignalByte : (byte)0;
+
+            return MavLinkPacket.GetBytesForMessage(
+                      msg, systemId, componentId, sequenceNumber, mark);
         }
 
 
@@ -72,32 +104,24 @@ namespace MavLinkNet
             {
                 while (true)
                 {
-                    GetNextPacket(reader);
-                }
-            }
-        }
+                    SyncStream(reader);
+                    MavLinkPacket packet = MavLinkPacket.Deserialize(reader);
 
-        private MavLinkPacket GetNextPacket(BinaryReader s)
-        {
-            while (true)
-            {
-                SyncStream(s);
-                MavLinkPacket packet = MavLinkPacket.Deserialize(s);
-
-                if (packet.IsValid)
-                {
-                    NotifyPacketReceived(packet);
-                }
-                else
-                {
-                    NotifyPacketDiscarded(packet);
+                    if (packet.IsValid)
+                    {
+                        NotifyPacketReceived(packet);
+                    }
+                    else
+                    {
+                        NotifyPacketDiscarded(packet);
+                    }
                 }
             }
         }
 
         private void SyncStream(BinaryReader s)
         {
-            while (s.ReadByte() != 0xFE)
+            while (s.ReadByte() != PacketSignalByte)
             {
                 // Skip bytes until a packet start is found
             }

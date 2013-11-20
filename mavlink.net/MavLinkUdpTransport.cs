@@ -129,7 +129,7 @@ namespace MavLinkNet
                 }
                 else
                 {
-                    // Empty queue, sleep until signalled
+                    // Queue is empty, sleep until signalled
                     mSendSignal.WaitOne();
                 }
             }
@@ -137,25 +137,11 @@ namespace MavLinkNet
 
         private void SendMavlinkMessage(IPEndPoint ep, UasMessage msg)
         {
-            MavLinkPacket p = GetPacketFromMsg(msg);
-
-            throw new NotImplementedException("GetPacketFromMsg is the job of the link layer in MavLinkWalker.");
-
-            byte[] buffer = mMavLink.SerializePacket(p);
+            byte[] buffer = mMavLink.SerializeMessage(msg, MavlinkSystemId, MavlinkComponentId, true);
             
+            
+
             mUdpClient.Send(buffer, buffer.Length, ep);
-        }
-
-        private MavLinkPacket GetPacketFromMsg(UasMessage msg)
-        {
-            MavLinkPacket p = new MavLinkPacket();
-            p.Message = msg;
-            //p.TimeStamp = DateTime.Now;
-            p.PacketSequenceNumber = 1;
-            p.SystemId = MavlinkSystemId;
-            p.ComponentId = MavlinkComponentId;
-
-            return p;
         }
 
 

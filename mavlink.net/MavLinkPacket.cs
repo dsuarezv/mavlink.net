@@ -28,6 +28,8 @@ namespace MavLinkNet
 {
     public class MavLinkPacket
     {
+        public const int PacketOverheadNumBytes = 7;
+
         public bool IsValid = false;
 
         public byte PayLoadLength;
@@ -78,6 +80,11 @@ namespace MavLinkNet
             }
 
             return result;
+        }
+
+        public int GetPacketSize()
+        {
+            return PacketOverheadNumBytes + PayLoadLength;
         }
 
         private bool IsValidCrc()
@@ -136,6 +143,31 @@ namespace MavLinkNet
 
             return result;
         }
+
+        public static byte[] GetBytesForMessage(
+            UasMessage msg, byte systemId, byte componentId, byte sequenceNumber, byte signalMark)
+        {
+            MavLinkPacket p = MavLinkPacket.GetPacketForMessage(
+                                 msg, systemId, componentId, sequenceNumber);
+
+            int bufferSize = p.GetPacketSize();
+
+            if (signalMark != 0) bufferSize++;
+
+            byte[] result = new byte[bufferSize];
+
+            using (MemoryStream s = new MemoryStream(result))
+            {
+                using (BinaryWriter w = new BinaryWriter(s))
+                {
+                    if (signalMark != 0) w.Write(signalMark);
+                    p.Serialize(w);
+                }
+            }
+
+            return result;
+        }
+
 
         public void Serialize(BinaryWriter w)
         {

@@ -100,7 +100,7 @@ namespace MavLinkNet
 
         private void PacketProcessingWorker(object state)
         {
-            using (BinaryReader reader = new BinaryReader(mProcessStream))
+            using (BinaryReader reader = MavLinkPacket.GetBinaryReader(mProcessStream))
             {
                 while (true)
                 {

@@ -23,6 +23,7 @@ THE SOFTWARE.
 */
 using System;
 using System.IO;
+using System.Text;
 
 namespace MavLinkNet
 {
@@ -103,7 +104,7 @@ namespace MavLinkNet
 
             using (MemoryStream ms = new MemoryStream(Payload))
             {
-                using (BinaryReader br = new BinaryReader(ms))
+                using (BinaryReader br = GetBinaryReader(ms))
                 {
                     result.DeserializeBody(br);
                 }
@@ -111,6 +112,11 @@ namespace MavLinkNet
 
             Message = result;
             IsValid = true;
+        }
+
+        public static BinaryReader GetBinaryReader(Stream s)
+        {
+            return new BinaryReader(s, Encoding.ASCII);
         }
 
 

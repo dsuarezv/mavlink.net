@@ -7447,7 +7447,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 1, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param1 {
+        public float Param1 {
             get { return mParam1; }
             set { mParam1 = value; NotifyUpdated(); }
         }
@@ -7455,7 +7455,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 2, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param2 {
+        public float Param2 {
             get { return mParam2; }
             set { mParam2 = value; NotifyUpdated(); }
         }
@@ -7463,7 +7463,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 3, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param3 {
+        public float Param3 {
             get { return mParam3; }
             set { mParam3 = value; NotifyUpdated(); }
         }
@@ -7471,7 +7471,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 4, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param4 {
+        public float Param4 {
             get { return mParam4; }
             set { mParam4 = value; NotifyUpdated(); }
         }
@@ -7479,7 +7479,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 5, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param5 {
+        public float Param5 {
             get { return mParam5; }
             set { mParam5 = value; NotifyUpdated(); }
         }
@@ -7487,7 +7487,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 6, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param6 {
+        public float Param6 {
             get { return mParam6; }
             set { mParam6 = value; NotifyUpdated(); }
         }
@@ -7495,7 +7495,7 @@ namespace MavLinkNet
         /// <summary>
         /// Parameter 7, as defined by MAV_CMD enum.
         /// </summary>
-        public MavCmd Param7 {
+        public float Param7 {
             get { return mParam7; }
             set { mParam7 = value; NotifyUpdated(); }
         }
@@ -7540,13 +7540,13 @@ namespace MavLinkNet
 
         internal override void SerializeBody(BinaryWriter s)
         {
-            s.Write((float)mParam1);
-            s.Write((float)mParam2);
-            s.Write((float)mParam3);
-            s.Write((float)mParam4);
-            s.Write((float)mParam5);
-            s.Write((float)mParam6);
-            s.Write((float)mParam7);
+            s.Write(mParam1);
+            s.Write(mParam2);
+            s.Write(mParam3);
+            s.Write(mParam4);
+            s.Write(mParam5);
+            s.Write(mParam6);
+            s.Write(mParam7);
             s.Write((UInt16)mCommand);
             s.Write(mTargetSystem);
             s.Write(mTargetComponent);
@@ -7555,13 +7555,13 @@ namespace MavLinkNet
 
         internal override void DeserializeBody(BinaryReader s)
         {
-            this.mParam1 = (MavCmd)s.ReadSingle();
-            this.mParam2 = (MavCmd)s.ReadSingle();
-            this.mParam3 = (MavCmd)s.ReadSingle();
-            this.mParam4 = (MavCmd)s.ReadSingle();
-            this.mParam5 = (MavCmd)s.ReadSingle();
-            this.mParam6 = (MavCmd)s.ReadSingle();
-            this.mParam7 = (MavCmd)s.ReadSingle();
+            this.mParam1 = s.ReadSingle();
+            this.mParam2 = s.ReadSingle();
+            this.mParam3 = s.ReadSingle();
+            this.mParam4 = s.ReadSingle();
+            this.mParam5 = s.ReadSingle();
+            this.mParam6 = s.ReadSingle();
+            this.mParam7 = s.ReadSingle();
             this.mCommand = (MavCmd)s.ReadUInt16();
             this.mTargetSystem = s.ReadByte();
             this.mTargetComponent = s.ReadByte();
@@ -7588,13 +7588,13 @@ namespace MavLinkNet
             return sb.ToString();
         }
 
-        private MavCmd mParam1;
-        private MavCmd mParam2;
-        private MavCmd mParam3;
-        private MavCmd mParam4;
-        private MavCmd mParam5;
-        private MavCmd mParam6;
-        private MavCmd mParam7;
+        private float mParam1;
+        private float mParam2;
+        private float mParam3;
+        private float mParam4;
+        private float mParam5;
+        private float mParam6;
+        private float mParam7;
         private MavCmd mCommand;
         private byte mTargetSystem;
         private byte mTargetComponent;

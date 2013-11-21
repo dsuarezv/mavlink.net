@@ -238,7 +238,7 @@ namespace MavLinkObjectGenerator
         {
             foreach (string s in data.Enumerations.Keys)
             {
-                if (field.Description.IndexOf(s) != -1)
+                if (field.Description.IndexOf(s) != -1 && field.Type != FieldDataType.FLOAT32)
                 {
                     field.IsEnum = true;
                     field.EnumType = s;

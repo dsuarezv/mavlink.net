@@ -100,10 +100,9 @@ namespace MavLinkObjectGenerator
                             currentMsg.Fields.Add(currentField);
                             break;
                         case "enum":
-                            currentEnum = new EnumData();
+                            currentEnum = GetEnumDataForName(result, reader.GetAttribute("name"));
                             currentObject = currentEnum;
-                            currentEnum.Name = reader.GetAttribute("name");
-                            result.Enumerations.Add(currentEnum.Name, currentEnum);
+                            result.Enumerations[currentEnum.Name] = currentEnum;
                             break;
                         case "entry":
                             currentEntry = new EnumEntry();
@@ -134,6 +133,19 @@ namespace MavLinkObjectGenerator
             {
                 Parse(reader, result);
             }
+        }
+
+        private EnumData GetEnumDataForName(ProtocolData data, string name)
+        {
+            EnumData result;
+
+            if (!data.Enumerations.TryGetValue(name, out result))
+            {
+                result = new EnumData();
+                result.Name = name;
+            }
+
+            return result;
         }
 
         private static int GetIntFromString(string intString)

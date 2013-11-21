@@ -536,7 +536,22 @@ namespace MavLinkNet
         ComponentArmDisarm = 400, 
 
         /// <summary> Starts receiver pairing </summary>
-        StartRxPair = 500 };
+        StartRxPair = 500, 
+
+        /// <summary> Mission command to configure an on-board camera controller system. </summary>
+        DoDigicamConfigure = 202, 
+
+        /// <summary> Mission command to control an on-board camera controller system. </summary>
+        DoDigicamControl = 203, 
+
+        /// <summary> Mission command to configure a camera or antenna mount </summary>
+        DoMountConfigure = 204, 
+
+        /// <summary> Mission command to control a camera or antenna mount </summary>
+        DoMountControl = 205, 
+
+        /// <summary> Mission command to set CAM_TRIGG_DIST for this flight </summary>
+        DoSetCamTriggDist = 206 };
 
     /// <summary>
     /// Data stream IDs. A data stream is not a fixed set of messages, but rather a       recommendation to the autopilot software. Individual autopilots may or may not obey       the recommended messages.
@@ -755,6 +770,96 @@ namespace MavLinkNet
 
         /// <summary> Useful non-operational messages that can assist in debugging. These should not occur during normal operation. </summary>
         Debug = 7 };
+
+    /// <summary>
+    /// Enumeration of possible mount operation modes
+    /// </summary>
+    public enum MavMountMode { 
+
+        /// <summary> Load and keep safe position (Roll,Pitch,Yaw) from EEPROM and stop stabilization </summary>
+        Retract = 0, 
+
+        /// <summary> Load and keep neutral position (Roll,Pitch,Yaw) from EEPROM. </summary>
+        Neutral = 1, 
+
+        /// <summary> Load neutral position and start MAVLink Roll,Pitch,Yaw control with stabilization </summary>
+        MavlinkTargeting = 2, 
+
+        /// <summary> Load neutral position and start RC Roll,Pitch,Yaw control with stabilization </summary>
+        RcTargeting = 3, 
+
+        /// <summary> Load neutral position and start to point to Lat,Lon,Alt </summary>
+        GpsPoint = 4 };
+
+    public enum FenceAction { 
+
+        /// <summary> Disable fenced mode </summary>
+        None = 0, 
+
+        /// <summary> Switched to guided mode to return point (fence point 0) </summary>
+        Guided = 1, 
+
+        /// <summary> Report fence breach, but don't take action </summary>
+        Report = 2, 
+
+        /// <summary> Switched to guided mode to return point (fence point 0) with manual throttle control </summary>
+        GuidedThrPass = 3 };
+
+    public enum FenceBreach { 
+
+        /// <summary> No last fence breach </summary>
+        None = 0, 
+
+        /// <summary> Breached minimum altitude </summary>
+        Minalt = 1, 
+
+        /// <summary> Breached maximum altitude </summary>
+        Maxalt = 2, 
+
+        /// <summary> Breached fence boundary </summary>
+        Boundary = 3 };
+
+    public enum LimitsState { 
+
+        /// <summary>  pre-initialization </summary>
+        LimitsInit = 0, 
+
+        /// <summary>  disabled </summary>
+        LimitsDisabled = 1, 
+
+        /// <summary>  checking limits </summary>
+        LimitsEnabled = 2, 
+
+        /// <summary>  a limit has been breached </summary>
+        LimitsTriggered = 3, 
+
+        /// <summary>  taking action eg. RTL </summary>
+        LimitsRecovering = 4, 
+
+        /// <summary>  we're no longer in breach of a limit </summary>
+        LimitsRecovered = 5 };
+
+    public enum LimitModule { 
+
+        /// <summary>  pre-initialization </summary>
+        LimitGpslock = 1, 
+
+        /// <summary>  disabled </summary>
+        LimitGeofence = 2, 
+
+        /// <summary>  checking limits </summary>
+        LimitAltitude = 4 };
+
+    /// <summary>
+    /// Flags in RALLY_POINT message
+    /// </summary>
+    public enum RallyFlags { 
+
+        /// <summary> Flag set when requiring favorable winds for landing.  </summary>
+        FavorableWind = 1, 
+
+        /// <summary> Flag set when plane is to immediately descend to break altitude and land without GCS intervention.  Flag not set when plane is to loiter at Rally point until commanded to land. </summary>
+        LandImmediately = 2 };
 
 
     // ___________________________________________________________________________________
@@ -13542,6 +13647,3354 @@ namespace MavLinkNet
     // ___________________________________________________________________________________
 
 
+    /// <summary>
+    /// Offsets and calibrations values for hardware          sensors. This makes it easier to debug the calibration process.
+    /// </summary>
+    public class UasSensorOffsets: UasMessage
+    {
+        /// <summary>
+        /// magnetic declination (radians)
+        /// </summary>
+        public float MagDeclination {
+            get { return mMagDeclination; }
+            set { mMagDeclination = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw pressure from barometer
+        /// </summary>
+        public Int32 RawPress {
+            get { return mRawPress; }
+            set { mRawPress = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw temperature from barometer
+        /// </summary>
+        public Int32 RawTemp {
+            get { return mRawTemp; }
+            set { mRawTemp = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// gyro X calibration
+        /// </summary>
+        public float GyroCalX {
+            get { return mGyroCalX; }
+            set { mGyroCalX = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// gyro Y calibration
+        /// </summary>
+        public float GyroCalY {
+            get { return mGyroCalY; }
+            set { mGyroCalY = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// gyro Z calibration
+        /// </summary>
+        public float GyroCalZ {
+            get { return mGyroCalZ; }
+            set { mGyroCalZ = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// accel X calibration
+        /// </summary>
+        public float AccelCalX {
+            get { return mAccelCalX; }
+            set { mAccelCalX = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// accel Y calibration
+        /// </summary>
+        public float AccelCalY {
+            get { return mAccelCalY; }
+            set { mAccelCalY = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// accel Z calibration
+        /// </summary>
+        public float AccelCalZ {
+            get { return mAccelCalZ; }
+            set { mAccelCalZ = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// magnetometer X offset
+        /// </summary>
+        public Int16 MagOfsX {
+            get { return mMagOfsX; }
+            set { mMagOfsX = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// magnetometer Y offset
+        /// </summary>
+        public Int16 MagOfsY {
+            get { return mMagOfsY; }
+            set { mMagOfsY = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// magnetometer Z offset
+        /// </summary>
+        public Int16 MagOfsZ {
+            get { return mMagOfsZ; }
+            set { mMagOfsZ = value; NotifyUpdated(); }
+        }
+
+        public UasSensorOffsets()
+        {
+            mMessageId = 150;
+            CrcExtra = 134;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mMagDeclination);
+            s.Write(mRawPress);
+            s.Write(mRawTemp);
+            s.Write(mGyroCalX);
+            s.Write(mGyroCalY);
+            s.Write(mGyroCalZ);
+            s.Write(mAccelCalX);
+            s.Write(mAccelCalY);
+            s.Write(mAccelCalZ);
+            s.Write(mMagOfsX);
+            s.Write(mMagOfsY);
+            s.Write(mMagOfsZ);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mMagDeclination = s.ReadSingle();
+            this.mRawPress = s.ReadInt32();
+            this.mRawTemp = s.ReadInt32();
+            this.mGyroCalX = s.ReadSingle();
+            this.mGyroCalY = s.ReadSingle();
+            this.mGyroCalZ = s.ReadSingle();
+            this.mAccelCalX = s.ReadSingle();
+            this.mAccelCalY = s.ReadSingle();
+            this.mAccelCalZ = s.ReadSingle();
+            this.mMagOfsX = s.ReadInt16();
+            this.mMagOfsY = s.ReadInt16();
+            this.mMagOfsZ = s.ReadInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SensorOffsets \n");
+            sb.AppendFormat("    MagDeclination: {0}\n", mMagDeclination);
+            sb.AppendFormat("    RawPress: {0}\n", mRawPress);
+            sb.AppendFormat("    RawTemp: {0}\n", mRawTemp);
+            sb.AppendFormat("    GyroCalX: {0}\n", mGyroCalX);
+            sb.AppendFormat("    GyroCalY: {0}\n", mGyroCalY);
+            sb.AppendFormat("    GyroCalZ: {0}\n", mGyroCalZ);
+            sb.AppendFormat("    AccelCalX: {0}\n", mAccelCalX);
+            sb.AppendFormat("    AccelCalY: {0}\n", mAccelCalY);
+            sb.AppendFormat("    AccelCalZ: {0}\n", mAccelCalZ);
+            sb.AppendFormat("    MagOfsX: {0}\n", mMagOfsX);
+            sb.AppendFormat("    MagOfsY: {0}\n", mMagOfsY);
+            sb.AppendFormat("    MagOfsZ: {0}\n", mMagOfsZ);
+
+            return sb.ToString();
+        }
+
+        private float mMagDeclination;
+        private Int32 mRawPress;
+        private Int32 mRawTemp;
+        private float mGyroCalX;
+        private float mGyroCalY;
+        private float mGyroCalZ;
+        private float mAccelCalX;
+        private float mAccelCalY;
+        private float mAccelCalZ;
+        private Int16 mMagOfsX;
+        private Int16 mMagOfsY;
+        private Int16 mMagOfsZ;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// set the magnetometer offsets
+    /// </summary>
+    public class UasSetMagOffsets: UasMessage
+    {
+        /// <summary>
+        /// magnetometer X offset
+        /// </summary>
+        public Int16 MagOfsX {
+            get { return mMagOfsX; }
+            set { mMagOfsX = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// magnetometer Y offset
+        /// </summary>
+        public Int16 MagOfsY {
+            get { return mMagOfsY; }
+            set { mMagOfsY = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// magnetometer Z offset
+        /// </summary>
+        public Int16 MagOfsZ {
+            get { return mMagOfsZ; }
+            set { mMagOfsZ = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        public UasSetMagOffsets()
+        {
+            mMessageId = 151;
+            CrcExtra = 219;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mMagOfsX);
+            s.Write(mMagOfsY);
+            s.Write(mMagOfsZ);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mMagOfsX = s.ReadInt16();
+            this.mMagOfsY = s.ReadInt16();
+            this.mMagOfsZ = s.ReadInt16();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("SetMagOffsets \n");
+            sb.AppendFormat("    MagOfsX: {0}\n", mMagOfsX);
+            sb.AppendFormat("    MagOfsY: {0}\n", mMagOfsY);
+            sb.AppendFormat("    MagOfsZ: {0}\n", mMagOfsZ);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
+        private Int16 mMagOfsX;
+        private Int16 mMagOfsY;
+        private Int16 mMagOfsZ;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// state of APM memory
+    /// </summary>
+    public class UasMeminfo: UasMessage
+    {
+        /// <summary>
+        /// heap top
+        /// </summary>
+        public UInt16 Brkval {
+            get { return mBrkval; }
+            set { mBrkval = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// free memory
+        /// </summary>
+        public UInt16 Freemem {
+            get { return mFreemem; }
+            set { mFreemem = value; NotifyUpdated(); }
+        }
+
+        public UasMeminfo()
+        {
+            mMessageId = 152;
+            CrcExtra = 208;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mBrkval);
+            s.Write(mFreemem);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mBrkval = s.ReadUInt16();
+            this.mFreemem = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Meminfo \n");
+            sb.AppendFormat("    Brkval: {0}\n", mBrkval);
+            sb.AppendFormat("    Freemem: {0}\n", mFreemem);
+
+            return sb.ToString();
+        }
+
+        private UInt16 mBrkval;
+        private UInt16 mFreemem;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// raw ADC output
+    /// </summary>
+    public class UasApAdc: UasMessage
+    {
+        /// <summary>
+        /// ADC output 1
+        /// </summary>
+        public UInt16 Adc1 {
+            get { return mAdc1; }
+            set { mAdc1 = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ADC output 2
+        /// </summary>
+        public UInt16 Adc2 {
+            get { return mAdc2; }
+            set { mAdc2 = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ADC output 3
+        /// </summary>
+        public UInt16 Adc3 {
+            get { return mAdc3; }
+            set { mAdc3 = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ADC output 4
+        /// </summary>
+        public UInt16 Adc4 {
+            get { return mAdc4; }
+            set { mAdc4 = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ADC output 5
+        /// </summary>
+        public UInt16 Adc5 {
+            get { return mAdc5; }
+            set { mAdc5 = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ADC output 6
+        /// </summary>
+        public UInt16 Adc6 {
+            get { return mAdc6; }
+            set { mAdc6 = value; NotifyUpdated(); }
+        }
+
+        public UasApAdc()
+        {
+            mMessageId = 153;
+            CrcExtra = 188;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mAdc1);
+            s.Write(mAdc2);
+            s.Write(mAdc3);
+            s.Write(mAdc4);
+            s.Write(mAdc5);
+            s.Write(mAdc6);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mAdc1 = s.ReadUInt16();
+            this.mAdc2 = s.ReadUInt16();
+            this.mAdc3 = s.ReadUInt16();
+            this.mAdc4 = s.ReadUInt16();
+            this.mAdc5 = s.ReadUInt16();
+            this.mAdc6 = s.ReadUInt16();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("ApAdc \n");
+            sb.AppendFormat("    Adc1: {0}\n", mAdc1);
+            sb.AppendFormat("    Adc2: {0}\n", mAdc2);
+            sb.AppendFormat("    Adc3: {0}\n", mAdc3);
+            sb.AppendFormat("    Adc4: {0}\n", mAdc4);
+            sb.AppendFormat("    Adc5: {0}\n", mAdc5);
+            sb.AppendFormat("    Adc6: {0}\n", mAdc6);
+
+            return sb.ToString();
+        }
+
+        private UInt16 mAdc1;
+        private UInt16 mAdc2;
+        private UInt16 mAdc3;
+        private UInt16 mAdc4;
+        private UInt16 mAdc5;
+        private UInt16 mAdc6;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Configure on-board Camera Control System.
+    /// </summary>
+    public class UasDigicamConfigure: UasMessage
+    {
+        /// <summary>
+        /// Correspondent value to given extra_param
+        /// </summary>
+        public float ExtraValue {
+            get { return mExtraValue; }
+            set { mExtraValue = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Divisor number //e.g. 1000 means 1/1000 (0 means ignore)
+        /// </summary>
+        public UInt16 ShutterSpeed {
+            get { return mShutterSpeed; }
+            set { mShutterSpeed = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Mode enumeration from 1 to N //P, TV, AV, M, Etc (0 means ignore)
+        /// </summary>
+        public byte Mode {
+            get { return mMode; }
+            set { mMode = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// F stop number x 10 //e.g. 28 means 2.8 (0 means ignore)
+        /// </summary>
+        public byte Aperture {
+            get { return mAperture; }
+            set { mAperture = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// ISO enumeration from 1 to N //e.g. 80, 100, 200, Etc (0 means ignore)
+        /// </summary>
+        public byte Iso {
+            get { return mIso; }
+            set { mIso = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Exposure type enumeration from 1 to N (0 means ignore)
+        /// </summary>
+        public byte ExposureType {
+            get { return mExposureType; }
+            set { mExposureType = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Command Identity (incremental loop: 0 to 255)//A command sent multiple times will be executed or pooled just once
+        /// </summary>
+        public byte CommandId {
+            get { return mCommandId; }
+            set { mCommandId = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Main engine cut-off time before camera trigger in seconds/10 (0 means no cut-off)
+        /// </summary>
+        public byte EngineCutOff {
+            get { return mEngineCutOff; }
+            set { mEngineCutOff = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Extra parameters enumeration (0 means ignore)
+        /// </summary>
+        public byte ExtraParam {
+            get { return mExtraParam; }
+            set { mExtraParam = value; NotifyUpdated(); }
+        }
+
+        public UasDigicamConfigure()
+        {
+            mMessageId = 154;
+            CrcExtra = 84;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mExtraValue);
+            s.Write(mShutterSpeed);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mMode);
+            s.Write(mAperture);
+            s.Write(mIso);
+            s.Write(mExposureType);
+            s.Write(mCommandId);
+            s.Write(mEngineCutOff);
+            s.Write(mExtraParam);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mExtraValue = s.ReadSingle();
+            this.mShutterSpeed = s.ReadUInt16();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mMode = s.ReadByte();
+            this.mAperture = s.ReadByte();
+            this.mIso = s.ReadByte();
+            this.mExposureType = s.ReadByte();
+            this.mCommandId = s.ReadByte();
+            this.mEngineCutOff = s.ReadByte();
+            this.mExtraParam = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("DigicamConfigure \n");
+            sb.AppendFormat("    ExtraValue: {0}\n", mExtraValue);
+            sb.AppendFormat("    ShutterSpeed: {0}\n", mShutterSpeed);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Mode: {0}\n", mMode);
+            sb.AppendFormat("    Aperture: {0}\n", mAperture);
+            sb.AppendFormat("    Iso: {0}\n", mIso);
+            sb.AppendFormat("    ExposureType: {0}\n", mExposureType);
+            sb.AppendFormat("    CommandId: {0}\n", mCommandId);
+            sb.AppendFormat("    EngineCutOff: {0}\n", mEngineCutOff);
+            sb.AppendFormat("    ExtraParam: {0}\n", mExtraParam);
+
+            return sb.ToString();
+        }
+
+        private float mExtraValue;
+        private UInt16 mShutterSpeed;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mMode;
+        private byte mAperture;
+        private byte mIso;
+        private byte mExposureType;
+        private byte mCommandId;
+        private byte mEngineCutOff;
+        private byte mExtraParam;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Control on-board Camera Control System to take shots.
+    /// </summary>
+    public class UasDigicamControl: UasMessage
+    {
+        /// <summary>
+        /// Correspondent value to given extra_param
+        /// </summary>
+        public float ExtraValue {
+            get { return mExtraValue; }
+            set { mExtraValue = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// 0: stop, 1: start or keep it up //Session control e.g. show/hide lens
+        /// </summary>
+        public byte Session {
+            get { return mSession; }
+            set { mSession = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// 1 to N //Zoom's absolute position (0 means ignore)
+        /// </summary>
+        public byte ZoomPos {
+            get { return mZoomPos; }
+            set { mZoomPos = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// -100 to 100 //Zooming step value to offset zoom from the current position
+        /// </summary>
+        public SByte ZoomStep {
+            get { return mZoomStep; }
+            set { mZoomStep = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// 0: unlock focus or keep unlocked, 1: lock focus or keep locked, 3: re-lock focus
+        /// </summary>
+        public byte FocusLock {
+            get { return mFocusLock; }
+            set { mFocusLock = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// 0: ignore, 1: shot or start filming
+        /// </summary>
+        public byte Shot {
+            get { return mShot; }
+            set { mShot = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Command Identity (incremental loop: 0 to 255)//A command sent multiple times will be executed or pooled just once
+        /// </summary>
+        public byte CommandId {
+            get { return mCommandId; }
+            set { mCommandId = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Extra parameters enumeration (0 means ignore)
+        /// </summary>
+        public byte ExtraParam {
+            get { return mExtraParam; }
+            set { mExtraParam = value; NotifyUpdated(); }
+        }
+
+        public UasDigicamControl()
+        {
+            mMessageId = 155;
+            CrcExtra = 22;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mExtraValue);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mSession);
+            s.Write(mZoomPos);
+            s.Write(mZoomStep);
+            s.Write(mFocusLock);
+            s.Write(mShot);
+            s.Write(mCommandId);
+            s.Write(mExtraParam);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mExtraValue = s.ReadSingle();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mSession = s.ReadByte();
+            this.mZoomPos = s.ReadByte();
+            this.mZoomStep = s.ReadSByte();
+            this.mFocusLock = s.ReadByte();
+            this.mShot = s.ReadByte();
+            this.mCommandId = s.ReadByte();
+            this.mExtraParam = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("DigicamControl \n");
+            sb.AppendFormat("    ExtraValue: {0}\n", mExtraValue);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Session: {0}\n", mSession);
+            sb.AppendFormat("    ZoomPos: {0}\n", mZoomPos);
+            sb.AppendFormat("    ZoomStep: {0}\n", mZoomStep);
+            sb.AppendFormat("    FocusLock: {0}\n", mFocusLock);
+            sb.AppendFormat("    Shot: {0}\n", mShot);
+            sb.AppendFormat("    CommandId: {0}\n", mCommandId);
+            sb.AppendFormat("    ExtraParam: {0}\n", mExtraParam);
+
+            return sb.ToString();
+        }
+
+        private float mExtraValue;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mSession;
+        private byte mZoomPos;
+        private SByte mZoomStep;
+        private byte mFocusLock;
+        private byte mShot;
+        private byte mCommandId;
+        private byte mExtraParam;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Message to configure a camera mount, directional antenna, etc.
+    /// </summary>
+    public class UasMountConfigure: UasMessage
+    {
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// mount operating mode (see MAV_MOUNT_MODE enum)
+        /// </summary>
+        public MavMountMode MountMode {
+            get { return mMountMode; }
+            set { mMountMode = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// (1 = yes, 0 = no)
+        /// </summary>
+        public byte StabRoll {
+            get { return mStabRoll; }
+            set { mStabRoll = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// (1 = yes, 0 = no)
+        /// </summary>
+        public byte StabPitch {
+            get { return mStabPitch; }
+            set { mStabPitch = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// (1 = yes, 0 = no)
+        /// </summary>
+        public byte StabYaw {
+            get { return mStabYaw; }
+            set { mStabYaw = value; NotifyUpdated(); }
+        }
+
+        public UasMountConfigure()
+        {
+            mMessageId = 156;
+            CrcExtra = 19;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write((byte)mMountMode);
+            s.Write(mStabRoll);
+            s.Write(mStabPitch);
+            s.Write(mStabYaw);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mMountMode = (MavMountMode)s.ReadByte();
+            this.mStabRoll = s.ReadByte();
+            this.mStabPitch = s.ReadByte();
+            this.mStabYaw = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MountConfigure \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    MountMode: {0}\n", mMountMode);
+            sb.AppendFormat("    StabRoll: {0}\n", mStabRoll);
+            sb.AppendFormat("    StabPitch: {0}\n", mStabPitch);
+            sb.AppendFormat("    StabYaw: {0}\n", mStabYaw);
+
+            return sb.ToString();
+        }
+
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private MavMountMode mMountMode;
+        private byte mStabRoll;
+        private byte mStabPitch;
+        private byte mStabYaw;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Message to control a camera mount, directional antenna, etc.
+    /// </summary>
+    public class UasMountControl: UasMessage
+    {
+        /// <summary>
+        /// pitch(deg*100) or lat, depending on mount mode
+        /// </summary>
+        public Int32 InputA {
+            get { return mInputA; }
+            set { mInputA = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// roll(deg*100) or lon depending on mount mode
+        /// </summary>
+        public Int32 InputB {
+            get { return mInputB; }
+            set { mInputB = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// yaw(deg*100) or alt (in cm) depending on mount mode
+        /// </summary>
+        public Int32 InputC {
+            get { return mInputC; }
+            set { mInputC = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// if "1" it will save current trimmed position on EEPROM (just valid for NEUTRAL and LANDING)
+        /// </summary>
+        public byte SavePosition {
+            get { return mSavePosition; }
+            set { mSavePosition = value; NotifyUpdated(); }
+        }
+
+        public UasMountControl()
+        {
+            mMessageId = 157;
+            CrcExtra = 21;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mInputA);
+            s.Write(mInputB);
+            s.Write(mInputC);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mSavePosition);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mInputA = s.ReadInt32();
+            this.mInputB = s.ReadInt32();
+            this.mInputC = s.ReadInt32();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mSavePosition = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MountControl \n");
+            sb.AppendFormat("    InputA: {0}\n", mInputA);
+            sb.AppendFormat("    InputB: {0}\n", mInputB);
+            sb.AppendFormat("    InputC: {0}\n", mInputC);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    SavePosition: {0}\n", mSavePosition);
+
+            return sb.ToString();
+        }
+
+        private Int32 mInputA;
+        private Int32 mInputB;
+        private Int32 mInputC;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mSavePosition;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Message with some status from APM to GCS about camera or antenna mount
+    /// </summary>
+    public class UasMountStatus: UasMessage
+    {
+        /// <summary>
+        /// pitch(deg*100) or lat, depending on mount mode
+        /// </summary>
+        public Int32 PointingA {
+            get { return mPointingA; }
+            set { mPointingA = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// roll(deg*100) or lon depending on mount mode
+        /// </summary>
+        public Int32 PointingB {
+            get { return mPointingB; }
+            set { mPointingB = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// yaw(deg*100) or alt (in cm) depending on mount mode
+        /// </summary>
+        public Int32 PointingC {
+            get { return mPointingC; }
+            set { mPointingC = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        public UasMountStatus()
+        {
+            mMessageId = 158;
+            CrcExtra = 134;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mPointingA);
+            s.Write(mPointingB);
+            s.Write(mPointingC);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mPointingA = s.ReadInt32();
+            this.mPointingB = s.ReadInt32();
+            this.mPointingC = s.ReadInt32();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("MountStatus \n");
+            sb.AppendFormat("    PointingA: {0}\n", mPointingA);
+            sb.AppendFormat("    PointingB: {0}\n", mPointingB);
+            sb.AppendFormat("    PointingC: {0}\n", mPointingC);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+
+            return sb.ToString();
+        }
+
+        private Int32 mPointingA;
+        private Int32 mPointingB;
+        private Int32 mPointingC;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// A fence point. Used to set a point when from  	      GCS -> MAV. Also used to return a point from MAV -> GCS
+    /// </summary>
+    public class UasFencePoint: UasMessage
+    {
+        /// <summary>
+        /// Latitude of point
+        /// </summary>
+        public float Lat {
+            get { return mLat; }
+            set { mLat = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Longitude of point
+        /// </summary>
+        public float Lng {
+            get { return mLng; }
+            set { mLng = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// point index (first point is 1, 0 is for return point)
+        /// </summary>
+        public byte Idx {
+            get { return mIdx; }
+            set { mIdx = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// total number of points (for sanity checking)
+        /// </summary>
+        public byte Count {
+            get { return mCount; }
+            set { mCount = value; NotifyUpdated(); }
+        }
+
+        public UasFencePoint()
+        {
+            mMessageId = 160;
+            CrcExtra = 78;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mLat);
+            s.Write(mLng);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mIdx);
+            s.Write(mCount);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mLat = s.ReadSingle();
+            this.mLng = s.ReadSingle();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mIdx = s.ReadByte();
+            this.mCount = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FencePoint \n");
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lng: {0}\n", mLng);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Idx: {0}\n", mIdx);
+            sb.AppendFormat("    Count: {0}\n", mCount);
+
+            return sb.ToString();
+        }
+
+        private float mLat;
+        private float mLng;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mIdx;
+        private byte mCount;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Request a current fence point from MAV
+    /// </summary>
+    public class UasFenceFetchPoint: UasMessage
+    {
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// point index (first point is 1, 0 is for return point)
+        /// </summary>
+        public byte Idx {
+            get { return mIdx; }
+            set { mIdx = value; NotifyUpdated(); }
+        }
+
+        public UasFenceFetchPoint()
+        {
+            mMessageId = 161;
+            CrcExtra = 68;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mIdx);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mIdx = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FenceFetchPoint \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Idx: {0}\n", mIdx);
+
+            return sb.ToString();
+        }
+
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mIdx;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status of geo-fencing. Sent in extended  	    status stream when fencing enabled
+    /// </summary>
+    public class UasFenceStatus: UasMessage
+    {
+        /// <summary>
+        /// time of last breach in milliseconds since boot
+        /// </summary>
+        public UInt32 BreachTime {
+            get { return mBreachTime; }
+            set { mBreachTime = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// number of fence breaches
+        /// </summary>
+        public UInt16 BreachCount {
+            get { return mBreachCount; }
+            set { mBreachCount = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// 0 if currently inside fence, 1 if outside
+        /// </summary>
+        public byte BreachStatus {
+            get { return mBreachStatus; }
+            set { mBreachStatus = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// last breach type (see FENCE_BREACH_* enum)
+        /// </summary>
+        public FenceBreach BreachType {
+            get { return mBreachType; }
+            set { mBreachType = value; NotifyUpdated(); }
+        }
+
+        public UasFenceStatus()
+        {
+            mMessageId = 162;
+            CrcExtra = 189;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mBreachTime);
+            s.Write(mBreachCount);
+            s.Write(mBreachStatus);
+            s.Write((byte)mBreachType);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mBreachTime = s.ReadUInt32();
+            this.mBreachCount = s.ReadUInt16();
+            this.mBreachStatus = s.ReadByte();
+            this.mBreachType = (FenceBreach)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("FenceStatus \n");
+            sb.AppendFormat("    BreachTime: {0}\n", mBreachTime);
+            sb.AppendFormat("    BreachCount: {0}\n", mBreachCount);
+            sb.AppendFormat("    BreachStatus: {0}\n", mBreachStatus);
+            sb.AppendFormat("    BreachType: {0}\n", mBreachType);
+
+            return sb.ToString();
+        }
+
+        private UInt32 mBreachTime;
+        private UInt16 mBreachCount;
+        private byte mBreachStatus;
+        private FenceBreach mBreachType;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status of DCM attitude estimator
+    /// </summary>
+    public class UasAhrs: UasMessage
+    {
+        /// <summary>
+        /// X gyro drift estimate rad/s
+        /// </summary>
+        public float Omegaix {
+            get { return mOmegaix; }
+            set { mOmegaix = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Y gyro drift estimate rad/s
+        /// </summary>
+        public float Omegaiy {
+            get { return mOmegaiy; }
+            set { mOmegaiy = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Z gyro drift estimate rad/s
+        /// </summary>
+        public float Omegaiz {
+            get { return mOmegaiz; }
+            set { mOmegaiz = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// average accel_weight
+        /// </summary>
+        public float AccelWeight {
+            get { return mAccelWeight; }
+            set { mAccelWeight = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// average renormalisation value
+        /// </summary>
+        public float RenormVal {
+            get { return mRenormVal; }
+            set { mRenormVal = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// average error_roll_pitch value
+        /// </summary>
+        public float ErrorRp {
+            get { return mErrorRp; }
+            set { mErrorRp = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// average error_yaw value
+        /// </summary>
+        public float ErrorYaw {
+            get { return mErrorYaw; }
+            set { mErrorYaw = value; NotifyUpdated(); }
+        }
+
+        public UasAhrs()
+        {
+            mMessageId = 163;
+            CrcExtra = 127;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mOmegaix);
+            s.Write(mOmegaiy);
+            s.Write(mOmegaiz);
+            s.Write(mAccelWeight);
+            s.Write(mRenormVal);
+            s.Write(mErrorRp);
+            s.Write(mErrorYaw);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mOmegaix = s.ReadSingle();
+            this.mOmegaiy = s.ReadSingle();
+            this.mOmegaiz = s.ReadSingle();
+            this.mAccelWeight = s.ReadSingle();
+            this.mRenormVal = s.ReadSingle();
+            this.mErrorRp = s.ReadSingle();
+            this.mErrorYaw = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Ahrs \n");
+            sb.AppendFormat("    Omegaix: {0}\n", mOmegaix);
+            sb.AppendFormat("    Omegaiy: {0}\n", mOmegaiy);
+            sb.AppendFormat("    Omegaiz: {0}\n", mOmegaiz);
+            sb.AppendFormat("    AccelWeight: {0}\n", mAccelWeight);
+            sb.AppendFormat("    RenormVal: {0}\n", mRenormVal);
+            sb.AppendFormat("    ErrorRp: {0}\n", mErrorRp);
+            sb.AppendFormat("    ErrorYaw: {0}\n", mErrorYaw);
+
+            return sb.ToString();
+        }
+
+        private float mOmegaix;
+        private float mOmegaiy;
+        private float mOmegaiz;
+        private float mAccelWeight;
+        private float mRenormVal;
+        private float mErrorRp;
+        private float mErrorYaw;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status of simulation environment, if used
+    /// </summary>
+    public class UasSimstate: UasMessage
+    {
+        /// <summary>
+        /// Roll angle (rad)
+        /// </summary>
+        public float Roll {
+            get { return mRoll; }
+            set { mRoll = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Pitch angle (rad)
+        /// </summary>
+        public float Pitch {
+            get { return mPitch; }
+            set { mPitch = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Yaw angle (rad)
+        /// </summary>
+        public float Yaw {
+            get { return mYaw; }
+            set { mYaw = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// X acceleration m/s/s
+        /// </summary>
+        public float Xacc {
+            get { return mXacc; }
+            set { mXacc = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Y acceleration m/s/s
+        /// </summary>
+        public float Yacc {
+            get { return mYacc; }
+            set { mYacc = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Z acceleration m/s/s
+        /// </summary>
+        public float Zacc {
+            get { return mZacc; }
+            set { mZacc = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Angular speed around X axis rad/s
+        /// </summary>
+        public float Xgyro {
+            get { return mXgyro; }
+            set { mXgyro = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Angular speed around Y axis rad/s
+        /// </summary>
+        public float Ygyro {
+            get { return mYgyro; }
+            set { mYgyro = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Angular speed around Z axis rad/s
+        /// </summary>
+        public float Zgyro {
+            get { return mZgyro; }
+            set { mZgyro = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Latitude in degrees * 1E7
+        /// </summary>
+        public Int32 Lat {
+            get { return mLat; }
+            set { mLat = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Longitude in degrees * 1E7
+        /// </summary>
+        public Int32 Lng {
+            get { return mLng; }
+            set { mLng = value; NotifyUpdated(); }
+        }
+
+        public UasSimstate()
+        {
+            mMessageId = 164;
+            CrcExtra = 154;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mRoll);
+            s.Write(mPitch);
+            s.Write(mYaw);
+            s.Write(mXacc);
+            s.Write(mYacc);
+            s.Write(mZacc);
+            s.Write(mXgyro);
+            s.Write(mYgyro);
+            s.Write(mZgyro);
+            s.Write(mLat);
+            s.Write(mLng);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mRoll = s.ReadSingle();
+            this.mPitch = s.ReadSingle();
+            this.mYaw = s.ReadSingle();
+            this.mXacc = s.ReadSingle();
+            this.mYacc = s.ReadSingle();
+            this.mZacc = s.ReadSingle();
+            this.mXgyro = s.ReadSingle();
+            this.mYgyro = s.ReadSingle();
+            this.mZgyro = s.ReadSingle();
+            this.mLat = s.ReadInt32();
+            this.mLng = s.ReadInt32();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Simstate \n");
+            sb.AppendFormat("    Roll: {0}\n", mRoll);
+            sb.AppendFormat("    Pitch: {0}\n", mPitch);
+            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            sb.AppendFormat("    Xacc: {0}\n", mXacc);
+            sb.AppendFormat("    Yacc: {0}\n", mYacc);
+            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
+            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
+            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lng: {0}\n", mLng);
+
+            return sb.ToString();
+        }
+
+        private float mRoll;
+        private float mPitch;
+        private float mYaw;
+        private float mXacc;
+        private float mYacc;
+        private float mZacc;
+        private float mXgyro;
+        private float mYgyro;
+        private float mZgyro;
+        private Int32 mLat;
+        private Int32 mLng;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status of key hardware
+    /// </summary>
+    public class UasHwstatus: UasMessage
+    {
+        /// <summary>
+        /// board voltage (mV)
+        /// </summary>
+        public UInt16 Vcc {
+            get { return mVcc; }
+            set { mVcc = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// I2C error count
+        /// </summary>
+        public byte I2cerr {
+            get { return mI2cerr; }
+            set { mI2cerr = value; NotifyUpdated(); }
+        }
+
+        public UasHwstatus()
+        {
+            mMessageId = 165;
+            CrcExtra = 21;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mVcc);
+            s.Write(mI2cerr);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mVcc = s.ReadUInt16();
+            this.mI2cerr = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Hwstatus \n");
+            sb.AppendFormat("    Vcc: {0}\n", mVcc);
+            sb.AppendFormat("    I2cerr: {0}\n", mI2cerr);
+
+            return sb.ToString();
+        }
+
+        private UInt16 mVcc;
+        private byte mI2cerr;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status generated by radio
+    /// </summary>
+    public class UasRadio: UasMessage
+    {
+        /// <summary>
+        /// receive errors
+        /// </summary>
+        public UInt16 Rxerrors {
+            get { return mRxerrors; }
+            set { mRxerrors = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// count of error corrected packets
+        /// </summary>
+        public UInt16 Fixed {
+            get { return mFixed; }
+            set { mFixed = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// local signal strength
+        /// </summary>
+        public byte Rssi {
+            get { return mRssi; }
+            set { mRssi = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// remote signal strength
+        /// </summary>
+        public byte Remrssi {
+            get { return mRemrssi; }
+            set { mRemrssi = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// how full the tx buffer is as a percentage
+        /// </summary>
+        public byte Txbuf {
+            get { return mTxbuf; }
+            set { mTxbuf = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// background noise level
+        /// </summary>
+        public byte Noise {
+            get { return mNoise; }
+            set { mNoise = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// remote background noise level
+        /// </summary>
+        public byte Remnoise {
+            get { return mRemnoise; }
+            set { mRemnoise = value; NotifyUpdated(); }
+        }
+
+        public UasRadio()
+        {
+            mMessageId = 166;
+            CrcExtra = 21;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mRxerrors);
+            s.Write(mFixed);
+            s.Write(mRssi);
+            s.Write(mRemrssi);
+            s.Write(mTxbuf);
+            s.Write(mNoise);
+            s.Write(mRemnoise);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mRxerrors = s.ReadUInt16();
+            this.mFixed = s.ReadUInt16();
+            this.mRssi = s.ReadByte();
+            this.mRemrssi = s.ReadByte();
+            this.mTxbuf = s.ReadByte();
+            this.mNoise = s.ReadByte();
+            this.mRemnoise = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Radio \n");
+            sb.AppendFormat("    Rxerrors: {0}\n", mRxerrors);
+            sb.AppendFormat("    Fixed: {0}\n", mFixed);
+            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+            sb.AppendFormat("    Remrssi: {0}\n", mRemrssi);
+            sb.AppendFormat("    Txbuf: {0}\n", mTxbuf);
+            sb.AppendFormat("    Noise: {0}\n", mNoise);
+            sb.AppendFormat("    Remnoise: {0}\n", mRemnoise);
+
+            return sb.ToString();
+        }
+
+        private UInt16 mRxerrors;
+        private UInt16 mFixed;
+        private byte mRssi;
+        private byte mRemrssi;
+        private byte mTxbuf;
+        private byte mNoise;
+        private byte mRemnoise;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Status of AP_Limits. Sent in extended  	    status stream when AP_Limits is enabled
+    /// </summary>
+    public class UasLimitsStatus: UasMessage
+    {
+        /// <summary>
+        /// time of last breach in milliseconds since boot
+        /// </summary>
+        public UInt32 LastTrigger {
+            get { return mLastTrigger; }
+            set { mLastTrigger = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// time of last recovery action in milliseconds since boot
+        /// </summary>
+        public UInt32 LastAction {
+            get { return mLastAction; }
+            set { mLastAction = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// time of last successful recovery in milliseconds since boot
+        /// </summary>
+        public UInt32 LastRecovery {
+            get { return mLastRecovery; }
+            set { mLastRecovery = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// time of last all-clear in milliseconds since boot
+        /// </summary>
+        public UInt32 LastClear {
+            get { return mLastClear; }
+            set { mLastClear = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// number of fence breaches
+        /// </summary>
+        public UInt16 BreachCount {
+            get { return mBreachCount; }
+            set { mBreachCount = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// state of AP_Limits, (see enum LimitState, LIMITS_STATE)
+        /// </summary>
+        public LimitsState LimitsState {
+            get { return mLimitsState; }
+            set { mLimitsState = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// AP_Limit_Module bitfield of enabled modules, (see enum moduleid or LIMIT_MODULE)
+        /// </summary>
+        public LimitModule ModsEnabled {
+            get { return mModsEnabled; }
+            set { mModsEnabled = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// AP_Limit_Module bitfield of required modules, (see enum moduleid or LIMIT_MODULE)
+        /// </summary>
+        public LimitModule ModsRequired {
+            get { return mModsRequired; }
+            set { mModsRequired = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// AP_Limit_Module bitfield of triggered modules, (see enum moduleid or LIMIT_MODULE)
+        /// </summary>
+        public LimitModule ModsTriggered {
+            get { return mModsTriggered; }
+            set { mModsTriggered = value; NotifyUpdated(); }
+        }
+
+        public UasLimitsStatus()
+        {
+            mMessageId = 167;
+            CrcExtra = 144;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mLastTrigger);
+            s.Write(mLastAction);
+            s.Write(mLastRecovery);
+            s.Write(mLastClear);
+            s.Write(mBreachCount);
+            s.Write((byte)mLimitsState);
+            s.Write((byte)mModsEnabled);
+            s.Write((byte)mModsRequired);
+            s.Write((byte)mModsTriggered);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mLastTrigger = s.ReadUInt32();
+            this.mLastAction = s.ReadUInt32();
+            this.mLastRecovery = s.ReadUInt32();
+            this.mLastClear = s.ReadUInt32();
+            this.mBreachCount = s.ReadUInt16();
+            this.mLimitsState = (LimitsState)s.ReadByte();
+            this.mModsEnabled = (LimitModule)s.ReadByte();
+            this.mModsRequired = (LimitModule)s.ReadByte();
+            this.mModsTriggered = (LimitModule)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("LimitsStatus \n");
+            sb.AppendFormat("    LastTrigger: {0}\n", mLastTrigger);
+            sb.AppendFormat("    LastAction: {0}\n", mLastAction);
+            sb.AppendFormat("    LastRecovery: {0}\n", mLastRecovery);
+            sb.AppendFormat("    LastClear: {0}\n", mLastClear);
+            sb.AppendFormat("    BreachCount: {0}\n", mBreachCount);
+            sb.AppendFormat("    LimitsState: {0}\n", mLimitsState);
+            sb.AppendFormat("    ModsEnabled: {0}\n", mModsEnabled);
+            sb.AppendFormat("    ModsRequired: {0}\n", mModsRequired);
+            sb.AppendFormat("    ModsTriggered: {0}\n", mModsTriggered);
+
+            return sb.ToString();
+        }
+
+        private UInt32 mLastTrigger;
+        private UInt32 mLastAction;
+        private UInt32 mLastRecovery;
+        private UInt32 mLastClear;
+        private UInt16 mBreachCount;
+        private LimitsState mLimitsState;
+        private LimitModule mModsEnabled;
+        private LimitModule mModsRequired;
+        private LimitModule mModsTriggered;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Wind estimation
+    /// </summary>
+    public class UasWind: UasMessage
+    {
+        /// <summary>
+        /// wind direction that wind is coming from (degrees)
+        /// </summary>
+        public float Direction {
+            get { return mDirection; }
+            set { mDirection = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// wind speed in ground plane (m/s)
+        /// </summary>
+        public float Speed {
+            get { return mSpeed; }
+            set { mSpeed = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// vertical wind speed (m/s)
+        /// </summary>
+        public float SpeedZ {
+            get { return mSpeedZ; }
+            set { mSpeedZ = value; NotifyUpdated(); }
+        }
+
+        public UasWind()
+        {
+            mMessageId = 168;
+            CrcExtra = 1;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mDirection);
+            s.Write(mSpeed);
+            s.Write(mSpeedZ);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mDirection = s.ReadSingle();
+            this.mSpeed = s.ReadSingle();
+            this.mSpeedZ = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Wind \n");
+            sb.AppendFormat("    Direction: {0}\n", mDirection);
+            sb.AppendFormat("    Speed: {0}\n", mSpeed);
+            sb.AppendFormat("    SpeedZ: {0}\n", mSpeedZ);
+
+            return sb.ToString();
+        }
+
+        private float mDirection;
+        private float mSpeed;
+        private float mSpeedZ;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Data packet, size 16
+    /// </summary>
+    public class UasData16: UasMessage
+    {
+        /// <summary>
+        /// data type
+        /// </summary>
+        public byte Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// data length
+        /// </summary>
+        public byte Len {
+            get { return mLen; }
+            set { mLen = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw data
+        /// </summary>
+        public byte[] Data {
+            get { return mData; }
+            set { mData = value; NotifyUpdated(); }
+        }
+
+        public UasData16()
+        {
+            mMessageId = 169;
+            CrcExtra = 234;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mType);
+            s.Write(mLen);
+            s.Write(mData[0]); 
+            s.Write(mData[1]); 
+            s.Write(mData[2]); 
+            s.Write(mData[3]); 
+            s.Write(mData[4]); 
+            s.Write(mData[5]); 
+            s.Write(mData[6]); 
+            s.Write(mData[7]); 
+            s.Write(mData[8]); 
+            s.Write(mData[9]); 
+            s.Write(mData[10]); 
+            s.Write(mData[11]); 
+            s.Write(mData[12]); 
+            s.Write(mData[13]); 
+            s.Write(mData[14]); 
+            s.Write(mData[15]); 
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mType = s.ReadByte();
+            this.mLen = s.ReadByte();
+            this.mData[0] = s.ReadByte();
+            this.mData[1] = s.ReadByte();
+            this.mData[2] = s.ReadByte();
+            this.mData[3] = s.ReadByte();
+            this.mData[4] = s.ReadByte();
+            this.mData[5] = s.ReadByte();
+            this.mData[6] = s.ReadByte();
+            this.mData[7] = s.ReadByte();
+            this.mData[8] = s.ReadByte();
+            this.mData[9] = s.ReadByte();
+            this.mData[10] = s.ReadByte();
+            this.mData[11] = s.ReadByte();
+            this.mData[12] = s.ReadByte();
+            this.mData[13] = s.ReadByte();
+            this.mData[14] = s.ReadByte();
+            this.mData[15] = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Data16 \n");
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.AppendFormat("    Len: {0}\n", mLen);
+            sb.Append("    Data\n");
+            sb.AppendFormat("        [0]: {0}\n", mData[0]);
+            sb.AppendFormat("        [1]: {0}\n", mData[1]);
+            sb.AppendFormat("        [2]: {0}\n", mData[2]);
+            sb.AppendFormat("        [3]: {0}\n", mData[3]);
+            sb.AppendFormat("        [4]: {0}\n", mData[4]);
+            sb.AppendFormat("        [5]: {0}\n", mData[5]);
+            sb.AppendFormat("        [6]: {0}\n", mData[6]);
+            sb.AppendFormat("        [7]: {0}\n", mData[7]);
+            sb.AppendFormat("        [8]: {0}\n", mData[8]);
+            sb.AppendFormat("        [9]: {0}\n", mData[9]);
+            sb.AppendFormat("        [10]: {0}\n", mData[10]);
+            sb.AppendFormat("        [11]: {0}\n", mData[11]);
+            sb.AppendFormat("        [12]: {0}\n", mData[12]);
+            sb.AppendFormat("        [13]: {0}\n", mData[13]);
+            sb.AppendFormat("        [14]: {0}\n", mData[14]);
+            sb.AppendFormat("        [15]: {0}\n", mData[15]);
+
+            return sb.ToString();
+        }
+
+        private byte mType;
+        private byte mLen;
+        private byte[] mData = new byte[16];
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Data packet, size 32
+    /// </summary>
+    public class UasData32: UasMessage
+    {
+        /// <summary>
+        /// data type
+        /// </summary>
+        public byte Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// data length
+        /// </summary>
+        public byte Len {
+            get { return mLen; }
+            set { mLen = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw data
+        /// </summary>
+        public byte[] Data {
+            get { return mData; }
+            set { mData = value; NotifyUpdated(); }
+        }
+
+        public UasData32()
+        {
+            mMessageId = 170;
+            CrcExtra = 73;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mType);
+            s.Write(mLen);
+            s.Write(mData[0]); 
+            s.Write(mData[1]); 
+            s.Write(mData[2]); 
+            s.Write(mData[3]); 
+            s.Write(mData[4]); 
+            s.Write(mData[5]); 
+            s.Write(mData[6]); 
+            s.Write(mData[7]); 
+            s.Write(mData[8]); 
+            s.Write(mData[9]); 
+            s.Write(mData[10]); 
+            s.Write(mData[11]); 
+            s.Write(mData[12]); 
+            s.Write(mData[13]); 
+            s.Write(mData[14]); 
+            s.Write(mData[15]); 
+            s.Write(mData[16]); 
+            s.Write(mData[17]); 
+            s.Write(mData[18]); 
+            s.Write(mData[19]); 
+            s.Write(mData[20]); 
+            s.Write(mData[21]); 
+            s.Write(mData[22]); 
+            s.Write(mData[23]); 
+            s.Write(mData[24]); 
+            s.Write(mData[25]); 
+            s.Write(mData[26]); 
+            s.Write(mData[27]); 
+            s.Write(mData[28]); 
+            s.Write(mData[29]); 
+            s.Write(mData[30]); 
+            s.Write(mData[31]); 
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mType = s.ReadByte();
+            this.mLen = s.ReadByte();
+            this.mData[0] = s.ReadByte();
+            this.mData[1] = s.ReadByte();
+            this.mData[2] = s.ReadByte();
+            this.mData[3] = s.ReadByte();
+            this.mData[4] = s.ReadByte();
+            this.mData[5] = s.ReadByte();
+            this.mData[6] = s.ReadByte();
+            this.mData[7] = s.ReadByte();
+            this.mData[8] = s.ReadByte();
+            this.mData[9] = s.ReadByte();
+            this.mData[10] = s.ReadByte();
+            this.mData[11] = s.ReadByte();
+            this.mData[12] = s.ReadByte();
+            this.mData[13] = s.ReadByte();
+            this.mData[14] = s.ReadByte();
+            this.mData[15] = s.ReadByte();
+            this.mData[16] = s.ReadByte();
+            this.mData[17] = s.ReadByte();
+            this.mData[18] = s.ReadByte();
+            this.mData[19] = s.ReadByte();
+            this.mData[20] = s.ReadByte();
+            this.mData[21] = s.ReadByte();
+            this.mData[22] = s.ReadByte();
+            this.mData[23] = s.ReadByte();
+            this.mData[24] = s.ReadByte();
+            this.mData[25] = s.ReadByte();
+            this.mData[26] = s.ReadByte();
+            this.mData[27] = s.ReadByte();
+            this.mData[28] = s.ReadByte();
+            this.mData[29] = s.ReadByte();
+            this.mData[30] = s.ReadByte();
+            this.mData[31] = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Data32 \n");
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.AppendFormat("    Len: {0}\n", mLen);
+            sb.Append("    Data\n");
+            sb.AppendFormat("        [0]: {0}\n", mData[0]);
+            sb.AppendFormat("        [1]: {0}\n", mData[1]);
+            sb.AppendFormat("        [2]: {0}\n", mData[2]);
+            sb.AppendFormat("        [3]: {0}\n", mData[3]);
+            sb.AppendFormat("        [4]: {0}\n", mData[4]);
+            sb.AppendFormat("        [5]: {0}\n", mData[5]);
+            sb.AppendFormat("        [6]: {0}\n", mData[6]);
+            sb.AppendFormat("        [7]: {0}\n", mData[7]);
+            sb.AppendFormat("        [8]: {0}\n", mData[8]);
+            sb.AppendFormat("        [9]: {0}\n", mData[9]);
+            sb.AppendFormat("        [10]: {0}\n", mData[10]);
+            sb.AppendFormat("        [11]: {0}\n", mData[11]);
+            sb.AppendFormat("        [12]: {0}\n", mData[12]);
+            sb.AppendFormat("        [13]: {0}\n", mData[13]);
+            sb.AppendFormat("        [14]: {0}\n", mData[14]);
+            sb.AppendFormat("        [15]: {0}\n", mData[15]);
+            sb.AppendFormat("        [16]: {0}\n", mData[16]);
+            sb.AppendFormat("        [17]: {0}\n", mData[17]);
+            sb.AppendFormat("        [18]: {0}\n", mData[18]);
+            sb.AppendFormat("        [19]: {0}\n", mData[19]);
+            sb.AppendFormat("        [20]: {0}\n", mData[20]);
+            sb.AppendFormat("        [21]: {0}\n", mData[21]);
+            sb.AppendFormat("        [22]: {0}\n", mData[22]);
+            sb.AppendFormat("        [23]: {0}\n", mData[23]);
+            sb.AppendFormat("        [24]: {0}\n", mData[24]);
+            sb.AppendFormat("        [25]: {0}\n", mData[25]);
+            sb.AppendFormat("        [26]: {0}\n", mData[26]);
+            sb.AppendFormat("        [27]: {0}\n", mData[27]);
+            sb.AppendFormat("        [28]: {0}\n", mData[28]);
+            sb.AppendFormat("        [29]: {0}\n", mData[29]);
+            sb.AppendFormat("        [30]: {0}\n", mData[30]);
+            sb.AppendFormat("        [31]: {0}\n", mData[31]);
+
+            return sb.ToString();
+        }
+
+        private byte mType;
+        private byte mLen;
+        private byte[] mData = new byte[32];
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Data packet, size 64
+    /// </summary>
+    public class UasData64: UasMessage
+    {
+        /// <summary>
+        /// data type
+        /// </summary>
+        public byte Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// data length
+        /// </summary>
+        public byte Len {
+            get { return mLen; }
+            set { mLen = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw data
+        /// </summary>
+        public byte[] Data {
+            get { return mData; }
+            set { mData = value; NotifyUpdated(); }
+        }
+
+        public UasData64()
+        {
+            mMessageId = 171;
+            CrcExtra = 181;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mType);
+            s.Write(mLen);
+            s.Write(mData[0]); 
+            s.Write(mData[1]); 
+            s.Write(mData[2]); 
+            s.Write(mData[3]); 
+            s.Write(mData[4]); 
+            s.Write(mData[5]); 
+            s.Write(mData[6]); 
+            s.Write(mData[7]); 
+            s.Write(mData[8]); 
+            s.Write(mData[9]); 
+            s.Write(mData[10]); 
+            s.Write(mData[11]); 
+            s.Write(mData[12]); 
+            s.Write(mData[13]); 
+            s.Write(mData[14]); 
+            s.Write(mData[15]); 
+            s.Write(mData[16]); 
+            s.Write(mData[17]); 
+            s.Write(mData[18]); 
+            s.Write(mData[19]); 
+            s.Write(mData[20]); 
+            s.Write(mData[21]); 
+            s.Write(mData[22]); 
+            s.Write(mData[23]); 
+            s.Write(mData[24]); 
+            s.Write(mData[25]); 
+            s.Write(mData[26]); 
+            s.Write(mData[27]); 
+            s.Write(mData[28]); 
+            s.Write(mData[29]); 
+            s.Write(mData[30]); 
+            s.Write(mData[31]); 
+            s.Write(mData[32]); 
+            s.Write(mData[33]); 
+            s.Write(mData[34]); 
+            s.Write(mData[35]); 
+            s.Write(mData[36]); 
+            s.Write(mData[37]); 
+            s.Write(mData[38]); 
+            s.Write(mData[39]); 
+            s.Write(mData[40]); 
+            s.Write(mData[41]); 
+            s.Write(mData[42]); 
+            s.Write(mData[43]); 
+            s.Write(mData[44]); 
+            s.Write(mData[45]); 
+            s.Write(mData[46]); 
+            s.Write(mData[47]); 
+            s.Write(mData[48]); 
+            s.Write(mData[49]); 
+            s.Write(mData[50]); 
+            s.Write(mData[51]); 
+            s.Write(mData[52]); 
+            s.Write(mData[53]); 
+            s.Write(mData[54]); 
+            s.Write(mData[55]); 
+            s.Write(mData[56]); 
+            s.Write(mData[57]); 
+            s.Write(mData[58]); 
+            s.Write(mData[59]); 
+            s.Write(mData[60]); 
+            s.Write(mData[61]); 
+            s.Write(mData[62]); 
+            s.Write(mData[63]); 
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mType = s.ReadByte();
+            this.mLen = s.ReadByte();
+            this.mData[0] = s.ReadByte();
+            this.mData[1] = s.ReadByte();
+            this.mData[2] = s.ReadByte();
+            this.mData[3] = s.ReadByte();
+            this.mData[4] = s.ReadByte();
+            this.mData[5] = s.ReadByte();
+            this.mData[6] = s.ReadByte();
+            this.mData[7] = s.ReadByte();
+            this.mData[8] = s.ReadByte();
+            this.mData[9] = s.ReadByte();
+            this.mData[10] = s.ReadByte();
+            this.mData[11] = s.ReadByte();
+            this.mData[12] = s.ReadByte();
+            this.mData[13] = s.ReadByte();
+            this.mData[14] = s.ReadByte();
+            this.mData[15] = s.ReadByte();
+            this.mData[16] = s.ReadByte();
+            this.mData[17] = s.ReadByte();
+            this.mData[18] = s.ReadByte();
+            this.mData[19] = s.ReadByte();
+            this.mData[20] = s.ReadByte();
+            this.mData[21] = s.ReadByte();
+            this.mData[22] = s.ReadByte();
+            this.mData[23] = s.ReadByte();
+            this.mData[24] = s.ReadByte();
+            this.mData[25] = s.ReadByte();
+            this.mData[26] = s.ReadByte();
+            this.mData[27] = s.ReadByte();
+            this.mData[28] = s.ReadByte();
+            this.mData[29] = s.ReadByte();
+            this.mData[30] = s.ReadByte();
+            this.mData[31] = s.ReadByte();
+            this.mData[32] = s.ReadByte();
+            this.mData[33] = s.ReadByte();
+            this.mData[34] = s.ReadByte();
+            this.mData[35] = s.ReadByte();
+            this.mData[36] = s.ReadByte();
+            this.mData[37] = s.ReadByte();
+            this.mData[38] = s.ReadByte();
+            this.mData[39] = s.ReadByte();
+            this.mData[40] = s.ReadByte();
+            this.mData[41] = s.ReadByte();
+            this.mData[42] = s.ReadByte();
+            this.mData[43] = s.ReadByte();
+            this.mData[44] = s.ReadByte();
+            this.mData[45] = s.ReadByte();
+            this.mData[46] = s.ReadByte();
+            this.mData[47] = s.ReadByte();
+            this.mData[48] = s.ReadByte();
+            this.mData[49] = s.ReadByte();
+            this.mData[50] = s.ReadByte();
+            this.mData[51] = s.ReadByte();
+            this.mData[52] = s.ReadByte();
+            this.mData[53] = s.ReadByte();
+            this.mData[54] = s.ReadByte();
+            this.mData[55] = s.ReadByte();
+            this.mData[56] = s.ReadByte();
+            this.mData[57] = s.ReadByte();
+            this.mData[58] = s.ReadByte();
+            this.mData[59] = s.ReadByte();
+            this.mData[60] = s.ReadByte();
+            this.mData[61] = s.ReadByte();
+            this.mData[62] = s.ReadByte();
+            this.mData[63] = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Data64 \n");
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.AppendFormat("    Len: {0}\n", mLen);
+            sb.Append("    Data\n");
+            sb.AppendFormat("        [0]: {0}\n", mData[0]);
+            sb.AppendFormat("        [1]: {0}\n", mData[1]);
+            sb.AppendFormat("        [2]: {0}\n", mData[2]);
+            sb.AppendFormat("        [3]: {0}\n", mData[3]);
+            sb.AppendFormat("        [4]: {0}\n", mData[4]);
+            sb.AppendFormat("        [5]: {0}\n", mData[5]);
+            sb.AppendFormat("        [6]: {0}\n", mData[6]);
+            sb.AppendFormat("        [7]: {0}\n", mData[7]);
+            sb.AppendFormat("        [8]: {0}\n", mData[8]);
+            sb.AppendFormat("        [9]: {0}\n", mData[9]);
+            sb.AppendFormat("        [10]: {0}\n", mData[10]);
+            sb.AppendFormat("        [11]: {0}\n", mData[11]);
+            sb.AppendFormat("        [12]: {0}\n", mData[12]);
+            sb.AppendFormat("        [13]: {0}\n", mData[13]);
+            sb.AppendFormat("        [14]: {0}\n", mData[14]);
+            sb.AppendFormat("        [15]: {0}\n", mData[15]);
+            sb.AppendFormat("        [16]: {0}\n", mData[16]);
+            sb.AppendFormat("        [17]: {0}\n", mData[17]);
+            sb.AppendFormat("        [18]: {0}\n", mData[18]);
+            sb.AppendFormat("        [19]: {0}\n", mData[19]);
+            sb.AppendFormat("        [20]: {0}\n", mData[20]);
+            sb.AppendFormat("        [21]: {0}\n", mData[21]);
+            sb.AppendFormat("        [22]: {0}\n", mData[22]);
+            sb.AppendFormat("        [23]: {0}\n", mData[23]);
+            sb.AppendFormat("        [24]: {0}\n", mData[24]);
+            sb.AppendFormat("        [25]: {0}\n", mData[25]);
+            sb.AppendFormat("        [26]: {0}\n", mData[26]);
+            sb.AppendFormat("        [27]: {0}\n", mData[27]);
+            sb.AppendFormat("        [28]: {0}\n", mData[28]);
+            sb.AppendFormat("        [29]: {0}\n", mData[29]);
+            sb.AppendFormat("        [30]: {0}\n", mData[30]);
+            sb.AppendFormat("        [31]: {0}\n", mData[31]);
+            sb.AppendFormat("        [32]: {0}\n", mData[32]);
+            sb.AppendFormat("        [33]: {0}\n", mData[33]);
+            sb.AppendFormat("        [34]: {0}\n", mData[34]);
+            sb.AppendFormat("        [35]: {0}\n", mData[35]);
+            sb.AppendFormat("        [36]: {0}\n", mData[36]);
+            sb.AppendFormat("        [37]: {0}\n", mData[37]);
+            sb.AppendFormat("        [38]: {0}\n", mData[38]);
+            sb.AppendFormat("        [39]: {0}\n", mData[39]);
+            sb.AppendFormat("        [40]: {0}\n", mData[40]);
+            sb.AppendFormat("        [41]: {0}\n", mData[41]);
+            sb.AppendFormat("        [42]: {0}\n", mData[42]);
+            sb.AppendFormat("        [43]: {0}\n", mData[43]);
+            sb.AppendFormat("        [44]: {0}\n", mData[44]);
+            sb.AppendFormat("        [45]: {0}\n", mData[45]);
+            sb.AppendFormat("        [46]: {0}\n", mData[46]);
+            sb.AppendFormat("        [47]: {0}\n", mData[47]);
+            sb.AppendFormat("        [48]: {0}\n", mData[48]);
+            sb.AppendFormat("        [49]: {0}\n", mData[49]);
+            sb.AppendFormat("        [50]: {0}\n", mData[50]);
+            sb.AppendFormat("        [51]: {0}\n", mData[51]);
+            sb.AppendFormat("        [52]: {0}\n", mData[52]);
+            sb.AppendFormat("        [53]: {0}\n", mData[53]);
+            sb.AppendFormat("        [54]: {0}\n", mData[54]);
+            sb.AppendFormat("        [55]: {0}\n", mData[55]);
+            sb.AppendFormat("        [56]: {0}\n", mData[56]);
+            sb.AppendFormat("        [57]: {0}\n", mData[57]);
+            sb.AppendFormat("        [58]: {0}\n", mData[58]);
+            sb.AppendFormat("        [59]: {0}\n", mData[59]);
+            sb.AppendFormat("        [60]: {0}\n", mData[60]);
+            sb.AppendFormat("        [61]: {0}\n", mData[61]);
+            sb.AppendFormat("        [62]: {0}\n", mData[62]);
+            sb.AppendFormat("        [63]: {0}\n", mData[63]);
+
+            return sb.ToString();
+        }
+
+        private byte mType;
+        private byte mLen;
+        private byte[] mData = new byte[64];
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Data packet, size 96
+    /// </summary>
+    public class UasData96: UasMessage
+    {
+        /// <summary>
+        /// data type
+        /// </summary>
+        public byte Type {
+            get { return mType; }
+            set { mType = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// data length
+        /// </summary>
+        public byte Len {
+            get { return mLen; }
+            set { mLen = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw data
+        /// </summary>
+        public byte[] Data {
+            get { return mData; }
+            set { mData = value; NotifyUpdated(); }
+        }
+
+        public UasData96()
+        {
+            mMessageId = 172;
+            CrcExtra = 22;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mType);
+            s.Write(mLen);
+            s.Write(mData[0]); 
+            s.Write(mData[1]); 
+            s.Write(mData[2]); 
+            s.Write(mData[3]); 
+            s.Write(mData[4]); 
+            s.Write(mData[5]); 
+            s.Write(mData[6]); 
+            s.Write(mData[7]); 
+            s.Write(mData[8]); 
+            s.Write(mData[9]); 
+            s.Write(mData[10]); 
+            s.Write(mData[11]); 
+            s.Write(mData[12]); 
+            s.Write(mData[13]); 
+            s.Write(mData[14]); 
+            s.Write(mData[15]); 
+            s.Write(mData[16]); 
+            s.Write(mData[17]); 
+            s.Write(mData[18]); 
+            s.Write(mData[19]); 
+            s.Write(mData[20]); 
+            s.Write(mData[21]); 
+            s.Write(mData[22]); 
+            s.Write(mData[23]); 
+            s.Write(mData[24]); 
+            s.Write(mData[25]); 
+            s.Write(mData[26]); 
+            s.Write(mData[27]); 
+            s.Write(mData[28]); 
+            s.Write(mData[29]); 
+            s.Write(mData[30]); 
+            s.Write(mData[31]); 
+            s.Write(mData[32]); 
+            s.Write(mData[33]); 
+            s.Write(mData[34]); 
+            s.Write(mData[35]); 
+            s.Write(mData[36]); 
+            s.Write(mData[37]); 
+            s.Write(mData[38]); 
+            s.Write(mData[39]); 
+            s.Write(mData[40]); 
+            s.Write(mData[41]); 
+            s.Write(mData[42]); 
+            s.Write(mData[43]); 
+            s.Write(mData[44]); 
+            s.Write(mData[45]); 
+            s.Write(mData[46]); 
+            s.Write(mData[47]); 
+            s.Write(mData[48]); 
+            s.Write(mData[49]); 
+            s.Write(mData[50]); 
+            s.Write(mData[51]); 
+            s.Write(mData[52]); 
+            s.Write(mData[53]); 
+            s.Write(mData[54]); 
+            s.Write(mData[55]); 
+            s.Write(mData[56]); 
+            s.Write(mData[57]); 
+            s.Write(mData[58]); 
+            s.Write(mData[59]); 
+            s.Write(mData[60]); 
+            s.Write(mData[61]); 
+            s.Write(mData[62]); 
+            s.Write(mData[63]); 
+            s.Write(mData[64]); 
+            s.Write(mData[65]); 
+            s.Write(mData[66]); 
+            s.Write(mData[67]); 
+            s.Write(mData[68]); 
+            s.Write(mData[69]); 
+            s.Write(mData[70]); 
+            s.Write(mData[71]); 
+            s.Write(mData[72]); 
+            s.Write(mData[73]); 
+            s.Write(mData[74]); 
+            s.Write(mData[75]); 
+            s.Write(mData[76]); 
+            s.Write(mData[77]); 
+            s.Write(mData[78]); 
+            s.Write(mData[79]); 
+            s.Write(mData[80]); 
+            s.Write(mData[81]); 
+            s.Write(mData[82]); 
+            s.Write(mData[83]); 
+            s.Write(mData[84]); 
+            s.Write(mData[85]); 
+            s.Write(mData[86]); 
+            s.Write(mData[87]); 
+            s.Write(mData[88]); 
+            s.Write(mData[89]); 
+            s.Write(mData[90]); 
+            s.Write(mData[91]); 
+            s.Write(mData[92]); 
+            s.Write(mData[93]); 
+            s.Write(mData[94]); 
+            s.Write(mData[95]); 
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mType = s.ReadByte();
+            this.mLen = s.ReadByte();
+            this.mData[0] = s.ReadByte();
+            this.mData[1] = s.ReadByte();
+            this.mData[2] = s.ReadByte();
+            this.mData[3] = s.ReadByte();
+            this.mData[4] = s.ReadByte();
+            this.mData[5] = s.ReadByte();
+            this.mData[6] = s.ReadByte();
+            this.mData[7] = s.ReadByte();
+            this.mData[8] = s.ReadByte();
+            this.mData[9] = s.ReadByte();
+            this.mData[10] = s.ReadByte();
+            this.mData[11] = s.ReadByte();
+            this.mData[12] = s.ReadByte();
+            this.mData[13] = s.ReadByte();
+            this.mData[14] = s.ReadByte();
+            this.mData[15] = s.ReadByte();
+            this.mData[16] = s.ReadByte();
+            this.mData[17] = s.ReadByte();
+            this.mData[18] = s.ReadByte();
+            this.mData[19] = s.ReadByte();
+            this.mData[20] = s.ReadByte();
+            this.mData[21] = s.ReadByte();
+            this.mData[22] = s.ReadByte();
+            this.mData[23] = s.ReadByte();
+            this.mData[24] = s.ReadByte();
+            this.mData[25] = s.ReadByte();
+            this.mData[26] = s.ReadByte();
+            this.mData[27] = s.ReadByte();
+            this.mData[28] = s.ReadByte();
+            this.mData[29] = s.ReadByte();
+            this.mData[30] = s.ReadByte();
+            this.mData[31] = s.ReadByte();
+            this.mData[32] = s.ReadByte();
+            this.mData[33] = s.ReadByte();
+            this.mData[34] = s.ReadByte();
+            this.mData[35] = s.ReadByte();
+            this.mData[36] = s.ReadByte();
+            this.mData[37] = s.ReadByte();
+            this.mData[38] = s.ReadByte();
+            this.mData[39] = s.ReadByte();
+            this.mData[40] = s.ReadByte();
+            this.mData[41] = s.ReadByte();
+            this.mData[42] = s.ReadByte();
+            this.mData[43] = s.ReadByte();
+            this.mData[44] = s.ReadByte();
+            this.mData[45] = s.ReadByte();
+            this.mData[46] = s.ReadByte();
+            this.mData[47] = s.ReadByte();
+            this.mData[48] = s.ReadByte();
+            this.mData[49] = s.ReadByte();
+            this.mData[50] = s.ReadByte();
+            this.mData[51] = s.ReadByte();
+            this.mData[52] = s.ReadByte();
+            this.mData[53] = s.ReadByte();
+            this.mData[54] = s.ReadByte();
+            this.mData[55] = s.ReadByte();
+            this.mData[56] = s.ReadByte();
+            this.mData[57] = s.ReadByte();
+            this.mData[58] = s.ReadByte();
+            this.mData[59] = s.ReadByte();
+            this.mData[60] = s.ReadByte();
+            this.mData[61] = s.ReadByte();
+            this.mData[62] = s.ReadByte();
+            this.mData[63] = s.ReadByte();
+            this.mData[64] = s.ReadByte();
+            this.mData[65] = s.ReadByte();
+            this.mData[66] = s.ReadByte();
+            this.mData[67] = s.ReadByte();
+            this.mData[68] = s.ReadByte();
+            this.mData[69] = s.ReadByte();
+            this.mData[70] = s.ReadByte();
+            this.mData[71] = s.ReadByte();
+            this.mData[72] = s.ReadByte();
+            this.mData[73] = s.ReadByte();
+            this.mData[74] = s.ReadByte();
+            this.mData[75] = s.ReadByte();
+            this.mData[76] = s.ReadByte();
+            this.mData[77] = s.ReadByte();
+            this.mData[78] = s.ReadByte();
+            this.mData[79] = s.ReadByte();
+            this.mData[80] = s.ReadByte();
+            this.mData[81] = s.ReadByte();
+            this.mData[82] = s.ReadByte();
+            this.mData[83] = s.ReadByte();
+            this.mData[84] = s.ReadByte();
+            this.mData[85] = s.ReadByte();
+            this.mData[86] = s.ReadByte();
+            this.mData[87] = s.ReadByte();
+            this.mData[88] = s.ReadByte();
+            this.mData[89] = s.ReadByte();
+            this.mData[90] = s.ReadByte();
+            this.mData[91] = s.ReadByte();
+            this.mData[92] = s.ReadByte();
+            this.mData[93] = s.ReadByte();
+            this.mData[94] = s.ReadByte();
+            this.mData[95] = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Data96 \n");
+            sb.AppendFormat("    Type: {0}\n", mType);
+            sb.AppendFormat("    Len: {0}\n", mLen);
+            sb.Append("    Data\n");
+            sb.AppendFormat("        [0]: {0}\n", mData[0]);
+            sb.AppendFormat("        [1]: {0}\n", mData[1]);
+            sb.AppendFormat("        [2]: {0}\n", mData[2]);
+            sb.AppendFormat("        [3]: {0}\n", mData[3]);
+            sb.AppendFormat("        [4]: {0}\n", mData[4]);
+            sb.AppendFormat("        [5]: {0}\n", mData[5]);
+            sb.AppendFormat("        [6]: {0}\n", mData[6]);
+            sb.AppendFormat("        [7]: {0}\n", mData[7]);
+            sb.AppendFormat("        [8]: {0}\n", mData[8]);
+            sb.AppendFormat("        [9]: {0}\n", mData[9]);
+            sb.AppendFormat("        [10]: {0}\n", mData[10]);
+            sb.AppendFormat("        [11]: {0}\n", mData[11]);
+            sb.AppendFormat("        [12]: {0}\n", mData[12]);
+            sb.AppendFormat("        [13]: {0}\n", mData[13]);
+            sb.AppendFormat("        [14]: {0}\n", mData[14]);
+            sb.AppendFormat("        [15]: {0}\n", mData[15]);
+            sb.AppendFormat("        [16]: {0}\n", mData[16]);
+            sb.AppendFormat("        [17]: {0}\n", mData[17]);
+            sb.AppendFormat("        [18]: {0}\n", mData[18]);
+            sb.AppendFormat("        [19]: {0}\n", mData[19]);
+            sb.AppendFormat("        [20]: {0}\n", mData[20]);
+            sb.AppendFormat("        [21]: {0}\n", mData[21]);
+            sb.AppendFormat("        [22]: {0}\n", mData[22]);
+            sb.AppendFormat("        [23]: {0}\n", mData[23]);
+            sb.AppendFormat("        [24]: {0}\n", mData[24]);
+            sb.AppendFormat("        [25]: {0}\n", mData[25]);
+            sb.AppendFormat("        [26]: {0}\n", mData[26]);
+            sb.AppendFormat("        [27]: {0}\n", mData[27]);
+            sb.AppendFormat("        [28]: {0}\n", mData[28]);
+            sb.AppendFormat("        [29]: {0}\n", mData[29]);
+            sb.AppendFormat("        [30]: {0}\n", mData[30]);
+            sb.AppendFormat("        [31]: {0}\n", mData[31]);
+            sb.AppendFormat("        [32]: {0}\n", mData[32]);
+            sb.AppendFormat("        [33]: {0}\n", mData[33]);
+            sb.AppendFormat("        [34]: {0}\n", mData[34]);
+            sb.AppendFormat("        [35]: {0}\n", mData[35]);
+            sb.AppendFormat("        [36]: {0}\n", mData[36]);
+            sb.AppendFormat("        [37]: {0}\n", mData[37]);
+            sb.AppendFormat("        [38]: {0}\n", mData[38]);
+            sb.AppendFormat("        [39]: {0}\n", mData[39]);
+            sb.AppendFormat("        [40]: {0}\n", mData[40]);
+            sb.AppendFormat("        [41]: {0}\n", mData[41]);
+            sb.AppendFormat("        [42]: {0}\n", mData[42]);
+            sb.AppendFormat("        [43]: {0}\n", mData[43]);
+            sb.AppendFormat("        [44]: {0}\n", mData[44]);
+            sb.AppendFormat("        [45]: {0}\n", mData[45]);
+            sb.AppendFormat("        [46]: {0}\n", mData[46]);
+            sb.AppendFormat("        [47]: {0}\n", mData[47]);
+            sb.AppendFormat("        [48]: {0}\n", mData[48]);
+            sb.AppendFormat("        [49]: {0}\n", mData[49]);
+            sb.AppendFormat("        [50]: {0}\n", mData[50]);
+            sb.AppendFormat("        [51]: {0}\n", mData[51]);
+            sb.AppendFormat("        [52]: {0}\n", mData[52]);
+            sb.AppendFormat("        [53]: {0}\n", mData[53]);
+            sb.AppendFormat("        [54]: {0}\n", mData[54]);
+            sb.AppendFormat("        [55]: {0}\n", mData[55]);
+            sb.AppendFormat("        [56]: {0}\n", mData[56]);
+            sb.AppendFormat("        [57]: {0}\n", mData[57]);
+            sb.AppendFormat("        [58]: {0}\n", mData[58]);
+            sb.AppendFormat("        [59]: {0}\n", mData[59]);
+            sb.AppendFormat("        [60]: {0}\n", mData[60]);
+            sb.AppendFormat("        [61]: {0}\n", mData[61]);
+            sb.AppendFormat("        [62]: {0}\n", mData[62]);
+            sb.AppendFormat("        [63]: {0}\n", mData[63]);
+            sb.AppendFormat("        [64]: {0}\n", mData[64]);
+            sb.AppendFormat("        [65]: {0}\n", mData[65]);
+            sb.AppendFormat("        [66]: {0}\n", mData[66]);
+            sb.AppendFormat("        [67]: {0}\n", mData[67]);
+            sb.AppendFormat("        [68]: {0}\n", mData[68]);
+            sb.AppendFormat("        [69]: {0}\n", mData[69]);
+            sb.AppendFormat("        [70]: {0}\n", mData[70]);
+            sb.AppendFormat("        [71]: {0}\n", mData[71]);
+            sb.AppendFormat("        [72]: {0}\n", mData[72]);
+            sb.AppendFormat("        [73]: {0}\n", mData[73]);
+            sb.AppendFormat("        [74]: {0}\n", mData[74]);
+            sb.AppendFormat("        [75]: {0}\n", mData[75]);
+            sb.AppendFormat("        [76]: {0}\n", mData[76]);
+            sb.AppendFormat("        [77]: {0}\n", mData[77]);
+            sb.AppendFormat("        [78]: {0}\n", mData[78]);
+            sb.AppendFormat("        [79]: {0}\n", mData[79]);
+            sb.AppendFormat("        [80]: {0}\n", mData[80]);
+            sb.AppendFormat("        [81]: {0}\n", mData[81]);
+            sb.AppendFormat("        [82]: {0}\n", mData[82]);
+            sb.AppendFormat("        [83]: {0}\n", mData[83]);
+            sb.AppendFormat("        [84]: {0}\n", mData[84]);
+            sb.AppendFormat("        [85]: {0}\n", mData[85]);
+            sb.AppendFormat("        [86]: {0}\n", mData[86]);
+            sb.AppendFormat("        [87]: {0}\n", mData[87]);
+            sb.AppendFormat("        [88]: {0}\n", mData[88]);
+            sb.AppendFormat("        [89]: {0}\n", mData[89]);
+            sb.AppendFormat("        [90]: {0}\n", mData[90]);
+            sb.AppendFormat("        [91]: {0}\n", mData[91]);
+            sb.AppendFormat("        [92]: {0}\n", mData[92]);
+            sb.AppendFormat("        [93]: {0}\n", mData[93]);
+            sb.AppendFormat("        [94]: {0}\n", mData[94]);
+            sb.AppendFormat("        [95]: {0}\n", mData[95]);
+
+            return sb.ToString();
+        }
+
+        private byte mType;
+        private byte mLen;
+        private byte[] mData = new byte[96];
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Rangefinder reporting
+    /// </summary>
+    public class UasRangefinder: UasMessage
+    {
+        /// <summary>
+        /// distance in meters
+        /// </summary>
+        public float Distance {
+            get { return mDistance; }
+            set { mDistance = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// raw voltage if available, zero otherwise
+        /// </summary>
+        public float Voltage {
+            get { return mVoltage; }
+            set { mVoltage = value; NotifyUpdated(); }
+        }
+
+        public UasRangefinder()
+        {
+            mMessageId = 173;
+            CrcExtra = 83;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mDistance);
+            s.Write(mVoltage);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mDistance = s.ReadSingle();
+            this.mVoltage = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("Rangefinder \n");
+            sb.AppendFormat("    Distance: {0}\n", mDistance);
+            sb.AppendFormat("    Voltage: {0}\n", mVoltage);
+
+            return sb.ToString();
+        }
+
+        private float mDistance;
+        private float mVoltage;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Airspeed auto-calibration
+    /// </summary>
+    public class UasAirspeedAutocal: UasMessage
+    {
+        /// <summary>
+        /// GPS velocity north m/s
+        /// </summary>
+        public float Vx {
+            get { return mVx; }
+            set { mVx = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// GPS velocity east m/s
+        /// </summary>
+        public float Vy {
+            get { return mVy; }
+            set { mVy = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// GPS velocity down m/s
+        /// </summary>
+        public float Vz {
+            get { return mVz; }
+            set { mVz = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Differential pressure pascals
+        /// </summary>
+        public float DiffPressure {
+            get { return mDiffPressure; }
+            set { mDiffPressure = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Estimated to true airspeed ratio
+        /// </summary>
+        public float Eas2tas {
+            get { return mEas2tas; }
+            set { mEas2tas = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Airspeed ratio
+        /// </summary>
+        public float Ratio {
+            get { return mRatio; }
+            set { mRatio = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF state x
+        /// </summary>
+        public float StateX {
+            get { return mStateX; }
+            set { mStateX = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF state y
+        /// </summary>
+        public float StateY {
+            get { return mStateY; }
+            set { mStateY = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF state z
+        /// </summary>
+        public float StateZ {
+            get { return mStateZ; }
+            set { mStateZ = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF Pax
+        /// </summary>
+        public float Pax {
+            get { return mPax; }
+            set { mPax = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF Pby
+        /// </summary>
+        public float Pby {
+            get { return mPby; }
+            set { mPby = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// EKF Pcz
+        /// </summary>
+        public float Pcz {
+            get { return mPcz; }
+            set { mPcz = value; NotifyUpdated(); }
+        }
+
+        public UasAirspeedAutocal()
+        {
+            mMessageId = 174;
+            CrcExtra = 167;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mVx);
+            s.Write(mVy);
+            s.Write(mVz);
+            s.Write(mDiffPressure);
+            s.Write(mEas2tas);
+            s.Write(mRatio);
+            s.Write(mStateX);
+            s.Write(mStateY);
+            s.Write(mStateZ);
+            s.Write(mPax);
+            s.Write(mPby);
+            s.Write(mPcz);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mVx = s.ReadSingle();
+            this.mVy = s.ReadSingle();
+            this.mVz = s.ReadSingle();
+            this.mDiffPressure = s.ReadSingle();
+            this.mEas2tas = s.ReadSingle();
+            this.mRatio = s.ReadSingle();
+            this.mStateX = s.ReadSingle();
+            this.mStateY = s.ReadSingle();
+            this.mStateZ = s.ReadSingle();
+            this.mPax = s.ReadSingle();
+            this.mPby = s.ReadSingle();
+            this.mPcz = s.ReadSingle();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("AirspeedAutocal \n");
+            sb.AppendFormat("    Vx: {0}\n", mVx);
+            sb.AppendFormat("    Vy: {0}\n", mVy);
+            sb.AppendFormat("    Vz: {0}\n", mVz);
+            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
+            sb.AppendFormat("    Eas2tas: {0}\n", mEas2tas);
+            sb.AppendFormat("    Ratio: {0}\n", mRatio);
+            sb.AppendFormat("    StateX: {0}\n", mStateX);
+            sb.AppendFormat("    StateY: {0}\n", mStateY);
+            sb.AppendFormat("    StateZ: {0}\n", mStateZ);
+            sb.AppendFormat("    Pax: {0}\n", mPax);
+            sb.AppendFormat("    Pby: {0}\n", mPby);
+            sb.AppendFormat("    Pcz: {0}\n", mPcz);
+
+            return sb.ToString();
+        }
+
+        private float mVx;
+        private float mVy;
+        private float mVz;
+        private float mDiffPressure;
+        private float mEas2tas;
+        private float mRatio;
+        private float mStateX;
+        private float mStateY;
+        private float mStateZ;
+        private float mPax;
+        private float mPby;
+        private float mPcz;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// A rally point. Used to set a point when from GCS -> MAV. Also used to return a point from MAV -> GCS
+    /// </summary>
+    public class UasRallyPoint: UasMessage
+    {
+        /// <summary>
+        /// Latitude of point in degrees * 1E7
+        /// </summary>
+        public Int32 Lat {
+            get { return mLat; }
+            set { mLat = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Longitude of point in degrees * 1E7
+        /// </summary>
+        public Int32 Lng {
+            get { return mLng; }
+            set { mLng = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Transit / loiter altitude in meters relative to home
+        /// </summary>
+        public Int16 Alt {
+            get { return mAlt; }
+            set { mAlt = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Break altitude in meters relative to home
+        /// </summary>
+        public Int16 BreakAlt {
+            get { return mBreakAlt; }
+            set { mBreakAlt = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Heading to aim for when landing. In centi-degrees.
+        /// </summary>
+        public UInt16 LandDir {
+            get { return mLandDir; }
+            set { mLandDir = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// point index (first point is 0)
+        /// </summary>
+        public byte Idx {
+            get { return mIdx; }
+            set { mIdx = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// total number of points (for sanity checking)
+        /// </summary>
+        public byte Count {
+            get { return mCount; }
+            set { mCount = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// See RALLY_FLAGS enum for definition of the bitmask.
+        /// </summary>
+        public RallyFlags Flags {
+            get { return mFlags; }
+            set { mFlags = value; NotifyUpdated(); }
+        }
+
+        public UasRallyPoint()
+        {
+            mMessageId = 175;
+            CrcExtra = 138;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mLat);
+            s.Write(mLng);
+            s.Write(mAlt);
+            s.Write(mBreakAlt);
+            s.Write(mLandDir);
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mIdx);
+            s.Write(mCount);
+            s.Write((byte)mFlags);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mLat = s.ReadInt32();
+            this.mLng = s.ReadInt32();
+            this.mAlt = s.ReadInt16();
+            this.mBreakAlt = s.ReadInt16();
+            this.mLandDir = s.ReadUInt16();
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mIdx = s.ReadByte();
+            this.mCount = s.ReadByte();
+            this.mFlags = (RallyFlags)s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RallyPoint \n");
+            sb.AppendFormat("    Lat: {0}\n", mLat);
+            sb.AppendFormat("    Lng: {0}\n", mLng);
+            sb.AppendFormat("    Alt: {0}\n", mAlt);
+            sb.AppendFormat("    BreakAlt: {0}\n", mBreakAlt);
+            sb.AppendFormat("    LandDir: {0}\n", mLandDir);
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Idx: {0}\n", mIdx);
+            sb.AppendFormat("    Count: {0}\n", mCount);
+            sb.AppendFormat("    Flags: {0}\n", mFlags);
+
+            return sb.ToString();
+        }
+
+        private Int32 mLat;
+        private Int32 mLng;
+        private Int16 mAlt;
+        private Int16 mBreakAlt;
+        private UInt16 mLandDir;
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mIdx;
+        private byte mCount;
+        private RallyFlags mFlags;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
+    /// <summary>
+    /// Request a current rally point from MAV. MAV should respond with a RALLY_POINT message. MAV should not respond if the request is invalid.
+    /// </summary>
+    public class UasRallyFetchPoint: UasMessage
+    {
+        /// <summary>
+        /// System ID
+        /// </summary>
+        public byte TargetSystem {
+            get { return mTargetSystem; }
+            set { mTargetSystem = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// Component ID
+        /// </summary>
+        public byte TargetComponent {
+            get { return mTargetComponent; }
+            set { mTargetComponent = value; NotifyUpdated(); }
+        }
+
+        /// <summary>
+        /// point index (first point is 0)
+        /// </summary>
+        public byte Idx {
+            get { return mIdx; }
+            set { mIdx = value; NotifyUpdated(); }
+        }
+
+        public UasRallyFetchPoint()
+        {
+            mMessageId = 176;
+            CrcExtra = 234;
+        }
+
+        internal override void SerializeBody(BinaryWriter s)
+        {
+            s.Write(mTargetSystem);
+            s.Write(mTargetComponent);
+            s.Write(mIdx);
+        }
+
+        internal override void DeserializeBody(BinaryReader s)
+        {
+            this.mTargetSystem = s.ReadByte();
+            this.mTargetComponent = s.ReadByte();
+            this.mIdx = s.ReadByte();
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.Append("RallyFetchPoint \n");
+            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            sb.AppendFormat("    Idx: {0}\n", mIdx);
+
+            return sb.ToString();
+        }
+
+        private byte mTargetSystem;
+        private byte mTargetComponent;
+        private byte mIdx;
+    }
+
+
+    // ___________________________________________________________________________________
+
+
     public class UasSummary
     {
         public static UasMessage CreateFromId(byte id)
@@ -13639,6 +17092,32 @@ namespace MavLinkNet
                case 252: return new UasNamedValueInt();
                case 253: return new UasStatustext();
                case 254: return new UasDebug();
+               case 150: return new UasSensorOffsets();
+               case 151: return new UasSetMagOffsets();
+               case 152: return new UasMeminfo();
+               case 153: return new UasApAdc();
+               case 154: return new UasDigicamConfigure();
+               case 155: return new UasDigicamControl();
+               case 156: return new UasMountConfigure();
+               case 157: return new UasMountControl();
+               case 158: return new UasMountStatus();
+               case 160: return new UasFencePoint();
+               case 161: return new UasFenceFetchPoint();
+               case 162: return new UasFenceStatus();
+               case 163: return new UasAhrs();
+               case 164: return new UasSimstate();
+               case 165: return new UasHwstatus();
+               case 166: return new UasRadio();
+               case 167: return new UasLimitsStatus();
+               case 168: return new UasWind();
+               case 169: return new UasData16();
+               case 170: return new UasData32();
+               case 171: return new UasData64();
+               case 172: return new UasData96();
+               case 173: return new UasRangefinder();
+               case 174: return new UasAirspeedAutocal();
+               case 175: return new UasRallyPoint();
+               case 176: return new UasRallyFetchPoint();
                default: return null;
             }
         }
@@ -13738,6 +17217,32 @@ namespace MavLinkNet
                case 252: return 44;
                case 253: return 83;
                case 254: return 86;
+               case 150: return 134;
+               case 151: return 219;
+               case 152: return 208;
+               case 153: return 188;
+               case 154: return 84;
+               case 155: return 22;
+               case 156: return 19;
+               case 157: return 21;
+               case 158: return 134;
+               case 160: return 78;
+               case 161: return 68;
+               case 162: return 189;
+               case 163: return 127;
+               case 164: return 154;
+               case 165: return 21;
+               case 166: return 21;
+               case 167: return 144;
+               case 168: return 1;
+               case 169: return 234;
+               case 170: return 73;
+               case 171: return 181;
+               case 172: return 22;
+               case 173: return 83;
+               case 174: return 167;
+               case 175: return 138;
+               case 176: return 234;
                default: return 0;
             }
         }

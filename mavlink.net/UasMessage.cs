@@ -30,11 +30,31 @@ namespace MavLinkNet
 {
     public class UasMessage
     {
-        public byte CrcExtra { get; protected set; }
+        public byte CrcExtra 
+        { 
+            get; 
+            protected set; 
+        }
 
         public byte MessageId
         {
             get { return mMessageId; }
+        }
+
+
+        public UasMessageMetadata GetMetadata()
+        {
+            if (mMetadata == null)
+            {
+                InitMetadata();
+            }
+
+            return mMetadata;
+        }
+
+        protected virtual void InitMetadata()
+        { 
+            
         }
 
         protected virtual void NotifyUpdated()
@@ -53,5 +73,35 @@ namespace MavLinkNet
         }
 
         protected byte mMessageId;
+        protected UasMessageMetadata mMetadata;
+    }
+
+    
+    public class UasMessageMetadata
+    {
+        public string Description;
+        public Dictionary<string, UasFieldMetadata> Fields = new Dictionary<string, UasFieldMetadata>();
+    }
+
+    public class UasFieldMetadata
+    {
+        public string Name;
+        public string Description;
+        public int NumElements = 1;
+        public UasEnumMetadata EnumMetadata;
+    }
+
+    public class UasEnumMetadata
+    {
+        public string Name;
+        public string Description;
+        public List<UasEnumEntryMetadata> Entries = new List<UasEnumEntryMetadata>();
+    }
+
+    public class UasEnumEntryMetadata
+    {
+        public string Name;
+        public string Description;
+        public List<string> Params;
     }
 }

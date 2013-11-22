@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace MavLinkNet
 {
@@ -747,7 +748,7 @@ namespace MavLinkNet
     /// </summary>
     public enum MavSeverity { 
 
-        /// <summary> System is unusable. This is a "panic" condition. </summary>
+        /// <summary> System is unusable. This is a 'panic' condition. </summary>
         Emergency = 0, 
 
         /// <summary> Action should be taken immediately. Indicates error in non-critical systems. </summary>
@@ -944,21 +945,53 @@ namespace MavLinkNet
             this.mMavlinkVersion = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The heartbeat message shows that a system is present and responding. The type of the MAV and Autopilot hardware allow the receiving system to treat further messages from this system appropriate (e.g. by laying out the user interface based on the autopilot)."
+            };
 
-            sb.Append("Heartbeat \n");
-            sb.AppendFormat("    CustomMode: {0}\n", mCustomMode);
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.AppendFormat("    Autopilot: {0}\n", mAutopilot);
-            sb.AppendFormat("    BaseMode: {0}\n", mBaseMode);
-            sb.AppendFormat("    SystemStatus: {0}\n", mSystemStatus);
-            sb.AppendFormat("    MavlinkVersion: {0}\n", mMavlinkVersion);
+            mMetadata.Fields.Add("CustomMode", new UasFieldMetadata() {
+                Name = "CustomMode",
+                Description = "A bitfield for use for autopilot-specific flags.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavType"),
+            });
+
+            mMetadata.Fields.Add("Autopilot", new UasFieldMetadata() {
+                Name = "Autopilot",
+                Description = "Autopilot type / class. defined in MAV_AUTOPILOT ENUM",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavAutopilot"),
+            });
+
+            mMetadata.Fields.Add("BaseMode", new UasFieldMetadata() {
+                Name = "BaseMode",
+                Description = "System mode bitfield, see MAV_MODE_FLAGS ENUM in mavlink/include/mavlink_types.h",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavModeFlag"),
+            });
+
+            mMetadata.Fields.Add("SystemStatus", new UasFieldMetadata() {
+                Name = "SystemStatus",
+                Description = "System status flag, see MAV_STATE ENUM",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavState"),
+            });
+
+            mMetadata.Fields.Add("MavlinkVersion", new UasFieldMetadata() {
+                Name = "MavlinkVersion",
+                Description = "MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mCustomMode;
         private MavType mType;
         private MavAutopilot mAutopilot;
@@ -1120,28 +1153,94 @@ namespace MavLinkNet
             this.mBatteryRemaining = s.ReadSByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows wether the system is currently active or not and if an emergency occured. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occured it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout."
+            };
 
-            sb.Append("SysStatus \n");
-            sb.AppendFormat("    OnboardControlSensorsPresent: {0}\n", mOnboardControlSensorsPresent);
-            sb.AppendFormat("    OnboardControlSensorsEnabled: {0}\n", mOnboardControlSensorsEnabled);
-            sb.AppendFormat("    OnboardControlSensorsHealth: {0}\n", mOnboardControlSensorsHealth);
-            sb.AppendFormat("    Load: {0}\n", mLoad);
-            sb.AppendFormat("    VoltageBattery: {0}\n", mVoltageBattery);
-            sb.AppendFormat("    CurrentBattery: {0}\n", mCurrentBattery);
-            sb.AppendFormat("    DropRateComm: {0}\n", mDropRateComm);
-            sb.AppendFormat("    ErrorsComm: {0}\n", mErrorsComm);
-            sb.AppendFormat("    ErrorsCount1: {0}\n", mErrorsCount1);
-            sb.AppendFormat("    ErrorsCount2: {0}\n", mErrorsCount2);
-            sb.AppendFormat("    ErrorsCount3: {0}\n", mErrorsCount3);
-            sb.AppendFormat("    ErrorsCount4: {0}\n", mErrorsCount4);
-            sb.AppendFormat("    BatteryRemaining: {0}\n", mBatteryRemaining);
+            mMetadata.Fields.Add("OnboardControlSensorsPresent", new UasFieldMetadata() {
+                Name = "OnboardControlSensorsPresent",
+                Description = "Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavSysStatusSensor"),
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("OnboardControlSensorsEnabled", new UasFieldMetadata() {
+                Name = "OnboardControlSensorsEnabled",
+                Description = "Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavSysStatusSensor"),
+            });
+
+            mMetadata.Fields.Add("OnboardControlSensorsHealth", new UasFieldMetadata() {
+                Name = "OnboardControlSensorsHealth",
+                Description = "Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavSysStatusSensor"),
+            });
+
+            mMetadata.Fields.Add("Load", new UasFieldMetadata() {
+                Name = "Load",
+                Description = "Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageBattery", new UasFieldMetadata() {
+                Name = "VoltageBattery",
+                Description = "Battery voltage, in millivolts (1 = 1 millivolt)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CurrentBattery", new UasFieldMetadata() {
+                Name = "CurrentBattery",
+                Description = "Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("DropRateComm", new UasFieldMetadata() {
+                Name = "DropRateComm",
+                Description = "Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorsComm", new UasFieldMetadata() {
+                Name = "ErrorsComm",
+                Description = "Communication errors (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorsCount1", new UasFieldMetadata() {
+                Name = "ErrorsCount1",
+                Description = "Autopilot-specific errors",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorsCount2", new UasFieldMetadata() {
+                Name = "ErrorsCount2",
+                Description = "Autopilot-specific errors",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorsCount3", new UasFieldMetadata() {
+                Name = "ErrorsCount3",
+                Description = "Autopilot-specific errors",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorsCount4", new UasFieldMetadata() {
+                Name = "ErrorsCount4",
+                Description = "Autopilot-specific errors",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BatteryRemaining", new UasFieldMetadata() {
+                Name = "BatteryRemaining",
+                Description = "Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery",
+                NumElements = 1,
+            });
+
         }
-
         private MavSysStatusSensor mOnboardControlSensorsPresent;
         private MavSysStatusSensor mOnboardControlSensorsEnabled;
         private MavSysStatusSensor mOnboardControlSensorsHealth;
@@ -1200,17 +1299,25 @@ namespace MavLinkNet
             this.mTimeBootMs = s.ReadUInt32();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The system time is the time of the master clock, typically the computer clock of the main onboard computer."
+            };
 
-            sb.Append("SystemTime \n");
-            sb.AppendFormat("    TimeUnixUsec: {0}\n", mTimeUnixUsec);
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
+            mMetadata.Fields.Add("TimeUnixUsec", new UasFieldMetadata() {
+                Name = "TimeUnixUsec",
+                Description = "Timestamp of the master clock in microseconds since UNIX epoch.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp of the component clock since boot time in milliseconds.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUnixUsec;
         private UInt32 mTimeBootMs;
     }
@@ -1278,19 +1385,37 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "A ping message either requesting or responding to a ping. This allows to measure the system latencies, including serial port, radio modem and UDP connections."
+            };
 
-            sb.Append("Ping \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Unix timestamp in microseconds",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "PING sequence",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "0: request ping from all receiving systems, if greater than 0: message is a ping response and number is the system id of the requesting system",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "0: request ping from all receiving components, if greater than 0: message is a ping response and number is the system id of the requesting system",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private UInt32 mSeq;
         private byte mTargetSystem;
@@ -1331,7 +1456,7 @@ namespace MavLinkNet
         }
 
         /// <summary>
-        /// Password / Key, depending on version plaintext or encrypted. 25 or less characters, NULL terminated. The characters may involve A-Z, a-z, 0-9, and "!?,.-"
+        /// Password / Key, depending on version plaintext or encrypted. 25 or less characters, NULL terminated. The characters may involve A-Z, a-z, 0-9, and '!?,.-'
         /// </summary>
         public char[] Passkey {
             get { return mPasskey; }
@@ -1408,44 +1533,37 @@ namespace MavLinkNet
             this.mPasskey[24] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request to control this MAV"
+            };
 
-            sb.Append("ChangeOperatorControl \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    ControlRequest: {0}\n", mControlRequest);
-            sb.AppendFormat("    Version: {0}\n", mVersion);
-            sb.Append("    Passkey\n");
-            sb.AppendFormat("        [0]: {0}\n", mPasskey[0]);
-            sb.AppendFormat("        [1]: {0}\n", mPasskey[1]);
-            sb.AppendFormat("        [2]: {0}\n", mPasskey[2]);
-            sb.AppendFormat("        [3]: {0}\n", mPasskey[3]);
-            sb.AppendFormat("        [4]: {0}\n", mPasskey[4]);
-            sb.AppendFormat("        [5]: {0}\n", mPasskey[5]);
-            sb.AppendFormat("        [6]: {0}\n", mPasskey[6]);
-            sb.AppendFormat("        [7]: {0}\n", mPasskey[7]);
-            sb.AppendFormat("        [8]: {0}\n", mPasskey[8]);
-            sb.AppendFormat("        [9]: {0}\n", mPasskey[9]);
-            sb.AppendFormat("        [10]: {0}\n", mPasskey[10]);
-            sb.AppendFormat("        [11]: {0}\n", mPasskey[11]);
-            sb.AppendFormat("        [12]: {0}\n", mPasskey[12]);
-            sb.AppendFormat("        [13]: {0}\n", mPasskey[13]);
-            sb.AppendFormat("        [14]: {0}\n", mPasskey[14]);
-            sb.AppendFormat("        [15]: {0}\n", mPasskey[15]);
-            sb.AppendFormat("        [16]: {0}\n", mPasskey[16]);
-            sb.AppendFormat("        [17]: {0}\n", mPasskey[17]);
-            sb.AppendFormat("        [18]: {0}\n", mPasskey[18]);
-            sb.AppendFormat("        [19]: {0}\n", mPasskey[19]);
-            sb.AppendFormat("        [20]: {0}\n", mPasskey[20]);
-            sb.AppendFormat("        [21]: {0}\n", mPasskey[21]);
-            sb.AppendFormat("        [22]: {0}\n", mPasskey[22]);
-            sb.AppendFormat("        [23]: {0}\n", mPasskey[23]);
-            sb.AppendFormat("        [24]: {0}\n", mPasskey[24]);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System the GCS requests control for",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("ControlRequest", new UasFieldMetadata() {
+                Name = "ControlRequest",
+                Description = "0: request control of this MAV, 1: Release control of this MAV",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Version", new UasFieldMetadata() {
+                Name = "Version",
+                Description = "0: key as plaintext, 1-255: future, different hashing/encryption variants. The GCS should in general use the safest mode possible initially and then gradually move down the encryption level if it gets a NACK message indicating an encryption mismatch.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Passkey", new UasFieldMetadata() {
+                Name = "Passkey",
+                Description = "Password / Key, depending on version plaintext or encrypted. 25 or less characters, NULL terminated. The characters may involve A-Z, a-z, 0-9, and '!?,.-'",
+                NumElements = 25,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mControlRequest;
         private byte mVersion;
@@ -1505,18 +1623,31 @@ namespace MavLinkNet
             this.mAck = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Accept / deny control of this MAV"
+            };
 
-            sb.Append("ChangeOperatorControlAck \n");
-            sb.AppendFormat("    GcsSystemId: {0}\n", mGcsSystemId);
-            sb.AppendFormat("    ControlRequest: {0}\n", mControlRequest);
-            sb.AppendFormat("    Ack: {0}\n", mAck);
+            mMetadata.Fields.Add("GcsSystemId", new UasFieldMetadata() {
+                Name = "GcsSystemId",
+                Description = "ID of the GCS this message ",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("ControlRequest", new UasFieldMetadata() {
+                Name = "ControlRequest",
+                Description = "0: request control of this MAV, 1: Release control of this MAV",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ack", new UasFieldMetadata() {
+                Name = "Ack",
+                Description = "0: ACK, 1: NACK: Wrong passkey, 2: NACK: Unsupported passkey encryption method, 3: NACK: Already under control",
+                NumElements = 1,
+            });
+
         }
-
         private byte mGcsSystemId;
         private byte mControlRequest;
         private byte mAck;
@@ -1617,48 +1748,19 @@ namespace MavLinkNet
             this.mKey[31] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Emit an encrypted signature / key identifying this system. PLEASE NOTE: This protocol has been kept simple, so transmitting the key requires an encrypted channel for true safety."
+            };
 
-            sb.Append("AuthKey \n");
-            sb.Append("    Key\n");
-            sb.AppendFormat("        [0]: {0}\n", mKey[0]);
-            sb.AppendFormat("        [1]: {0}\n", mKey[1]);
-            sb.AppendFormat("        [2]: {0}\n", mKey[2]);
-            sb.AppendFormat("        [3]: {0}\n", mKey[3]);
-            sb.AppendFormat("        [4]: {0}\n", mKey[4]);
-            sb.AppendFormat("        [5]: {0}\n", mKey[5]);
-            sb.AppendFormat("        [6]: {0}\n", mKey[6]);
-            sb.AppendFormat("        [7]: {0}\n", mKey[7]);
-            sb.AppendFormat("        [8]: {0}\n", mKey[8]);
-            sb.AppendFormat("        [9]: {0}\n", mKey[9]);
-            sb.AppendFormat("        [10]: {0}\n", mKey[10]);
-            sb.AppendFormat("        [11]: {0}\n", mKey[11]);
-            sb.AppendFormat("        [12]: {0}\n", mKey[12]);
-            sb.AppendFormat("        [13]: {0}\n", mKey[13]);
-            sb.AppendFormat("        [14]: {0}\n", mKey[14]);
-            sb.AppendFormat("        [15]: {0}\n", mKey[15]);
-            sb.AppendFormat("        [16]: {0}\n", mKey[16]);
-            sb.AppendFormat("        [17]: {0}\n", mKey[17]);
-            sb.AppendFormat("        [18]: {0}\n", mKey[18]);
-            sb.AppendFormat("        [19]: {0}\n", mKey[19]);
-            sb.AppendFormat("        [20]: {0}\n", mKey[20]);
-            sb.AppendFormat("        [21]: {0}\n", mKey[21]);
-            sb.AppendFormat("        [22]: {0}\n", mKey[22]);
-            sb.AppendFormat("        [23]: {0}\n", mKey[23]);
-            sb.AppendFormat("        [24]: {0}\n", mKey[24]);
-            sb.AppendFormat("        [25]: {0}\n", mKey[25]);
-            sb.AppendFormat("        [26]: {0}\n", mKey[26]);
-            sb.AppendFormat("        [27]: {0}\n", mKey[27]);
-            sb.AppendFormat("        [28]: {0}\n", mKey[28]);
-            sb.AppendFormat("        [29]: {0}\n", mKey[29]);
-            sb.AppendFormat("        [30]: {0}\n", mKey[30]);
-            sb.AppendFormat("        [31]: {0}\n", mKey[31]);
+            mMetadata.Fields.Add("Key", new UasFieldMetadata() {
+                Name = "Key",
+                Description = "key",
+                NumElements = 32,
+            });
 
-            return sb.ToString();
         }
-
         private char[] mKey = new char[32];
     }
 
@@ -1715,18 +1817,31 @@ namespace MavLinkNet
             this.mBaseMode = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component."
+            };
 
-            sb.Append("SetMode \n");
-            sb.AppendFormat("    CustomMode: {0}\n", mCustomMode);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    BaseMode: {0}\n", mBaseMode);
+            mMetadata.Fields.Add("CustomMode", new UasFieldMetadata() {
+                Name = "CustomMode",
+                Description = "The new autopilot-specific mode. This field can be ignored by an autopilot.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "The system setting the mode",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BaseMode", new UasFieldMetadata() {
+                Name = "BaseMode",
+                Description = "The new base mode",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mCustomMode;
         private byte mTargetSystem;
         private byte mBaseMode;
@@ -1825,35 +1940,37 @@ namespace MavLinkNet
             this.mParamId[15] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request to read the onboard parameter with the param_id string id. Onboard parameters are stored as key[const char*] -> value[float]. This allows to send a parameter to any other component (such as the GCS) without the need of previous knowledge of possible parameter names. Thus the same GCS can store different parameters for different autopilots. See also http://qgroundcontrol.org/parameter_interface for a full documentation of QGroundControl and IMU code."
+            };
 
-            sb.Append("ParamRequestRead \n");
-            sb.AppendFormat("    ParamIndex: {0}\n", mParamIndex);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.Append("    ParamId\n");
-            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
-            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
-            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
-            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
-            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
-            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
-            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
-            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
-            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
-            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
-            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
-            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
-            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
-            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
-            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
-            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
+            mMetadata.Fields.Add("ParamIndex", new UasFieldMetadata() {
+                Name = "ParamIndex",
+                Description = "Parameter index. Send -1 to use the param ID field as identifier (else the param id will be ignored)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ParamId", new UasFieldMetadata() {
+                Name = "ParamId",
+                Description = "Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string",
+                NumElements = 16,
+            });
+
         }
-
         private Int16 mParamIndex;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -1903,17 +2020,25 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request all parameters of this component. After his request, all parameters are emitted."
+            };
 
-            sb.Append("ParamRequestList \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
     }
@@ -2021,36 +2146,44 @@ namespace MavLinkNet
             this.mParamType = (MavParamType)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Emit the value of a onboard parameter. The inclusion of param_count and param_index in the message allows the recipient to keep track of received parameters and allows him to re-request missing parameters after a loss or timeout."
+            };
 
-            sb.Append("ParamValue \n");
-            sb.AppendFormat("    ParamValue: {0}\n", mParamValue);
-            sb.AppendFormat("    ParamCount: {0}\n", mParamCount);
-            sb.AppendFormat("    ParamIndex: {0}\n", mParamIndex);
-            sb.Append("    ParamId\n");
-            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
-            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
-            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
-            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
-            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
-            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
-            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
-            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
-            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
-            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
-            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
-            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
-            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
-            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
-            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
-            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
-            sb.AppendFormat("    ParamType: {0}\n", mParamType);
+            mMetadata.Fields.Add("ParamValue", new UasFieldMetadata() {
+                Name = "ParamValue",
+                Description = "Onboard parameter value",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("ParamCount", new UasFieldMetadata() {
+                Name = "ParamCount",
+                Description = "Total number of onboard parameters",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ParamIndex", new UasFieldMetadata() {
+                Name = "ParamIndex",
+                Description = "Index of this onboard parameter",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ParamId", new UasFieldMetadata() {
+                Name = "ParamId",
+                Description = "Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string",
+                NumElements = 16,
+            });
+
+            mMetadata.Fields.Add("ParamType", new UasFieldMetadata() {
+                Name = "ParamType",
+                Description = "Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavParamType"),
+            });
+
         }
-
         private float mParamValue;
         private UInt16 mParamCount;
         private UInt16 mParamIndex;
@@ -2161,36 +2294,44 @@ namespace MavLinkNet
             this.mParamType = (MavParamType)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set a parameter value TEMPORARILY to RAM. It will be reset to default on system reboot. Send the ACTION MAV_ACTION_STORAGE_WRITE to PERMANENTLY write the RAM contents to EEPROM. IMPORTANT: The receiving component should acknowledge the new parameter value by sending a param_value message to all communication partners. This will also ensure that multiple GCS all have an up-to-date list of all parameters. If the sending GCS did not receive a PARAM_VALUE message within its timeout time, it should re-send the PARAM_SET message."
+            };
 
-            sb.Append("ParamSet \n");
-            sb.AppendFormat("    ParamValue: {0}\n", mParamValue);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.Append("    ParamId\n");
-            sb.AppendFormat("        [0]: {0}\n", mParamId[0]);
-            sb.AppendFormat("        [1]: {0}\n", mParamId[1]);
-            sb.AppendFormat("        [2]: {0}\n", mParamId[2]);
-            sb.AppendFormat("        [3]: {0}\n", mParamId[3]);
-            sb.AppendFormat("        [4]: {0}\n", mParamId[4]);
-            sb.AppendFormat("        [5]: {0}\n", mParamId[5]);
-            sb.AppendFormat("        [6]: {0}\n", mParamId[6]);
-            sb.AppendFormat("        [7]: {0}\n", mParamId[7]);
-            sb.AppendFormat("        [8]: {0}\n", mParamId[8]);
-            sb.AppendFormat("        [9]: {0}\n", mParamId[9]);
-            sb.AppendFormat("        [10]: {0}\n", mParamId[10]);
-            sb.AppendFormat("        [11]: {0}\n", mParamId[11]);
-            sb.AppendFormat("        [12]: {0}\n", mParamId[12]);
-            sb.AppendFormat("        [13]: {0}\n", mParamId[13]);
-            sb.AppendFormat("        [14]: {0}\n", mParamId[14]);
-            sb.AppendFormat("        [15]: {0}\n", mParamId[15]);
-            sb.AppendFormat("    ParamType: {0}\n", mParamType);
+            mMetadata.Fields.Add("ParamValue", new UasFieldMetadata() {
+                Name = "ParamValue",
+                Description = "Onboard parameter value",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ParamId", new UasFieldMetadata() {
+                Name = "ParamId",
+                Description = "Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string",
+                NumElements = 16,
+            });
+
+            mMetadata.Fields.Add("ParamType", new UasFieldMetadata() {
+                Name = "ParamType",
+                Description = "Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavParamType"),
+            });
+
         }
-
         private float mParamValue;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -2321,25 +2462,73 @@ namespace MavLinkNet
             this.mSatellitesVisible = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The global position, as returned by the Global Positioning System (GPS). This is                  NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame)."
+            };
 
-            sb.Append("GpsRawInt \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    Eph: {0}\n", mEph);
-            sb.AppendFormat("    Epv: {0}\n", mEpv);
-            sb.AppendFormat("    Vel: {0}\n", mVel);
-            sb.AppendFormat("    Cog: {0}\n", mCog);
-            sb.AppendFormat("    FixType: {0}\n", mFixType);
-            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Eph", new UasFieldMetadata() {
+                Name = "Eph",
+                Description = "GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: UINT16_MAX",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Epv", new UasFieldMetadata() {
+                Name = "Epv",
+                Description = "GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: UINT16_MAX",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vel", new UasFieldMetadata() {
+                Name = "Vel",
+                Description = "GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Cog", new UasFieldMetadata() {
+                Name = "Cog",
+                Description = "Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FixType", new UasFieldMetadata() {
+                Name = "FixType",
+                Description = "0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SatellitesVisible", new UasFieldMetadata() {
+                Name = "SatellitesVisible",
+                Description = "Number of satellites visible. If unknown, set to 255",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private Int32 mLat;
         private Int32 mLon;
@@ -2625,121 +2814,49 @@ namespace MavLinkNet
             this.mSatelliteSnr[19] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The positioning status, as reported by GPS. This message is intended to display status information about each satellite visible to the receiver. See message GLOBAL_POSITION for the global position estimate. This message can contain information for up to 20 satellites."
+            };
 
-            sb.Append("GpsStatus \n");
-            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
-            sb.Append("    SatellitePrn\n");
-            sb.AppendFormat("        [0]: {0}\n", mSatellitePrn[0]);
-            sb.AppendFormat("        [1]: {0}\n", mSatellitePrn[1]);
-            sb.AppendFormat("        [2]: {0}\n", mSatellitePrn[2]);
-            sb.AppendFormat("        [3]: {0}\n", mSatellitePrn[3]);
-            sb.AppendFormat("        [4]: {0}\n", mSatellitePrn[4]);
-            sb.AppendFormat("        [5]: {0}\n", mSatellitePrn[5]);
-            sb.AppendFormat("        [6]: {0}\n", mSatellitePrn[6]);
-            sb.AppendFormat("        [7]: {0}\n", mSatellitePrn[7]);
-            sb.AppendFormat("        [8]: {0}\n", mSatellitePrn[8]);
-            sb.AppendFormat("        [9]: {0}\n", mSatellitePrn[9]);
-            sb.AppendFormat("        [10]: {0}\n", mSatellitePrn[10]);
-            sb.AppendFormat("        [11]: {0}\n", mSatellitePrn[11]);
-            sb.AppendFormat("        [12]: {0}\n", mSatellitePrn[12]);
-            sb.AppendFormat("        [13]: {0}\n", mSatellitePrn[13]);
-            sb.AppendFormat("        [14]: {0}\n", mSatellitePrn[14]);
-            sb.AppendFormat("        [15]: {0}\n", mSatellitePrn[15]);
-            sb.AppendFormat("        [16]: {0}\n", mSatellitePrn[16]);
-            sb.AppendFormat("        [17]: {0}\n", mSatellitePrn[17]);
-            sb.AppendFormat("        [18]: {0}\n", mSatellitePrn[18]);
-            sb.AppendFormat("        [19]: {0}\n", mSatellitePrn[19]);
-            sb.Append("    SatelliteUsed\n");
-            sb.AppendFormat("        [0]: {0}\n", mSatelliteUsed[0]);
-            sb.AppendFormat("        [1]: {0}\n", mSatelliteUsed[1]);
-            sb.AppendFormat("        [2]: {0}\n", mSatelliteUsed[2]);
-            sb.AppendFormat("        [3]: {0}\n", mSatelliteUsed[3]);
-            sb.AppendFormat("        [4]: {0}\n", mSatelliteUsed[4]);
-            sb.AppendFormat("        [5]: {0}\n", mSatelliteUsed[5]);
-            sb.AppendFormat("        [6]: {0}\n", mSatelliteUsed[6]);
-            sb.AppendFormat("        [7]: {0}\n", mSatelliteUsed[7]);
-            sb.AppendFormat("        [8]: {0}\n", mSatelliteUsed[8]);
-            sb.AppendFormat("        [9]: {0}\n", mSatelliteUsed[9]);
-            sb.AppendFormat("        [10]: {0}\n", mSatelliteUsed[10]);
-            sb.AppendFormat("        [11]: {0}\n", mSatelliteUsed[11]);
-            sb.AppendFormat("        [12]: {0}\n", mSatelliteUsed[12]);
-            sb.AppendFormat("        [13]: {0}\n", mSatelliteUsed[13]);
-            sb.AppendFormat("        [14]: {0}\n", mSatelliteUsed[14]);
-            sb.AppendFormat("        [15]: {0}\n", mSatelliteUsed[15]);
-            sb.AppendFormat("        [16]: {0}\n", mSatelliteUsed[16]);
-            sb.AppendFormat("        [17]: {0}\n", mSatelliteUsed[17]);
-            sb.AppendFormat("        [18]: {0}\n", mSatelliteUsed[18]);
-            sb.AppendFormat("        [19]: {0}\n", mSatelliteUsed[19]);
-            sb.Append("    SatelliteElevation\n");
-            sb.AppendFormat("        [0]: {0}\n", mSatelliteElevation[0]);
-            sb.AppendFormat("        [1]: {0}\n", mSatelliteElevation[1]);
-            sb.AppendFormat("        [2]: {0}\n", mSatelliteElevation[2]);
-            sb.AppendFormat("        [3]: {0}\n", mSatelliteElevation[3]);
-            sb.AppendFormat("        [4]: {0}\n", mSatelliteElevation[4]);
-            sb.AppendFormat("        [5]: {0}\n", mSatelliteElevation[5]);
-            sb.AppendFormat("        [6]: {0}\n", mSatelliteElevation[6]);
-            sb.AppendFormat("        [7]: {0}\n", mSatelliteElevation[7]);
-            sb.AppendFormat("        [8]: {0}\n", mSatelliteElevation[8]);
-            sb.AppendFormat("        [9]: {0}\n", mSatelliteElevation[9]);
-            sb.AppendFormat("        [10]: {0}\n", mSatelliteElevation[10]);
-            sb.AppendFormat("        [11]: {0}\n", mSatelliteElevation[11]);
-            sb.AppendFormat("        [12]: {0}\n", mSatelliteElevation[12]);
-            sb.AppendFormat("        [13]: {0}\n", mSatelliteElevation[13]);
-            sb.AppendFormat("        [14]: {0}\n", mSatelliteElevation[14]);
-            sb.AppendFormat("        [15]: {0}\n", mSatelliteElevation[15]);
-            sb.AppendFormat("        [16]: {0}\n", mSatelliteElevation[16]);
-            sb.AppendFormat("        [17]: {0}\n", mSatelliteElevation[17]);
-            sb.AppendFormat("        [18]: {0}\n", mSatelliteElevation[18]);
-            sb.AppendFormat("        [19]: {0}\n", mSatelliteElevation[19]);
-            sb.Append("    SatelliteAzimuth\n");
-            sb.AppendFormat("        [0]: {0}\n", mSatelliteAzimuth[0]);
-            sb.AppendFormat("        [1]: {0}\n", mSatelliteAzimuth[1]);
-            sb.AppendFormat("        [2]: {0}\n", mSatelliteAzimuth[2]);
-            sb.AppendFormat("        [3]: {0}\n", mSatelliteAzimuth[3]);
-            sb.AppendFormat("        [4]: {0}\n", mSatelliteAzimuth[4]);
-            sb.AppendFormat("        [5]: {0}\n", mSatelliteAzimuth[5]);
-            sb.AppendFormat("        [6]: {0}\n", mSatelliteAzimuth[6]);
-            sb.AppendFormat("        [7]: {0}\n", mSatelliteAzimuth[7]);
-            sb.AppendFormat("        [8]: {0}\n", mSatelliteAzimuth[8]);
-            sb.AppendFormat("        [9]: {0}\n", mSatelliteAzimuth[9]);
-            sb.AppendFormat("        [10]: {0}\n", mSatelliteAzimuth[10]);
-            sb.AppendFormat("        [11]: {0}\n", mSatelliteAzimuth[11]);
-            sb.AppendFormat("        [12]: {0}\n", mSatelliteAzimuth[12]);
-            sb.AppendFormat("        [13]: {0}\n", mSatelliteAzimuth[13]);
-            sb.AppendFormat("        [14]: {0}\n", mSatelliteAzimuth[14]);
-            sb.AppendFormat("        [15]: {0}\n", mSatelliteAzimuth[15]);
-            sb.AppendFormat("        [16]: {0}\n", mSatelliteAzimuth[16]);
-            sb.AppendFormat("        [17]: {0}\n", mSatelliteAzimuth[17]);
-            sb.AppendFormat("        [18]: {0}\n", mSatelliteAzimuth[18]);
-            sb.AppendFormat("        [19]: {0}\n", mSatelliteAzimuth[19]);
-            sb.Append("    SatelliteSnr\n");
-            sb.AppendFormat("        [0]: {0}\n", mSatelliteSnr[0]);
-            sb.AppendFormat("        [1]: {0}\n", mSatelliteSnr[1]);
-            sb.AppendFormat("        [2]: {0}\n", mSatelliteSnr[2]);
-            sb.AppendFormat("        [3]: {0}\n", mSatelliteSnr[3]);
-            sb.AppendFormat("        [4]: {0}\n", mSatelliteSnr[4]);
-            sb.AppendFormat("        [5]: {0}\n", mSatelliteSnr[5]);
-            sb.AppendFormat("        [6]: {0}\n", mSatelliteSnr[6]);
-            sb.AppendFormat("        [7]: {0}\n", mSatelliteSnr[7]);
-            sb.AppendFormat("        [8]: {0}\n", mSatelliteSnr[8]);
-            sb.AppendFormat("        [9]: {0}\n", mSatelliteSnr[9]);
-            sb.AppendFormat("        [10]: {0}\n", mSatelliteSnr[10]);
-            sb.AppendFormat("        [11]: {0}\n", mSatelliteSnr[11]);
-            sb.AppendFormat("        [12]: {0}\n", mSatelliteSnr[12]);
-            sb.AppendFormat("        [13]: {0}\n", mSatelliteSnr[13]);
-            sb.AppendFormat("        [14]: {0}\n", mSatelliteSnr[14]);
-            sb.AppendFormat("        [15]: {0}\n", mSatelliteSnr[15]);
-            sb.AppendFormat("        [16]: {0}\n", mSatelliteSnr[16]);
-            sb.AppendFormat("        [17]: {0}\n", mSatelliteSnr[17]);
-            sb.AppendFormat("        [18]: {0}\n", mSatelliteSnr[18]);
-            sb.AppendFormat("        [19]: {0}\n", mSatelliteSnr[19]);
+            mMetadata.Fields.Add("SatellitesVisible", new UasFieldMetadata() {
+                Name = "SatellitesVisible",
+                Description = "Number of satellites visible",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("SatellitePrn", new UasFieldMetadata() {
+                Name = "SatellitePrn",
+                Description = "Global satellite ID",
+                NumElements = 20,
+            });
+
+            mMetadata.Fields.Add("SatelliteUsed", new UasFieldMetadata() {
+                Name = "SatelliteUsed",
+                Description = "0: Satellite not used, 1: used for localization",
+                NumElements = 20,
+            });
+
+            mMetadata.Fields.Add("SatelliteElevation", new UasFieldMetadata() {
+                Name = "SatelliteElevation",
+                Description = "Elevation (0: right on top of receiver, 90: on the horizon) of satellite",
+                NumElements = 20,
+            });
+
+            mMetadata.Fields.Add("SatelliteAzimuth", new UasFieldMetadata() {
+                Name = "SatelliteAzimuth",
+                Description = "Direction of satellite, 0: 0 deg, 255: 360 deg.",
+                NumElements = 20,
+            });
+
+            mMetadata.Fields.Add("SatelliteSnr", new UasFieldMetadata() {
+                Name = "SatelliteSnr",
+                Description = "Signal to noise ratio of satellite",
+                NumElements = 20,
+            });
+
         }
-
         private byte mSatellitesVisible;
         private byte[] mSatellitePrn = new byte[20];
         private byte[] mSatelliteUsed = new byte[20];
@@ -2871,25 +2988,73 @@ namespace MavLinkNet
             this.mZmag = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW IMU readings for the usual 9DOF sensor setup. This message should contain the scaled values to the described units"
+            };
 
-            sb.Append("ScaledImu \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Xmag: {0}\n", mXmag);
-            sb.AppendFormat("    Ymag: {0}\n", mYmag);
-            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis (millirad /sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis (millirad /sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis (millirad /sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xmag", new UasFieldMetadata() {
+                Name = "Xmag",
+                Description = "X Magnetic field (milli tesla)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ymag", new UasFieldMetadata() {
+                Name = "Ymag",
+                Description = "Y Magnetic field (milli tesla)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zmag", new UasFieldMetadata() {
+                Name = "Zmag",
+                Description = "Z Magnetic field (milli tesla)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private Int16 mXacc;
         private Int16 mYacc;
@@ -3025,25 +3190,73 @@ namespace MavLinkNet
             this.mZmag = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW IMU readings for the usual 9DOF sensor setup. This message should always contain the true raw values without any scaling to allow data capture and system debugging."
+            };
 
-            sb.Append("RawImu \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Xmag: {0}\n", mXmag);
-            sb.AppendFormat("    Ymag: {0}\n", mYmag);
-            sb.AppendFormat("    Zmag: {0}\n", mZmag);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xmag", new UasFieldMetadata() {
+                Name = "Xmag",
+                Description = "X Magnetic field (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ymag", new UasFieldMetadata() {
+                Name = "Ymag",
+                Description = "Y Magnetic field (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zmag", new UasFieldMetadata() {
+                Name = "Zmag",
+                Description = "Z Magnetic field (raw)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private Int16 mXacc;
         private Int16 mYacc;
@@ -3129,20 +3342,43 @@ namespace MavLinkNet
             this.mTemperature = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW pressure readings for the typical setup of one absolute pressure and one differential pressure sensor. The sensor values should be the raw, UNSCALED ADC values."
+            };
 
-            sb.Append("RawPressure \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    PressAbs: {0}\n", mPressAbs);
-            sb.AppendFormat("    PressDiff1: {0}\n", mPressDiff1);
-            sb.AppendFormat("    PressDiff2: {0}\n", mPressDiff2);
-            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("PressAbs", new UasFieldMetadata() {
+                Name = "PressAbs",
+                Description = "Absolute pressure (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PressDiff1", new UasFieldMetadata() {
+                Name = "PressDiff1",
+                Description = "Differential pressure 1 (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PressDiff2", new UasFieldMetadata() {
+                Name = "PressDiff2",
+                Description = "Differential pressure 2 (raw)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Temperature", new UasFieldMetadata() {
+                Name = "Temperature",
+                Description = "Raw Temperature measurement (raw)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private Int16 mPressAbs;
         private Int16 mPressDiff1;
@@ -3213,19 +3449,37 @@ namespace MavLinkNet
             this.mTemperature = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The pressure readings for the typical setup of one absolute and differential pressure sensor. The units are as specified in each field."
+            };
 
-            sb.Append("ScaledPressure \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    PressAbs: {0}\n", mPressAbs);
-            sb.AppendFormat("    PressDiff: {0}\n", mPressDiff);
-            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("PressAbs", new UasFieldMetadata() {
+                Name = "PressAbs",
+                Description = "Absolute pressure (hectopascal)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PressDiff", new UasFieldMetadata() {
+                Name = "PressDiff",
+                Description = "Differential pressure 1 (hectopascal)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Temperature", new UasFieldMetadata() {
+                Name = "Temperature",
+                Description = "Temperature measurement (0.01 degrees celsius)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mPressAbs;
         private float mPressDiff;
@@ -3325,22 +3579,55 @@ namespace MavLinkNet
             this.mYawspeed = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The attitude in the aeronautical frame (right-handed, Z-down, X-front, Y-right)."
+            };
 
-            sb.Append("Attitude \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
-            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
-            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle (rad, -pi..+pi)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle (rad, -pi..+pi)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle (rad, -pi..+pi)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rollspeed", new UasFieldMetadata() {
+                Name = "Rollspeed",
+                Description = "Roll angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitchspeed", new UasFieldMetadata() {
+                Name = "Pitchspeed",
+                Description = "Pitch angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yawspeed", new UasFieldMetadata() {
+                Name = "Yawspeed",
+                Description = "Yaw angular speed (rad/s)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mRoll;
         private float mPitch;
@@ -3453,23 +3740,61 @@ namespace MavLinkNet
             this.mYawspeed = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The attitude in the aeronautical frame (right-handed, Z-down, X-front, Y-right), expressed as quaternion."
+            };
 
-            sb.Append("AttitudeQuaternion \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Q1: {0}\n", mQ1);
-            sb.AppendFormat("    Q2: {0}\n", mQ2);
-            sb.AppendFormat("    Q3: {0}\n", mQ3);
-            sb.AppendFormat("    Q4: {0}\n", mQ4);
-            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
-            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
-            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Q1", new UasFieldMetadata() {
+                Name = "Q1",
+                Description = "Quaternion component 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Q2", new UasFieldMetadata() {
+                Name = "Q2",
+                Description = "Quaternion component 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Q3", new UasFieldMetadata() {
+                Name = "Q3",
+                Description = "Quaternion component 3",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Q4", new UasFieldMetadata() {
+                Name = "Q4",
+                Description = "Quaternion component 4",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rollspeed", new UasFieldMetadata() {
+                Name = "Rollspeed",
+                Description = "Roll angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitchspeed", new UasFieldMetadata() {
+                Name = "Pitchspeed",
+                Description = "Pitch angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yawspeed", new UasFieldMetadata() {
+                Name = "Yawspeed",
+                Description = "Yaw angular speed (rad/s)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mQ1;
         private float mQ2;
@@ -3573,22 +3898,55 @@ namespace MavLinkNet
             this.mVz = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The filtered local position (e.g. fused computer vision and accelerometers). Coordinate frame is right-handed, Z-axis down (aeronautical frame, NED / north-east-down convention)"
+            };
 
-            sb.Append("LocalPositionNed \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Vx: {0}\n", mVx);
-            sb.AppendFormat("    Vy: {0}\n", mVy);
-            sb.AppendFormat("    Vz: {0}\n", mVz);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "X Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Y Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Z Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vx", new UasFieldMetadata() {
+                Name = "Vx",
+                Description = "X Speed",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vy", new UasFieldMetadata() {
+                Name = "Vy",
+                Description = "Y Speed",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vz", new UasFieldMetadata() {
+                Name = "Vz",
+                Description = "Z Speed",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mX;
         private float mY;
@@ -3711,24 +4069,67 @@ namespace MavLinkNet
             this.mHdg = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The filtered global position (e.g. fused GPS and accelerometers). The position is in GPS-frame (right-handed, Z-up). It                 is designed as scaled integer message since the resolution of float is not sufficient."
+            };
 
-            sb.Append("GlobalPositionInt \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    RelativeAlt: {0}\n", mRelativeAlt);
-            sb.AppendFormat("    Vx: {0}\n", mVx);
-            sb.AppendFormat("    Vy: {0}\n", mVy);
-            sb.AppendFormat("    Vz: {0}\n", mVz);
-            sb.AppendFormat("    Hdg: {0}\n", mHdg);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude in meters, expressed as * 1000 (millimeters), above MSL",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RelativeAlt", new UasFieldMetadata() {
+                Name = "RelativeAlt",
+                Description = "Altitude above ground in meters, expressed as * 1000 (millimeters)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vx", new UasFieldMetadata() {
+                Name = "Vx",
+                Description = "Ground X Speed (Latitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vy", new UasFieldMetadata() {
+                Name = "Vy",
+                Description = "Ground Y Speed (Longitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vz", new UasFieldMetadata() {
+                Name = "Vz",
+                Description = "Ground Z Speed (Altitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Hdg", new UasFieldMetadata() {
+                Name = "Hdg",
+                Description = "Compass heading in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private Int32 mLat;
         private Int32 mLon;
@@ -3873,26 +4274,79 @@ namespace MavLinkNet
             this.mRssi = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The scaled values of the RC channels received. (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX."
+            };
 
-            sb.Append("RcChannelsScaled \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Chan1Scaled: {0}\n", mChan1Scaled);
-            sb.AppendFormat("    Chan2Scaled: {0}\n", mChan2Scaled);
-            sb.AppendFormat("    Chan3Scaled: {0}\n", mChan3Scaled);
-            sb.AppendFormat("    Chan4Scaled: {0}\n", mChan4Scaled);
-            sb.AppendFormat("    Chan5Scaled: {0}\n", mChan5Scaled);
-            sb.AppendFormat("    Chan6Scaled: {0}\n", mChan6Scaled);
-            sb.AppendFormat("    Chan7Scaled: {0}\n", mChan7Scaled);
-            sb.AppendFormat("    Chan8Scaled: {0}\n", mChan8Scaled);
-            sb.AppendFormat("    Port: {0}\n", mPort);
-            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Chan1Scaled", new UasFieldMetadata() {
+                Name = "Chan1Scaled",
+                Description = "RC channel 1 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan2Scaled", new UasFieldMetadata() {
+                Name = "Chan2Scaled",
+                Description = "RC channel 2 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan3Scaled", new UasFieldMetadata() {
+                Name = "Chan3Scaled",
+                Description = "RC channel 3 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan4Scaled", new UasFieldMetadata() {
+                Name = "Chan4Scaled",
+                Description = "RC channel 4 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan5Scaled", new UasFieldMetadata() {
+                Name = "Chan5Scaled",
+                Description = "RC channel 5 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan6Scaled", new UasFieldMetadata() {
+                Name = "Chan6Scaled",
+                Description = "RC channel 6 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan7Scaled", new UasFieldMetadata() {
+                Name = "Chan7Scaled",
+                Description = "RC channel 7 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan8Scaled", new UasFieldMetadata() {
+                Name = "Chan8Scaled",
+                Description = "RC channel 8 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Port", new UasFieldMetadata() {
+                Name = "Port",
+                Description = "Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows for more than 8 servos.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rssi", new UasFieldMetadata() {
+                Name = "Rssi",
+                Description = "Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private Int16 mChan1Scaled;
         private Int16 mChan2Scaled;
@@ -4039,26 +4493,79 @@ namespace MavLinkNet
             this.mRssi = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification."
+            };
 
-            sb.Append("RcChannelsRaw \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
-            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
-            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
-            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
-            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
-            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
-            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
-            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
-            sb.AppendFormat("    Port: {0}\n", mPort);
-            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Chan1Raw", new UasFieldMetadata() {
+                Name = "Chan1Raw",
+                Description = "RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan2Raw", new UasFieldMetadata() {
+                Name = "Chan2Raw",
+                Description = "RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan3Raw", new UasFieldMetadata() {
+                Name = "Chan3Raw",
+                Description = "RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan4Raw", new UasFieldMetadata() {
+                Name = "Chan4Raw",
+                Description = "RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan5Raw", new UasFieldMetadata() {
+                Name = "Chan5Raw",
+                Description = "RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan6Raw", new UasFieldMetadata() {
+                Name = "Chan6Raw",
+                Description = "RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan7Raw", new UasFieldMetadata() {
+                Name = "Chan7Raw",
+                Description = "RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan8Raw", new UasFieldMetadata() {
+                Name = "Chan8Raw",
+                Description = "RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Port", new UasFieldMetadata() {
+                Name = "Port",
+                Description = "Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows for more than 8 servos.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rssi", new UasFieldMetadata() {
+                Name = "Rssi",
+                Description = "Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
@@ -4195,25 +4702,73 @@ namespace MavLinkNet
             this.mPort = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW values of the servo outputs (for RC input from the remote, use the RC_CHANNELS messages). The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%."
+            };
 
-            sb.Append("ServoOutputRaw \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Servo1Raw: {0}\n", mServo1Raw);
-            sb.AppendFormat("    Servo2Raw: {0}\n", mServo2Raw);
-            sb.AppendFormat("    Servo3Raw: {0}\n", mServo3Raw);
-            sb.AppendFormat("    Servo4Raw: {0}\n", mServo4Raw);
-            sb.AppendFormat("    Servo5Raw: {0}\n", mServo5Raw);
-            sb.AppendFormat("    Servo6Raw: {0}\n", mServo6Raw);
-            sb.AppendFormat("    Servo7Raw: {0}\n", mServo7Raw);
-            sb.AppendFormat("    Servo8Raw: {0}\n", mServo8Raw);
-            sb.AppendFormat("    Port: {0}\n", mPort);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Servo1Raw", new UasFieldMetadata() {
+                Name = "Servo1Raw",
+                Description = "Servo output 1 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo2Raw", new UasFieldMetadata() {
+                Name = "Servo2Raw",
+                Description = "Servo output 2 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo3Raw", new UasFieldMetadata() {
+                Name = "Servo3Raw",
+                Description = "Servo output 3 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo4Raw", new UasFieldMetadata() {
+                Name = "Servo4Raw",
+                Description = "Servo output 4 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo5Raw", new UasFieldMetadata() {
+                Name = "Servo5Raw",
+                Description = "Servo output 5 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo6Raw", new UasFieldMetadata() {
+                Name = "Servo6Raw",
+                Description = "Servo output 6 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo7Raw", new UasFieldMetadata() {
+                Name = "Servo7Raw",
+                Description = "Servo output 7 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Servo8Raw", new UasFieldMetadata() {
+                Name = "Servo8Raw",
+                Description = "Servo output 8 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Port", new UasFieldMetadata() {
+                Name = "Port",
+                Description = "Servo output port (set of 8 outputs = 1 port). Most MAVs will just use one, but this allows to encode more than 8 servos.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeUsec;
         private UInt16 mServo1Raw;
         private UInt16 mServo2Raw;
@@ -4289,19 +4844,37 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request a partial list of mission items from the system/component. http://qgroundcontrol.org/mavlink/waypoint_protocol. If start and end index are the same, just send one waypoint."
+            };
 
-            sb.Append("MissionRequestPartialList \n");
-            sb.AppendFormat("    StartIndex: {0}\n", mStartIndex);
-            sb.AppendFormat("    EndIndex: {0}\n", mEndIndex);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("StartIndex", new UasFieldMetadata() {
+                Name = "StartIndex",
+                Description = "Start index, 0 by default",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("EndIndex", new UasFieldMetadata() {
+                Name = "EndIndex",
+                Description = "End index, -1 by default (-1: send list to end). Else a valid index of the list",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private Int16 mStartIndex;
         private Int16 mEndIndex;
         private byte mTargetSystem;
@@ -4371,19 +4944,37 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "This message is sent to the MAV to write a partial list. If start index == end index, only one item will be transmitted / updated. If the start index is NOT 0 and above the current list size, this request should be REJECTED!"
+            };
 
-            sb.Append("MissionWritePartialList \n");
-            sb.AppendFormat("    StartIndex: {0}\n", mStartIndex);
-            sb.AppendFormat("    EndIndex: {0}\n", mEndIndex);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("StartIndex", new UasFieldMetadata() {
+                Name = "StartIndex",
+                Description = "Start index, 0 by default and smaller / equal to the largest index of the current onboard list.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("EndIndex", new UasFieldMetadata() {
+                Name = "EndIndex",
+                Description = "End index, equal or greater than start index.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private Int16 mStartIndex;
         private Int16 mEndIndex;
         private byte mTargetSystem;
@@ -4553,29 +5144,99 @@ namespace MavLinkNet
             this.mAutocontinue = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Message encoding a mission item. This message is emitted to announce                  the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also http://qgroundcontrol.org/mavlink/waypoint_protocol."
+            };
 
-            sb.Append("MissionItem \n");
-            sb.AppendFormat("    Param1: {0}\n", mParam1);
-            sb.AppendFormat("    Param2: {0}\n", mParam2);
-            sb.AppendFormat("    Param3: {0}\n", mParam3);
-            sb.AppendFormat("    Param4: {0}\n", mParam4);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
-            sb.AppendFormat("    Command: {0}\n", mCommand);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Frame: {0}\n", mFrame);
-            sb.AppendFormat("    Current: {0}\n", mCurrent);
-            sb.AppendFormat("    Autocontinue: {0}\n", mAutocontinue);
+            mMetadata.Fields.Add("Param1", new UasFieldMetadata() {
+                Name = "Param1",
+                Description = "PARAM1 / For NAV command MISSIONs: Radius in which the MISSION is accepted as reached, in meters",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Param2", new UasFieldMetadata() {
+                Name = "Param2",
+                Description = "PARAM2 / For NAV command MISSIONs: Time that the MAV should stay inside the PARAM1 radius before advancing, in milliseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param3", new UasFieldMetadata() {
+                Name = "Param3",
+                Description = "PARAM3 / For LOITER command MISSIONs: Orbit to circle around the MISSION, in meters. If positive the orbit direction should be clockwise, if negative the orbit direction should be counter-clockwise.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param4", new UasFieldMetadata() {
+                Name = "Param4",
+                Description = "PARAM4 / For NAV and LOITER command MISSIONs: Yaw orientation in degrees, [0..360] 0 = NORTH",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "PARAM5 / local: x position, global: latitude",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "PARAM6 / y position: global: longitude",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "PARAM7 / z position: global: altitude",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "Sequence",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Command", new UasFieldMetadata() {
+                Name = "Command",
+                Description = "The scheduled action for the MISSION. see MAV_CMD in common.xml MAVLink specs",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavCmd"),
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Frame", new UasFieldMetadata() {
+                Name = "Frame",
+                Description = "The coordinate system of the MISSION. see MAV_FRAME in mavlink_types.h",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
+            mMetadata.Fields.Add("Current", new UasFieldMetadata() {
+                Name = "Current",
+                Description = "false:0, true:1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Autocontinue", new UasFieldMetadata() {
+                Name = "Autocontinue",
+                Description = "autocontinue to next wp",
+                NumElements = 1,
+            });
+
         }
-
         private float mParam1;
         private float mParam2;
         private float mParam3;
@@ -4645,18 +5306,31 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM message. http://qgroundcontrol.org/mavlink/waypoint_protocol"
+            };
 
-            sb.Append("MissionRequest \n");
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "Sequence",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mSeq;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -4715,18 +5389,31 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the mission item with sequence number seq as current item. This means that the MAV will continue to this mission item on the shortest path (not following the mission items in-between)."
+            };
 
-            sb.Append("MissionSetCurrent \n");
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "Sequence",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mSeq;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -4765,16 +5452,19 @@ namespace MavLinkNet
             this.mSeq = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Message that announces the sequence number of the current active mission item. The MAV will fly towards this mission item."
+            };
 
-            sb.Append("MissionCurrent \n");
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "Sequence",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
         }
-
         private UInt16 mSeq;
     }
 
@@ -4821,17 +5511,25 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request the overall list of mission items from the system/component."
+            };
 
-            sb.Append("MissionRequestList \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
     }
@@ -4889,18 +5587,31 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "This message is emitted as response to MISSION_REQUEST_LIST by the MAV and to initiate a write transaction. The GCS can then request the individual mission item based on the knowledge of the total number of MISSIONs."
+            };
 
-            sb.Append("MissionCount \n");
-            sb.AppendFormat("    Count: {0}\n", mCount);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("Count", new UasFieldMetadata() {
+                Name = "Count",
+                Description = "Number of mission items in the sequence",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mCount;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -4949,17 +5660,25 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Delete all mission items at once."
+            };
 
-            sb.Append("MissionClearAll \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
     }
@@ -4997,16 +5716,19 @@ namespace MavLinkNet
             this.mSeq = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "A certain mission item has been reached. The system will either hold this position (or circle on the orbit) or (if the autocontinue on the WP was set) continue to the next MISSION."
+            };
 
-            sb.Append("MissionItemReached \n");
-            sb.AppendFormat("    Seq: {0}\n", mSeq);
+            mMetadata.Fields.Add("Seq", new UasFieldMetadata() {
+                Name = "Seq",
+                Description = "Sequence",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
         }
-
         private UInt16 mSeq;
     }
 
@@ -5063,18 +5785,32 @@ namespace MavLinkNet
             this.mType = (MavMissionResult)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Ack message during MISSION handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero)."
+            };
 
-            sb.Append("MissionAck \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Type: {0}\n", mType);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "See MAV_MISSION_RESULT enum",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavMissionResult"),
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
         private MavMissionResult mType;
@@ -5143,19 +5879,37 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "As local waypoints exist, the global MISSION reference allows to transform between the local coordinate frame and the global (GPS) coordinate frame. This can be necessary when e.g. in- and outdoor settings are connected and the MAV should move from in- to outdoor."
+            };
 
-            sb.Append("SetGpsGlobalOrigin \n");
-            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
-            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
-            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            mMetadata.Fields.Add("Latitude", new UasFieldMetadata() {
+                Name = "Latitude",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Longitude", new UasFieldMetadata() {
+                Name = "Longitude",
+                Description = "Longitude (WGS84, in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Altitude", new UasFieldMetadata() {
+                Name = "Altitude",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
         }
-
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -5215,18 +5969,31 @@ namespace MavLinkNet
             this.mAltitude = s.ReadInt32();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Once the MAV sets a new GPS-Local correspondence, this message announces the origin (0,0,0) position"
+            };
 
-            sb.Append("GpsGlobalOrigin \n");
-            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
-            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
-            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
+            mMetadata.Fields.Add("Latitude", new UasFieldMetadata() {
+                Name = "Latitude",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Longitude", new UasFieldMetadata() {
+                Name = "Longitude",
+                Description = "Longitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Altitude", new UasFieldMetadata() {
+                Name = "Altitude",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
         }
-
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -5325,22 +6092,56 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the setpoint for a local position controller. This is the position in local coordinates the MAV should fly to. This message is sent by the path/MISSION planner to the onboard position controller. As some MAVs have a degree of freedom in yaw (e.g. all helicopters/quadrotors), the desired yaw angle is part of the message."
+            };
 
-            sb.Append("SetLocalPositionSetpoint \n");
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "x position",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "y position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "z position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CoordinateFrame", new UasFieldMetadata() {
+                Name = "CoordinateFrame",
+                Description = "Coordinate frame - valid values are only MAV_FRAME_LOCAL_NED or MAV_FRAME_LOCAL_ENU",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private float mX;
         private float mY;
         private float mZ;
@@ -5423,20 +6224,44 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Transmit the current local setpoint of the controller to other MAVs (collision avoidance) and to the GCS."
+            };
 
-            sb.Append("LocalPositionSetpoint \n");
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "x position",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "y position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "z position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CoordinateFrame", new UasFieldMetadata() {
+                Name = "CoordinateFrame",
+                Description = "Coordinate frame - valid values are only MAV_FRAME_LOCAL_NED or MAV_FRAME_LOCAL_ENU",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private float mX;
         private float mY;
         private float mZ;
@@ -5517,20 +6342,44 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Transmit the current local setpoint of the controller to other MAVs (collision avoidance) and to the GCS."
+            };
 
-            sb.Append("GlobalPositionSetpointInt \n");
-            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
-            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
-            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+            mMetadata.Fields.Add("Latitude", new UasFieldMetadata() {
+                Name = "Latitude",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Longitude", new UasFieldMetadata() {
+                Name = "Longitude",
+                Description = "Longitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Altitude", new UasFieldMetadata() {
+                Name = "Altitude",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in degrees * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CoordinateFrame", new UasFieldMetadata() {
+                Name = "CoordinateFrame",
+                Description = "Coordinate frame - valid values are only MAV_FRAME_GLOBAL or MAV_FRAME_GLOBAL_RELATIVE_ALT",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -5611,20 +6460,44 @@ namespace MavLinkNet
             this.mCoordinateFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the current global position setpoint."
+            };
 
-            sb.Append("SetGlobalPositionSetpointInt \n");
-            sb.AppendFormat("    Latitude: {0}\n", mLatitude);
-            sb.AppendFormat("    Longitude: {0}\n", mLongitude);
-            sb.AppendFormat("    Altitude: {0}\n", mAltitude);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    CoordinateFrame: {0}\n", mCoordinateFrame);
+            mMetadata.Fields.Add("Latitude", new UasFieldMetadata() {
+                Name = "Latitude",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Longitude", new UasFieldMetadata() {
+                Name = "Longitude",
+                Description = "Longitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Altitude", new UasFieldMetadata() {
+                Name = "Altitude",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in degrees * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CoordinateFrame", new UasFieldMetadata() {
+                Name = "CoordinateFrame",
+                Description = "Coordinate frame - valid values are only MAV_FRAME_GLOBAL or MAV_FRAME_GLOBAL_RELATIVE_ALT",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private Int32 mLatitude;
         private Int32 mLongitude;
         private Int32 mAltitude;
@@ -5745,24 +6618,68 @@ namespace MavLinkNet
             this.mFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set a safety zone (volume), which is defined by two corners of a cube. This message can be used to tell the MAV which setpoints/MISSIONs to accept and which to reject. Safety areas are often enforced by national or competition regulations."
+            };
 
-            sb.Append("SafetySetAllowedArea \n");
-            sb.AppendFormat("    P1x: {0}\n", mP1x);
-            sb.AppendFormat("    P1y: {0}\n", mP1y);
-            sb.AppendFormat("    P1z: {0}\n", mP1z);
-            sb.AppendFormat("    P2x: {0}\n", mP2x);
-            sb.AppendFormat("    P2y: {0}\n", mP2y);
-            sb.AppendFormat("    P2z: {0}\n", mP2z);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Frame: {0}\n", mFrame);
+            mMetadata.Fields.Add("P1x", new UasFieldMetadata() {
+                Name = "P1x",
+                Description = "x position 1 / Latitude 1",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("P1y", new UasFieldMetadata() {
+                Name = "P1y",
+                Description = "y position 1 / Longitude 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P1z", new UasFieldMetadata() {
+                Name = "P1z",
+                Description = "z position 1 / Altitude 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2x", new UasFieldMetadata() {
+                Name = "P2x",
+                Description = "x position 2 / Latitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2y", new UasFieldMetadata() {
+                Name = "P2y",
+                Description = "y position 2 / Longitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2z", new UasFieldMetadata() {
+                Name = "P2z",
+                Description = "z position 2 / Altitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Frame", new UasFieldMetadata() {
+                Name = "Frame",
+                Description = "Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private float mP1x;
         private float mP1y;
         private float mP1z;
@@ -5867,22 +6784,56 @@ namespace MavLinkNet
             this.mFrame = (MavFrame)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Read out the safety zone the MAV currently assumes."
+            };
 
-            sb.Append("SafetyAllowedArea \n");
-            sb.AppendFormat("    P1x: {0}\n", mP1x);
-            sb.AppendFormat("    P1y: {0}\n", mP1y);
-            sb.AppendFormat("    P1z: {0}\n", mP1z);
-            sb.AppendFormat("    P2x: {0}\n", mP2x);
-            sb.AppendFormat("    P2y: {0}\n", mP2y);
-            sb.AppendFormat("    P2z: {0}\n", mP2z);
-            sb.AppendFormat("    Frame: {0}\n", mFrame);
+            mMetadata.Fields.Add("P1x", new UasFieldMetadata() {
+                Name = "P1x",
+                Description = "x position 1 / Latitude 1",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("P1y", new UasFieldMetadata() {
+                Name = "P1y",
+                Description = "y position 1 / Longitude 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P1z", new UasFieldMetadata() {
+                Name = "P1z",
+                Description = "z position 1 / Altitude 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2x", new UasFieldMetadata() {
+                Name = "P2x",
+                Description = "x position 2 / Latitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2y", new UasFieldMetadata() {
+                Name = "P2y",
+                Description = "y position 2 / Longitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("P2z", new UasFieldMetadata() {
+                Name = "P2z",
+                Description = "z position 2 / Altitude 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Frame", new UasFieldMetadata() {
+                Name = "Frame",
+                Description = "Coordinate frame, as defined by MAV_FRAME enum in mavlink_types.h. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavFrame"),
+            });
+
         }
-
         private float mP1x;
         private float mP1y;
         private float mP1z;
@@ -5975,21 +6926,49 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set roll, pitch and yaw."
+            };
 
-            sb.Append("SetRollPitchYawThrust \n");
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Desired roll angle in radians",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Desired pitch angle in radians",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in radians",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private float mRoll;
         private float mPitch;
         private float mYaw;
@@ -6081,21 +7060,49 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set roll, pitch and yaw."
+            };
 
-            sb.Append("SetRollPitchYawSpeedThrust \n");
-            sb.AppendFormat("    RollSpeed: {0}\n", mRollSpeed);
-            sb.AppendFormat("    PitchSpeed: {0}\n", mPitchSpeed);
-            sb.AppendFormat("    YawSpeed: {0}\n", mYawSpeed);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("RollSpeed", new UasFieldMetadata() {
+                Name = "RollSpeed",
+                Description = "Desired roll angular speed in rad/s",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("PitchSpeed", new UasFieldMetadata() {
+                Name = "PitchSpeed",
+                Description = "Desired pitch angular speed in rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("YawSpeed", new UasFieldMetadata() {
+                Name = "YawSpeed",
+                Description = "Desired yaw angular speed in rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private float mRollSpeed;
         private float mPitchSpeed;
         private float mYawSpeed;
@@ -6177,20 +7184,43 @@ namespace MavLinkNet
             this.mThrust = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint in roll, pitch, yaw currently active on the system."
+            };
 
-            sb.Append("RollPitchYawThrustSetpoint \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp in milliseconds since system boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Desired roll angle in radians",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Desired pitch angle in radians",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in radians",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mRoll;
         private float mPitch;
@@ -6271,20 +7301,43 @@ namespace MavLinkNet
             this.mThrust = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint in rollspeed, pitchspeed, yawspeed currently active on the system."
+            };
 
-            sb.Append("RollPitchYawSpeedThrustSetpoint \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    RollSpeed: {0}\n", mRollSpeed);
-            sb.AppendFormat("    PitchSpeed: {0}\n", mPitchSpeed);
-            sb.AppendFormat("    YawSpeed: {0}\n", mYawSpeed);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp in milliseconds since system boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("RollSpeed", new UasFieldMetadata() {
+                Name = "RollSpeed",
+                Description = "Desired roll angular speed in rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PitchSpeed", new UasFieldMetadata() {
+                Name = "PitchSpeed",
+                Description = "Desired pitch angular speed in rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("YawSpeed", new UasFieldMetadata() {
+                Name = "YawSpeed",
+                Description = "Desired yaw angular speed in rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mRollSpeed;
         private float mPitchSpeed;
@@ -6365,20 +7418,43 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint in the four motor speeds"
+            };
 
-            sb.Append("SetQuadMotorsSetpoint \n");
-            sb.AppendFormat("    MotorFrontNw: {0}\n", mMotorFrontNw);
-            sb.AppendFormat("    MotorRightNe: {0}\n", mMotorRightNe);
-            sb.AppendFormat("    MotorBackSe: {0}\n", mMotorBackSe);
-            sb.AppendFormat("    MotorLeftSw: {0}\n", mMotorLeftSw);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            mMetadata.Fields.Add("MotorFrontNw", new UasFieldMetadata() {
+                Name = "MotorFrontNw",
+                Description = "Front motor in + configuration, front left motor in x configuration",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("MotorRightNe", new UasFieldMetadata() {
+                Name = "MotorRightNe",
+                Description = "Right motor in + configuration, front right motor in x configuration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MotorBackSe", new UasFieldMetadata() {
+                Name = "MotorBackSe",
+                Description = "Back motor in + configuration, back right motor in x configuration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MotorLeftSw", new UasFieldMetadata() {
+                Name = "MotorLeftSw",
+                Description = "Left motor in + configuration, back left motor in x configuration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID of the system that should set these motor commands",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mMotorFrontNw;
         private UInt16 mMotorRightNe;
         private UInt16 mMotorBackSe;
@@ -6493,37 +7569,49 @@ namespace MavLinkNet
             this.mMode = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint for up to four quadrotors in a group / wing"
+            };
 
-            sb.Append("SetQuadSwarmRollPitchYawThrust \n");
-            sb.Append("    Roll\n");
-            sb.AppendFormat("        [0]: {0}\n", mRoll[0]);
-            sb.AppendFormat("        [1]: {0}\n", mRoll[1]);
-            sb.AppendFormat("        [2]: {0}\n", mRoll[2]);
-            sb.AppendFormat("        [3]: {0}\n", mRoll[3]);
-            sb.Append("    Pitch\n");
-            sb.AppendFormat("        [0]: {0}\n", mPitch[0]);
-            sb.AppendFormat("        [1]: {0}\n", mPitch[1]);
-            sb.AppendFormat("        [2]: {0}\n", mPitch[2]);
-            sb.AppendFormat("        [3]: {0}\n", mPitch[3]);
-            sb.Append("    Yaw\n");
-            sb.AppendFormat("        [0]: {0}\n", mYaw[0]);
-            sb.AppendFormat("        [1]: {0}\n", mYaw[1]);
-            sb.AppendFormat("        [2]: {0}\n", mYaw[2]);
-            sb.AppendFormat("        [3]: {0}\n", mYaw[3]);
-            sb.Append("    Thrust\n");
-            sb.AppendFormat("        [0]: {0}\n", mThrust[0]);
-            sb.AppendFormat("        [1]: {0}\n", mThrust[1]);
-            sb.AppendFormat("        [2]: {0}\n", mThrust[2]);
-            sb.AppendFormat("        [3]: {0}\n", mThrust[3]);
-            sb.AppendFormat("    Group: {0}\n", mGroup);
-            sb.AppendFormat("    Mode: {0}\n", mMode);
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Desired roll angle in radians +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Desired pitch angle in radians +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in radians, scaled to int16 +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, scaled to uint16 (0..UINT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Group", new UasFieldMetadata() {
+                Name = "Group",
+                Description = "ID of the quadrotor group (0 - 255, up to 256 groups supported)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Mode", new UasFieldMetadata() {
+                Name = "Mode",
+                Description = "ID of the flight mode (0 - 255, up to 256 modes supported)",
+                NumElements = 1,
+            });
+
         }
-
         private Int16[] mRoll = new Int16[4];
         private Int16[] mPitch = new Int16[4];
         private Int16[] mYaw = new Int16[4];
@@ -6635,23 +7723,61 @@ namespace MavLinkNet
             this.mWpDist = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Outputs of the APM navigation controller. The primary use of this message is to check the response and signs of the controller before actual flight and to assist with tuning controller parameters."
+            };
 
-            sb.Append("NavControllerOutput \n");
-            sb.AppendFormat("    NavRoll: {0}\n", mNavRoll);
-            sb.AppendFormat("    NavPitch: {0}\n", mNavPitch);
-            sb.AppendFormat("    AltError: {0}\n", mAltError);
-            sb.AppendFormat("    AspdError: {0}\n", mAspdError);
-            sb.AppendFormat("    XtrackError: {0}\n", mXtrackError);
-            sb.AppendFormat("    NavBearing: {0}\n", mNavBearing);
-            sb.AppendFormat("    TargetBearing: {0}\n", mTargetBearing);
-            sb.AppendFormat("    WpDist: {0}\n", mWpDist);
+            mMetadata.Fields.Add("NavRoll", new UasFieldMetadata() {
+                Name = "NavRoll",
+                Description = "Current desired roll in degrees",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("NavPitch", new UasFieldMetadata() {
+                Name = "NavPitch",
+                Description = "Current desired pitch in degrees",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AltError", new UasFieldMetadata() {
+                Name = "AltError",
+                Description = "Current altitude error in meters",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AspdError", new UasFieldMetadata() {
+                Name = "AspdError",
+                Description = "Current airspeed error in meters/second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("XtrackError", new UasFieldMetadata() {
+                Name = "XtrackError",
+                Description = "Current crosstrack error on x-y plane in meters",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("NavBearing", new UasFieldMetadata() {
+                Name = "NavBearing",
+                Description = "Current desired heading in degrees",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetBearing", new UasFieldMetadata() {
+                Name = "TargetBearing",
+                Description = "Bearing to current MISSION/target in degrees",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("WpDist", new UasFieldMetadata() {
+                Name = "WpDist",
+                Description = "Distance to active MISSION in meters",
+                NumElements = 1,
+            });
+
         }
-
         private float mNavRoll;
         private float mNavPitch;
         private float mAltError;
@@ -6817,52 +7943,67 @@ namespace MavLinkNet
             this.mLedGreen[3] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint for up to four quadrotors in a group / wing"
+            };
 
-            sb.Append("SetQuadSwarmLedRollPitchYawThrust \n");
-            sb.Append("    Roll\n");
-            sb.AppendFormat("        [0]: {0}\n", mRoll[0]);
-            sb.AppendFormat("        [1]: {0}\n", mRoll[1]);
-            sb.AppendFormat("        [2]: {0}\n", mRoll[2]);
-            sb.AppendFormat("        [3]: {0}\n", mRoll[3]);
-            sb.Append("    Pitch\n");
-            sb.AppendFormat("        [0]: {0}\n", mPitch[0]);
-            sb.AppendFormat("        [1]: {0}\n", mPitch[1]);
-            sb.AppendFormat("        [2]: {0}\n", mPitch[2]);
-            sb.AppendFormat("        [3]: {0}\n", mPitch[3]);
-            sb.Append("    Yaw\n");
-            sb.AppendFormat("        [0]: {0}\n", mYaw[0]);
-            sb.AppendFormat("        [1]: {0}\n", mYaw[1]);
-            sb.AppendFormat("        [2]: {0}\n", mYaw[2]);
-            sb.AppendFormat("        [3]: {0}\n", mYaw[3]);
-            sb.Append("    Thrust\n");
-            sb.AppendFormat("        [0]: {0}\n", mThrust[0]);
-            sb.AppendFormat("        [1]: {0}\n", mThrust[1]);
-            sb.AppendFormat("        [2]: {0}\n", mThrust[2]);
-            sb.AppendFormat("        [3]: {0}\n", mThrust[3]);
-            sb.AppendFormat("    Group: {0}\n", mGroup);
-            sb.AppendFormat("    Mode: {0}\n", mMode);
-            sb.Append("    LedRed\n");
-            sb.AppendFormat("        [0]: {0}\n", mLedRed[0]);
-            sb.AppendFormat("        [1]: {0}\n", mLedRed[1]);
-            sb.AppendFormat("        [2]: {0}\n", mLedRed[2]);
-            sb.AppendFormat("        [3]: {0}\n", mLedRed[3]);
-            sb.Append("    LedBlue\n");
-            sb.AppendFormat("        [0]: {0}\n", mLedBlue[0]);
-            sb.AppendFormat("        [1]: {0}\n", mLedBlue[1]);
-            sb.AppendFormat("        [2]: {0}\n", mLedBlue[2]);
-            sb.AppendFormat("        [3]: {0}\n", mLedBlue[3]);
-            sb.Append("    LedGreen\n");
-            sb.AppendFormat("        [0]: {0}\n", mLedGreen[0]);
-            sb.AppendFormat("        [1]: {0}\n", mLedGreen[1]);
-            sb.AppendFormat("        [2]: {0}\n", mLedGreen[2]);
-            sb.AppendFormat("        [3]: {0}\n", mLedGreen[3]);
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Desired roll angle in radians +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Desired pitch angle in radians +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw angle in radians, scaled to int16 +-PI (+-INT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, scaled to uint16 (0..UINT16_MAX)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Group", new UasFieldMetadata() {
+                Name = "Group",
+                Description = "ID of the quadrotor group (0 - 255, up to 256 groups supported)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Mode", new UasFieldMetadata() {
+                Name = "Mode",
+                Description = "ID of the flight mode (0 - 255, up to 256 modes supported)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("LedRed", new UasFieldMetadata() {
+                Name = "LedRed",
+                Description = "RGB red channel (0-255)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("LedBlue", new UasFieldMetadata() {
+                Name = "LedBlue",
+                Description = "RGB green channel (0-255)",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("LedGreen", new UasFieldMetadata() {
+                Name = "LedGreen",
+                Description = "RGB blue channel (0-255)",
+                NumElements = 4,
+            });
+
         }
-
         private Int16[] mRoll = new Int16[4];
         private Int16[] mPitch = new Int16[4];
         private Int16[] mYaw = new Int16[4];
@@ -6987,24 +8128,67 @@ namespace MavLinkNet
             this.mVzerr = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Corrects the systems state by adding an error correction term to the position and velocity, and by rotating the attitude by a correction angle."
+            };
 
-            sb.Append("StateCorrection \n");
-            sb.AppendFormat("    Xerr: {0}\n", mXerr);
-            sb.AppendFormat("    Yerr: {0}\n", mYerr);
-            sb.AppendFormat("    Zerr: {0}\n", mZerr);
-            sb.AppendFormat("    Rollerr: {0}\n", mRollerr);
-            sb.AppendFormat("    Pitcherr: {0}\n", mPitcherr);
-            sb.AppendFormat("    Yawerr: {0}\n", mYawerr);
-            sb.AppendFormat("    Vxerr: {0}\n", mVxerr);
-            sb.AppendFormat("    Vyerr: {0}\n", mVyerr);
-            sb.AppendFormat("    Vzerr: {0}\n", mVzerr);
+            mMetadata.Fields.Add("Xerr", new UasFieldMetadata() {
+                Name = "Xerr",
+                Description = "x position error",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Yerr", new UasFieldMetadata() {
+                Name = "Yerr",
+                Description = "y position error",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zerr", new UasFieldMetadata() {
+                Name = "Zerr",
+                Description = "z position error",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rollerr", new UasFieldMetadata() {
+                Name = "Rollerr",
+                Description = "roll error (radians)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitcherr", new UasFieldMetadata() {
+                Name = "Pitcherr",
+                Description = "pitch error (radians)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yawerr", new UasFieldMetadata() {
+                Name = "Yawerr",
+                Description = "yaw error (radians)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vxerr", new UasFieldMetadata() {
+                Name = "Vxerr",
+                Description = "x velocity",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vyerr", new UasFieldMetadata() {
+                Name = "Vyerr",
+                Description = "y velocity",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vzerr", new UasFieldMetadata() {
+                Name = "Vzerr",
+                Description = "z velocity",
+                NumElements = 1,
+            });
+
         }
-
         private float mXerr;
         private float mYerr;
         private float mZerr;
@@ -7086,20 +8270,43 @@ namespace MavLinkNet
             this.mStartStop = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("RequestDataStream \n");
-            sb.AppendFormat("    ReqMessageRate: {0}\n", mReqMessageRate);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    ReqStreamId: {0}\n", mReqStreamId);
-            sb.AppendFormat("    StartStop: {0}\n", mStartStop);
+            mMetadata.Fields.Add("ReqMessageRate", new UasFieldMetadata() {
+                Name = "ReqMessageRate",
+                Description = "The requested interval between two messages of this type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "The target requested to send the message stream.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "The target requested to send the message stream.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ReqStreamId", new UasFieldMetadata() {
+                Name = "ReqStreamId",
+                Description = "The ID of the requested data stream",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StartStop", new UasFieldMetadata() {
+                Name = "StartStop",
+                Description = "1 to start sending, 0 to stop sending.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mReqMessageRate;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -7157,18 +8364,31 @@ namespace MavLinkNet
             this.mOnOff = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("DataStream \n");
-            sb.AppendFormat("    MessageRate: {0}\n", mMessageRate);
-            sb.AppendFormat("    StreamId: {0}\n", mStreamId);
-            sb.AppendFormat("    OnOff: {0}\n", mOnOff);
+            mMetadata.Fields.Add("MessageRate", new UasFieldMetadata() {
+                Name = "MessageRate",
+                Description = "The requested interval between two messages of this type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("StreamId", new UasFieldMetadata() {
+                Name = "StreamId",
+                Description = "The ID of the requested data stream",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("OnOff", new UasFieldMetadata() {
+                Name = "OnOff",
+                Description = "1 stream is enabled, 0 stream is stopped.",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mMessageRate;
         private byte mStreamId;
         private byte mOnOff;
@@ -7257,21 +8477,49 @@ namespace MavLinkNet
             this.mTarget = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "This message provides an API for manually controlling the vehicle using standard joystick axes nomenclature, along with a joystick-like input device. Unused axes can be disabled an buttons are also transmit as boolean values of their "
+            };
 
-            sb.Append("ManualControl \n");
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    R: {0}\n", mR);
-            sb.AppendFormat("    Buttons: {0}\n", mButtons);
-            sb.AppendFormat("    Target: {0}\n", mTarget);
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "X-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to forward(1000)-backward(-1000) movement on a joystick and the pitch of a vehicle.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Y-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to left(-1000)-right(1000) movement on a joystick and the roll of a vehicle.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Z-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to a separate slider movement with maximum being 1000 and minimum being -1000 on a joystick and the thrust of a vehicle.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("R", new UasFieldMetadata() {
+                Name = "R",
+                Description = "R-axis, normalized to the range [-1000,1000]. A value of INT16_MAX indicates that this axis is invalid. Generally corresponds to a twisting of the joystick, with counter-clockwise being 1000 and clockwise being -1000, and the yaw of a vehicle.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Buttons", new UasFieldMetadata() {
+                Name = "Buttons",
+                Description = "A bitfield corresponding to the joystick buttons' current state, 1 for pressed, 0 for released. The lowest bit corresponds to Button 1.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Target", new UasFieldMetadata() {
+                Name = "Target",
+                Description = "The system to be controlled.",
+                NumElements = 1,
+            });
+
         }
-
         private Int16 mX;
         private Int16 mY;
         private Int16 mZ;
@@ -7403,25 +8651,73 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The RAW values of the RC channels sent to the MAV to override info received from the RC radio. A value of UINT16_MAX means no change to that channel. A value of 0 means control of that channel should be released back to the RC radio. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification."
+            };
 
-            sb.Append("RcChannelsOverride \n");
-            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
-            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
-            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
-            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
-            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
-            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
-            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
-            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("Chan1Raw", new UasFieldMetadata() {
+                Name = "Chan1Raw",
+                Description = "RC channel 1 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Chan2Raw", new UasFieldMetadata() {
+                Name = "Chan2Raw",
+                Description = "RC channel 2 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan3Raw", new UasFieldMetadata() {
+                Name = "Chan3Raw",
+                Description = "RC channel 3 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan4Raw", new UasFieldMetadata() {
+                Name = "Chan4Raw",
+                Description = "RC channel 4 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan5Raw", new UasFieldMetadata() {
+                Name = "Chan5Raw",
+                Description = "RC channel 5 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan6Raw", new UasFieldMetadata() {
+                Name = "Chan6Raw",
+                Description = "RC channel 6 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan7Raw", new UasFieldMetadata() {
+                Name = "Chan7Raw",
+                Description = "RC channel 7 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan8Raw", new UasFieldMetadata() {
+                Name = "Chan8Raw",
+                Description = "RC channel 8 value, in microseconds. A value of UINT16_MAX means to ignore this field.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
         private UInt16 mChan3Raw;
@@ -7517,21 +8813,49 @@ namespace MavLinkNet
             this.mThrottle = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Metrics typically displayed on a HUD for fixed wing aircraft"
+            };
 
-            sb.Append("VfrHud \n");
-            sb.AppendFormat("    Airspeed: {0}\n", mAirspeed);
-            sb.AppendFormat("    Groundspeed: {0}\n", mGroundspeed);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    Climb: {0}\n", mClimb);
-            sb.AppendFormat("    Heading: {0}\n", mHeading);
-            sb.AppendFormat("    Throttle: {0}\n", mThrottle);
+            mMetadata.Fields.Add("Airspeed", new UasFieldMetadata() {
+                Name = "Airspeed",
+                Description = "Current airspeed in m/s",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Groundspeed", new UasFieldMetadata() {
+                Name = "Groundspeed",
+                Description = "Current ground speed in m/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Current altitude (MSL), in meters",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Climb", new UasFieldMetadata() {
+                Name = "Climb",
+                Description = "Current climb rate in meters/second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Heading", new UasFieldMetadata() {
+                Name = "Heading",
+                Description = "Current heading in degrees, in compass units (0..360, 0=north)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Throttle", new UasFieldMetadata() {
+                Name = "Throttle",
+                Description = "Current throttle setting in integer percent, 0 to 100",
+                NumElements = 1,
+            });
+
         }
-
         private float mAirspeed;
         private float mGroundspeed;
         private float mAlt;
@@ -7673,26 +8997,80 @@ namespace MavLinkNet
             this.mConfirmation = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Send a command with up to seven parameters to the MAV"
+            };
 
-            sb.Append("CommandLong \n");
-            sb.AppendFormat("    Param1: {0}\n", mParam1);
-            sb.AppendFormat("    Param2: {0}\n", mParam2);
-            sb.AppendFormat("    Param3: {0}\n", mParam3);
-            sb.AppendFormat("    Param4: {0}\n", mParam4);
-            sb.AppendFormat("    Param5: {0}\n", mParam5);
-            sb.AppendFormat("    Param6: {0}\n", mParam6);
-            sb.AppendFormat("    Param7: {0}\n", mParam7);
-            sb.AppendFormat("    Command: {0}\n", mCommand);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Confirmation: {0}\n", mConfirmation);
+            mMetadata.Fields.Add("Param1", new UasFieldMetadata() {
+                Name = "Param1",
+                Description = "Parameter 1, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Param2", new UasFieldMetadata() {
+                Name = "Param2",
+                Description = "Parameter 2, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param3", new UasFieldMetadata() {
+                Name = "Param3",
+                Description = "Parameter 3, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param4", new UasFieldMetadata() {
+                Name = "Param4",
+                Description = "Parameter 4, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param5", new UasFieldMetadata() {
+                Name = "Param5",
+                Description = "Parameter 5, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param6", new UasFieldMetadata() {
+                Name = "Param6",
+                Description = "Parameter 6, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Param7", new UasFieldMetadata() {
+                Name = "Param7",
+                Description = "Parameter 7, as defined by MAV_CMD enum.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Command", new UasFieldMetadata() {
+                Name = "Command",
+                Description = "Command ID, as defined by MAV_CMD enum.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavCmd"),
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System which should execute the command",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component which should execute the command, 0 for all components",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Confirmation", new UasFieldMetadata() {
+                Name = "Confirmation",
+                Description = "0: First transmission of this command. 1-255: Confirmation transmissions (e.g. for kill command)",
+                NumElements = 1,
+            });
+
         }
-
         private float mParam1;
         private float mParam2;
         private float mParam3;
@@ -7749,17 +9127,27 @@ namespace MavLinkNet
             this.mResult = (MavResult)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Report status of a command. Includes feedback wether the command was executed."
+            };
 
-            sb.Append("CommandAck \n");
-            sb.AppendFormat("    Command: {0}\n", mCommand);
-            sb.AppendFormat("    Result: {0}\n", mResult);
+            mMetadata.Fields.Add("Command", new UasFieldMetadata() {
+                Name = "Command",
+                Description = "Command ID, as defined by MAV_CMD enum.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavCmd"),
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Result", new UasFieldMetadata() {
+                Name = "Result",
+                Description = "See MAV_RESULT enum",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavResult"),
+            });
+
         }
-
         private MavCmd mCommand;
         private MavResult mResult;
     }
@@ -7837,20 +9225,43 @@ namespace MavLinkNet
             this.mThrust = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint in roll, pitch, yaw rates and thrust currently active on the system."
+            };
 
-            sb.Append("RollPitchYawRatesThrustSetpoint \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    RollRate: {0}\n", mRollRate);
-            sb.AppendFormat("    PitchRate: {0}\n", mPitchRate);
-            sb.AppendFormat("    YawRate: {0}\n", mYawRate);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp in milliseconds since system boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("RollRate", new UasFieldMetadata() {
+                Name = "RollRate",
+                Description = "Desired roll rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PitchRate", new UasFieldMetadata() {
+                Name = "PitchRate",
+                Description = "Desired pitch rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("YawRate", new UasFieldMetadata() {
+                Name = "YawRate",
+                Description = "Desired yaw rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mRollRate;
         private float mPitchRate;
@@ -7951,22 +9362,55 @@ namespace MavLinkNet
             this.mManualOverrideSwitch = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Setpoint in roll, pitch, yaw and thrust from the operator"
+            };
 
-            sb.Append("ManualSetpoint \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Thrust: {0}\n", mThrust);
-            sb.AppendFormat("    ModeSwitch: {0}\n", mModeSwitch);
-            sb.AppendFormat("    ManualOverrideSwitch: {0}\n", mManualOverrideSwitch);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp in milliseconds since system boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Desired roll rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Desired pitch rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Desired yaw rate in radians per second",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Thrust", new UasFieldMetadata() {
+                Name = "Thrust",
+                Description = "Collective thrust, normalized to 0 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ModeSwitch", new UasFieldMetadata() {
+                Name = "ModeSwitch",
+                Description = "Flight mode switch position, 0.. 255",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ManualOverrideSwitch", new UasFieldMetadata() {
+                Name = "ManualOverrideSwitch",
+                Description = "Override mode switch position, 0.. 255",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mRoll;
         private float mPitch;
@@ -8069,22 +9513,55 @@ namespace MavLinkNet
             this.mYaw = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The offset in X, Y, Z and yaw between the LOCAL_POSITION_NED messages of MAV X and the global coordinate frame in NED coordinates. Coordinate frame is right-handed, Z-axis down (aeronautical frame, NED / north-east-down convention)"
+            };
 
-            sb.Append("LocalPositionNedSystemGlobalOffset \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "X Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Y Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Z Position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mX;
         private float mY;
@@ -8277,31 +9754,109 @@ namespace MavLinkNet
             this.mZacc = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "DEPRECATED PACKET! Suffers from missing airspeed fields and singularities due to Euler angles. Please use HIL_STATE_QUATERNION instead. Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations."
+            };
 
-            sb.Append("HilState \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
-            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
-            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    Vx: {0}\n", mVx);
-            sb.AppendFormat("    Vy: {0}\n", mVy);
-            sb.AppendFormat("    Vz: {0}\n", mVz);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle (rad)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle (rad)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle (rad)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rollspeed", new UasFieldMetadata() {
+                Name = "Rollspeed",
+                Description = "Body frame roll / phi angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitchspeed", new UasFieldMetadata() {
+                Name = "Pitchspeed",
+                Description = "Body frame pitch / theta angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yawspeed", new UasFieldMetadata() {
+                Name = "Yawspeed",
+                Description = "Body frame yaw / psi angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude in meters, expressed as * 1000 (millimeters)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vx", new UasFieldMetadata() {
+                Name = "Vx",
+                Description = "Ground X Speed (Latitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vy", new UasFieldMetadata() {
+                Name = "Vy",
+                Description = "Ground Y Speed (Longitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vz", new UasFieldMetadata() {
+                Name = "Vz",
+                Description = "Ground Z Speed (Altitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (mg)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mRoll;
         private float mPitch;
@@ -8453,26 +10008,80 @@ namespace MavLinkNet
             this.mNavMode = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Sent from autopilot to simulation. Hardware in the loop control outputs"
+            };
 
-            sb.Append("HilControls \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    RollAilerons: {0}\n", mRollAilerons);
-            sb.AppendFormat("    PitchElevator: {0}\n", mPitchElevator);
-            sb.AppendFormat("    YawRudder: {0}\n", mYawRudder);
-            sb.AppendFormat("    Throttle: {0}\n", mThrottle);
-            sb.AppendFormat("    Aux1: {0}\n", mAux1);
-            sb.AppendFormat("    Aux2: {0}\n", mAux2);
-            sb.AppendFormat("    Aux3: {0}\n", mAux3);
-            sb.AppendFormat("    Aux4: {0}\n", mAux4);
-            sb.AppendFormat("    Mode: {0}\n", mMode);
-            sb.AppendFormat("    NavMode: {0}\n", mNavMode);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("RollAilerons", new UasFieldMetadata() {
+                Name = "RollAilerons",
+                Description = "Control output -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PitchElevator", new UasFieldMetadata() {
+                Name = "PitchElevator",
+                Description = "Control output -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("YawRudder", new UasFieldMetadata() {
+                Name = "YawRudder",
+                Description = "Control output -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Throttle", new UasFieldMetadata() {
+                Name = "Throttle",
+                Description = "Throttle 0 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Aux1", new UasFieldMetadata() {
+                Name = "Aux1",
+                Description = "Aux 1, -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Aux2", new UasFieldMetadata() {
+                Name = "Aux2",
+                Description = "Aux 2, -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Aux3", new UasFieldMetadata() {
+                Name = "Aux3",
+                Description = "Aux 3, -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Aux4", new UasFieldMetadata() {
+                Name = "Aux4",
+                Description = "Aux 4, -1 .. 1",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Mode", new UasFieldMetadata() {
+                Name = "Mode",
+                Description = "System mode (MAV_MODE)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavMode"),
+            });
+
+            mMetadata.Fields.Add("NavMode", new UasFieldMetadata() {
+                Name = "NavMode",
+                Description = "Navigation mode (MAV_NAV_MODE)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mRollAilerons;
         private float mPitchElevator;
@@ -8649,29 +10258,97 @@ namespace MavLinkNet
             this.mRssi = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Sent from simulation to autopilot. The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification."
+            };
 
-            sb.Append("HilRcInputsRaw \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Chan1Raw: {0}\n", mChan1Raw);
-            sb.AppendFormat("    Chan2Raw: {0}\n", mChan2Raw);
-            sb.AppendFormat("    Chan3Raw: {0}\n", mChan3Raw);
-            sb.AppendFormat("    Chan4Raw: {0}\n", mChan4Raw);
-            sb.AppendFormat("    Chan5Raw: {0}\n", mChan5Raw);
-            sb.AppendFormat("    Chan6Raw: {0}\n", mChan6Raw);
-            sb.AppendFormat("    Chan7Raw: {0}\n", mChan7Raw);
-            sb.AppendFormat("    Chan8Raw: {0}\n", mChan8Raw);
-            sb.AppendFormat("    Chan9Raw: {0}\n", mChan9Raw);
-            sb.AppendFormat("    Chan10Raw: {0}\n", mChan10Raw);
-            sb.AppendFormat("    Chan11Raw: {0}\n", mChan11Raw);
-            sb.AppendFormat("    Chan12Raw: {0}\n", mChan12Raw);
-            sb.AppendFormat("    Rssi: {0}\n", mRssi);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Chan1Raw", new UasFieldMetadata() {
+                Name = "Chan1Raw",
+                Description = "RC channel 1 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan2Raw", new UasFieldMetadata() {
+                Name = "Chan2Raw",
+                Description = "RC channel 2 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan3Raw", new UasFieldMetadata() {
+                Name = "Chan3Raw",
+                Description = "RC channel 3 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan4Raw", new UasFieldMetadata() {
+                Name = "Chan4Raw",
+                Description = "RC channel 4 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan5Raw", new UasFieldMetadata() {
+                Name = "Chan5Raw",
+                Description = "RC channel 5 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan6Raw", new UasFieldMetadata() {
+                Name = "Chan6Raw",
+                Description = "RC channel 6 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan7Raw", new UasFieldMetadata() {
+                Name = "Chan7Raw",
+                Description = "RC channel 7 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan8Raw", new UasFieldMetadata() {
+                Name = "Chan8Raw",
+                Description = "RC channel 8 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan9Raw", new UasFieldMetadata() {
+                Name = "Chan9Raw",
+                Description = "RC channel 9 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan10Raw", new UasFieldMetadata() {
+                Name = "Chan10Raw",
+                Description = "RC channel 10 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan11Raw", new UasFieldMetadata() {
+                Name = "Chan11Raw",
+                Description = "RC channel 11 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Chan12Raw", new UasFieldMetadata() {
+                Name = "Chan12Raw",
+                Description = "RC channel 12 value, in microseconds",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rssi", new UasFieldMetadata() {
+                Name = "Rssi",
+                Description = "Receive signal strength indicator, 0: 0%, 255: 100%",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private UInt16 mChan1Raw;
         private UInt16 mChan2Raw;
@@ -8791,23 +10468,61 @@ namespace MavLinkNet
             this.mQuality = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Optical flow from a flow sensor (e.g. optical mouse sensor)"
+            };
 
-            sb.Append("OpticalFlow \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    FlowCompMX: {0}\n", mFlowCompMX);
-            sb.AppendFormat("    FlowCompMY: {0}\n", mFlowCompMY);
-            sb.AppendFormat("    GroundDistance: {0}\n", mGroundDistance);
-            sb.AppendFormat("    FlowX: {0}\n", mFlowX);
-            sb.AppendFormat("    FlowY: {0}\n", mFlowY);
-            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
-            sb.AppendFormat("    Quality: {0}\n", mQuality);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (UNIX)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("FlowCompMX", new UasFieldMetadata() {
+                Name = "FlowCompMX",
+                Description = "Flow in meters in x-sensor direction, angular-speed compensated",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowCompMY", new UasFieldMetadata() {
+                Name = "FlowCompMY",
+                Description = "Flow in meters in y-sensor direction, angular-speed compensated",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("GroundDistance", new UasFieldMetadata() {
+                Name = "GroundDistance",
+                Description = "Ground distance in meters. Positive value: distance known. Negative value: Unknown distance",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowX", new UasFieldMetadata() {
+                Name = "FlowX",
+                Description = "Flow in pixels * 10 in x-sensor direction (dezi-pixels)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowY", new UasFieldMetadata() {
+                Name = "FlowY",
+                Description = "Flow in pixels * 10 in y-sensor direction (dezi-pixels)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SensorId", new UasFieldMetadata() {
+                Name = "SensorId",
+                Description = "Sensor ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Quality", new UasFieldMetadata() {
+                Name = "Quality",
+                Description = "Optical flow quality / confidence. 0: bad, 255: maximum quality",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mFlowCompMX;
         private float mFlowCompMY;
@@ -8908,22 +10623,55 @@ namespace MavLinkNet
             this.mYaw = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("GlobalVisionPositionEstimate \n");
-            sb.AppendFormat("    Usec: {0}\n", mUsec);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            mMetadata.Fields.Add("Usec", new UasFieldMetadata() {
+                Name = "Usec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "Global X position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Global Y position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Global Z position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle in rad",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mUsec;
         private float mX;
         private float mY;
@@ -9023,22 +10771,55 @@ namespace MavLinkNet
             this.mYaw = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("VisionPositionEstimate \n");
-            sb.AppendFormat("    Usec: {0}\n", mUsec);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            mMetadata.Fields.Add("Usec", new UasFieldMetadata() {
+                Name = "Usec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "Global X position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Global Y position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Global Z position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle in rad",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mUsec;
         private float mX;
         private float mY;
@@ -9108,19 +10889,37 @@ namespace MavLinkNet
             this.mZ = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("VisionSpeedEstimate \n");
-            sb.AppendFormat("    Usec: {0}\n", mUsec);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
+            mMetadata.Fields.Add("Usec", new UasFieldMetadata() {
+                Name = "Usec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "Global X speed",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Global Y speed",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Global Z speed",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mUsec;
         private float mX;
         private float mY;
@@ -9217,22 +11016,55 @@ namespace MavLinkNet
             this.mYaw = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("ViconPositionEstimate \n");
-            sb.AppendFormat("    Usec: {0}\n", mUsec);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
+            mMetadata.Fields.Add("Usec", new UasFieldMetadata() {
+                Name = "Usec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "Global X position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "Global Y position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "Global Z position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle in rad",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle in rad",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mUsec;
         private float mX;
         private float mY;
@@ -9415,30 +11247,103 @@ namespace MavLinkNet
             this.mFieldsUpdated = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The IMU readings in SI units in NED body frame"
+            };
 
-            sb.Append("HighresImu \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Xmag: {0}\n", mXmag);
-            sb.AppendFormat("    Ymag: {0}\n", mYmag);
-            sb.AppendFormat("    Zmag: {0}\n", mZmag);
-            sb.AppendFormat("    AbsPressure: {0}\n", mAbsPressure);
-            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
-            sb.AppendFormat("    PressureAlt: {0}\n", mPressureAlt);
-            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
-            sb.AppendFormat("    FieldsUpdated: {0}\n", mFieldsUpdated);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xmag", new UasFieldMetadata() {
+                Name = "Xmag",
+                Description = "X Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ymag", new UasFieldMetadata() {
+                Name = "Ymag",
+                Description = "Y Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zmag", new UasFieldMetadata() {
+                Name = "Zmag",
+                Description = "Z Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AbsPressure", new UasFieldMetadata() {
+                Name = "AbsPressure",
+                Description = "Absolute pressure in millibar",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("DiffPressure", new UasFieldMetadata() {
+                Name = "DiffPressure",
+                Description = "Differential pressure in millibar",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PressureAlt", new UasFieldMetadata() {
+                Name = "PressureAlt",
+                Description = "Altitude calculated from pressure",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Temperature", new UasFieldMetadata() {
+                Name = "Temperature",
+                Description = "Temperature in degrees celsius",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FieldsUpdated", new UasFieldMetadata() {
+                Name = "FieldsUpdated",
+                Description = "Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mXacc;
         private float mYacc;
@@ -9575,41 +11480,49 @@ namespace MavLinkNet
             this.mQuality = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Optical flow from an omnidirectional flow sensor (e.g. PX4FLOW with wide angle lens)"
+            };
 
-            sb.Append("OmnidirectionalFlow \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    FrontDistanceM: {0}\n", mFrontDistanceM);
-            sb.Append("    Left\n");
-            sb.AppendFormat("        [0]: {0}\n", mLeft[0]);
-            sb.AppendFormat("        [1]: {0}\n", mLeft[1]);
-            sb.AppendFormat("        [2]: {0}\n", mLeft[2]);
-            sb.AppendFormat("        [3]: {0}\n", mLeft[3]);
-            sb.AppendFormat("        [4]: {0}\n", mLeft[4]);
-            sb.AppendFormat("        [5]: {0}\n", mLeft[5]);
-            sb.AppendFormat("        [6]: {0}\n", mLeft[6]);
-            sb.AppendFormat("        [7]: {0}\n", mLeft[7]);
-            sb.AppendFormat("        [8]: {0}\n", mLeft[8]);
-            sb.AppendFormat("        [9]: {0}\n", mLeft[9]);
-            sb.Append("    Right\n");
-            sb.AppendFormat("        [0]: {0}\n", mRight[0]);
-            sb.AppendFormat("        [1]: {0}\n", mRight[1]);
-            sb.AppendFormat("        [2]: {0}\n", mRight[2]);
-            sb.AppendFormat("        [3]: {0}\n", mRight[3]);
-            sb.AppendFormat("        [4]: {0}\n", mRight[4]);
-            sb.AppendFormat("        [5]: {0}\n", mRight[5]);
-            sb.AppendFormat("        [6]: {0}\n", mRight[6]);
-            sb.AppendFormat("        [7]: {0}\n", mRight[7]);
-            sb.AppendFormat("        [8]: {0}\n", mRight[8]);
-            sb.AppendFormat("        [9]: {0}\n", mRight[9]);
-            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
-            sb.AppendFormat("    Quality: {0}\n", mQuality);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("FrontDistanceM", new UasFieldMetadata() {
+                Name = "FrontDistanceM",
+                Description = "Front distance in meters. Positive value (including zero): distance known. Negative value: Unknown distance",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Left", new UasFieldMetadata() {
+                Name = "Left",
+                Description = "Flow in deci pixels (1 = 0.1 pixel) on left hemisphere",
+                NumElements = 10,
+            });
+
+            mMetadata.Fields.Add("Right", new UasFieldMetadata() {
+                Name = "Right",
+                Description = "Flow in deci pixels (1 = 0.1 pixel) on right hemisphere",
+                NumElements = 10,
+            });
+
+            mMetadata.Fields.Add("SensorId", new UasFieldMetadata() {
+                Name = "SensorId",
+                Description = "Sensor ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Quality", new UasFieldMetadata() {
+                Name = "Quality",
+                Description = "Optical flow quality / confidence. 0: bad, 255: maximum quality",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mFrontDistanceM;
         private Int16[] mLeft = new Int16[10];
@@ -9791,30 +11704,103 @@ namespace MavLinkNet
             this.mFieldsUpdated = s.ReadUInt32();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The IMU readings in SI units in NED body frame"
+            };
 
-            sb.Append("HilSensor \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Xmag: {0}\n", mXmag);
-            sb.AppendFormat("    Ymag: {0}\n", mYmag);
-            sb.AppendFormat("    Zmag: {0}\n", mZmag);
-            sb.AppendFormat("    AbsPressure: {0}\n", mAbsPressure);
-            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
-            sb.AppendFormat("    PressureAlt: {0}\n", mPressureAlt);
-            sb.AppendFormat("    Temperature: {0}\n", mTemperature);
-            sb.AppendFormat("    FieldsUpdated: {0}\n", mFieldsUpdated);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds, synced to UNIX time or since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (m/s^2)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis in body frame (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis in body frame (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis in body frame (rad / sec)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xmag", new UasFieldMetadata() {
+                Name = "Xmag",
+                Description = "X Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ymag", new UasFieldMetadata() {
+                Name = "Ymag",
+                Description = "Y Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zmag", new UasFieldMetadata() {
+                Name = "Zmag",
+                Description = "Z Magnetic field (Gauss)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AbsPressure", new UasFieldMetadata() {
+                Name = "AbsPressure",
+                Description = "Absolute pressure in millibar",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("DiffPressure", new UasFieldMetadata() {
+                Name = "DiffPressure",
+                Description = "Differential pressure (airspeed) in millibar",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PressureAlt", new UasFieldMetadata() {
+                Name = "PressureAlt",
+                Description = "Altitude calculated from pressure",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Temperature", new UasFieldMetadata() {
+                Name = "Temperature",
+                Description = "Temperature in degrees celsius",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FieldsUpdated", new UasFieldMetadata() {
+                Name = "FieldsUpdated",
+                Description = "Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mXacc;
         private float mYacc;
@@ -10065,36 +12051,139 @@ namespace MavLinkNet
             this.mVd = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of simulation environment, if used"
+            };
 
-            sb.Append("SimState \n");
-            sb.AppendFormat("    Q1: {0}\n", mQ1);
-            sb.AppendFormat("    Q2: {0}\n", mQ2);
-            sb.AppendFormat("    Q3: {0}\n", mQ3);
-            sb.AppendFormat("    Q4: {0}\n", mQ4);
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    StdDevHorz: {0}\n", mStdDevHorz);
-            sb.AppendFormat("    StdDevVert: {0}\n", mStdDevVert);
-            sb.AppendFormat("    Vn: {0}\n", mVn);
-            sb.AppendFormat("    Ve: {0}\n", mVe);
-            sb.AppendFormat("    Vd: {0}\n", mVd);
+            mMetadata.Fields.Add("Q1", new UasFieldMetadata() {
+                Name = "Q1",
+                Description = "True attitude quaternion component 1",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Q2", new UasFieldMetadata() {
+                Name = "Q2",
+                Description = "True attitude quaternion component 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Q3", new UasFieldMetadata() {
+                Name = "Q3",
+                Description = "True attitude quaternion component 3",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Q4", new UasFieldMetadata() {
+                Name = "Q4",
+                Description = "True attitude quaternion component 4",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Attitude roll expressed as Euler angles, not recommended except for human-readable outputs",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Attitude pitch expressed as Euler angles, not recommended except for human-readable outputs",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Attitude yaw expressed as Euler angles, not recommended except for human-readable outputs",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude in degrees",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude in degrees",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude in meters",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StdDevHorz", new UasFieldMetadata() {
+                Name = "StdDevHorz",
+                Description = "Horizontal position standard deviation",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StdDevVert", new UasFieldMetadata() {
+                Name = "StdDevVert",
+                Description = "Vertical position standard deviation",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vn", new UasFieldMetadata() {
+                Name = "Vn",
+                Description = "True velocity in m/s in NORTH direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ve", new UasFieldMetadata() {
+                Name = "Ve",
+                Description = "True velocity in m/s in EAST direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vd", new UasFieldMetadata() {
+                Name = "Vd",
+                Description = "True velocity in m/s in DOWN direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
         }
-
         private float mQ1;
         private float mQ2;
         private float mQ3;
@@ -10211,22 +12300,55 @@ namespace MavLinkNet
             this.mRemnoise = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status generated by radio"
+            };
 
-            sb.Append("RadioStatus \n");
-            sb.AppendFormat("    Rxerrors: {0}\n", mRxerrors);
-            sb.AppendFormat("    Fixed: {0}\n", mFixed);
-            sb.AppendFormat("    Rssi: {0}\n", mRssi);
-            sb.AppendFormat("    Remrssi: {0}\n", mRemrssi);
-            sb.AppendFormat("    Txbuf: {0}\n", mTxbuf);
-            sb.AppendFormat("    Noise: {0}\n", mNoise);
-            sb.AppendFormat("    Remnoise: {0}\n", mRemnoise);
+            mMetadata.Fields.Add("Rxerrors", new UasFieldMetadata() {
+                Name = "Rxerrors",
+                Description = "receive errors",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Fixed", new UasFieldMetadata() {
+                Name = "Fixed",
+                Description = "count of error corrected packets",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rssi", new UasFieldMetadata() {
+                Name = "Rssi",
+                Description = "local signal strength",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Remrssi", new UasFieldMetadata() {
+                Name = "Remrssi",
+                Description = "remote signal strength",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Txbuf", new UasFieldMetadata() {
+                Name = "Txbuf",
+                Description = "how full the tx buffer is as a percentage",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Noise", new UasFieldMetadata() {
+                Name = "Noise",
+                Description = "background noise level",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Remnoise", new UasFieldMetadata() {
+                Name = "Remnoise",
+                Description = "remote background noise level",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mRxerrors;
         private UInt16 mFixed;
         private byte mRssi;
@@ -10787,260 +12909,43 @@ namespace MavLinkNet
             this.mFlags = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Begin file transfer"
+            };
 
-            sb.Append("FileTransferStart \n");
-            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
-            sb.AppendFormat("    FileSize: {0}\n", mFileSize);
-            sb.Append("    DestPath\n");
-            sb.AppendFormat("        [0]: {0}\n", mDestPath[0]);
-            sb.AppendFormat("        [1]: {0}\n", mDestPath[1]);
-            sb.AppendFormat("        [2]: {0}\n", mDestPath[2]);
-            sb.AppendFormat("        [3]: {0}\n", mDestPath[3]);
-            sb.AppendFormat("        [4]: {0}\n", mDestPath[4]);
-            sb.AppendFormat("        [5]: {0}\n", mDestPath[5]);
-            sb.AppendFormat("        [6]: {0}\n", mDestPath[6]);
-            sb.AppendFormat("        [7]: {0}\n", mDestPath[7]);
-            sb.AppendFormat("        [8]: {0}\n", mDestPath[8]);
-            sb.AppendFormat("        [9]: {0}\n", mDestPath[9]);
-            sb.AppendFormat("        [10]: {0}\n", mDestPath[10]);
-            sb.AppendFormat("        [11]: {0}\n", mDestPath[11]);
-            sb.AppendFormat("        [12]: {0}\n", mDestPath[12]);
-            sb.AppendFormat("        [13]: {0}\n", mDestPath[13]);
-            sb.AppendFormat("        [14]: {0}\n", mDestPath[14]);
-            sb.AppendFormat("        [15]: {0}\n", mDestPath[15]);
-            sb.AppendFormat("        [16]: {0}\n", mDestPath[16]);
-            sb.AppendFormat("        [17]: {0}\n", mDestPath[17]);
-            sb.AppendFormat("        [18]: {0}\n", mDestPath[18]);
-            sb.AppendFormat("        [19]: {0}\n", mDestPath[19]);
-            sb.AppendFormat("        [20]: {0}\n", mDestPath[20]);
-            sb.AppendFormat("        [21]: {0}\n", mDestPath[21]);
-            sb.AppendFormat("        [22]: {0}\n", mDestPath[22]);
-            sb.AppendFormat("        [23]: {0}\n", mDestPath[23]);
-            sb.AppendFormat("        [24]: {0}\n", mDestPath[24]);
-            sb.AppendFormat("        [25]: {0}\n", mDestPath[25]);
-            sb.AppendFormat("        [26]: {0}\n", mDestPath[26]);
-            sb.AppendFormat("        [27]: {0}\n", mDestPath[27]);
-            sb.AppendFormat("        [28]: {0}\n", mDestPath[28]);
-            sb.AppendFormat("        [29]: {0}\n", mDestPath[29]);
-            sb.AppendFormat("        [30]: {0}\n", mDestPath[30]);
-            sb.AppendFormat("        [31]: {0}\n", mDestPath[31]);
-            sb.AppendFormat("        [32]: {0}\n", mDestPath[32]);
-            sb.AppendFormat("        [33]: {0}\n", mDestPath[33]);
-            sb.AppendFormat("        [34]: {0}\n", mDestPath[34]);
-            sb.AppendFormat("        [35]: {0}\n", mDestPath[35]);
-            sb.AppendFormat("        [36]: {0}\n", mDestPath[36]);
-            sb.AppendFormat("        [37]: {0}\n", mDestPath[37]);
-            sb.AppendFormat("        [38]: {0}\n", mDestPath[38]);
-            sb.AppendFormat("        [39]: {0}\n", mDestPath[39]);
-            sb.AppendFormat("        [40]: {0}\n", mDestPath[40]);
-            sb.AppendFormat("        [41]: {0}\n", mDestPath[41]);
-            sb.AppendFormat("        [42]: {0}\n", mDestPath[42]);
-            sb.AppendFormat("        [43]: {0}\n", mDestPath[43]);
-            sb.AppendFormat("        [44]: {0}\n", mDestPath[44]);
-            sb.AppendFormat("        [45]: {0}\n", mDestPath[45]);
-            sb.AppendFormat("        [46]: {0}\n", mDestPath[46]);
-            sb.AppendFormat("        [47]: {0}\n", mDestPath[47]);
-            sb.AppendFormat("        [48]: {0}\n", mDestPath[48]);
-            sb.AppendFormat("        [49]: {0}\n", mDestPath[49]);
-            sb.AppendFormat("        [50]: {0}\n", mDestPath[50]);
-            sb.AppendFormat("        [51]: {0}\n", mDestPath[51]);
-            sb.AppendFormat("        [52]: {0}\n", mDestPath[52]);
-            sb.AppendFormat("        [53]: {0}\n", mDestPath[53]);
-            sb.AppendFormat("        [54]: {0}\n", mDestPath[54]);
-            sb.AppendFormat("        [55]: {0}\n", mDestPath[55]);
-            sb.AppendFormat("        [56]: {0}\n", mDestPath[56]);
-            sb.AppendFormat("        [57]: {0}\n", mDestPath[57]);
-            sb.AppendFormat("        [58]: {0}\n", mDestPath[58]);
-            sb.AppendFormat("        [59]: {0}\n", mDestPath[59]);
-            sb.AppendFormat("        [60]: {0}\n", mDestPath[60]);
-            sb.AppendFormat("        [61]: {0}\n", mDestPath[61]);
-            sb.AppendFormat("        [62]: {0}\n", mDestPath[62]);
-            sb.AppendFormat("        [63]: {0}\n", mDestPath[63]);
-            sb.AppendFormat("        [64]: {0}\n", mDestPath[64]);
-            sb.AppendFormat("        [65]: {0}\n", mDestPath[65]);
-            sb.AppendFormat("        [66]: {0}\n", mDestPath[66]);
-            sb.AppendFormat("        [67]: {0}\n", mDestPath[67]);
-            sb.AppendFormat("        [68]: {0}\n", mDestPath[68]);
-            sb.AppendFormat("        [69]: {0}\n", mDestPath[69]);
-            sb.AppendFormat("        [70]: {0}\n", mDestPath[70]);
-            sb.AppendFormat("        [71]: {0}\n", mDestPath[71]);
-            sb.AppendFormat("        [72]: {0}\n", mDestPath[72]);
-            sb.AppendFormat("        [73]: {0}\n", mDestPath[73]);
-            sb.AppendFormat("        [74]: {0}\n", mDestPath[74]);
-            sb.AppendFormat("        [75]: {0}\n", mDestPath[75]);
-            sb.AppendFormat("        [76]: {0}\n", mDestPath[76]);
-            sb.AppendFormat("        [77]: {0}\n", mDestPath[77]);
-            sb.AppendFormat("        [78]: {0}\n", mDestPath[78]);
-            sb.AppendFormat("        [79]: {0}\n", mDestPath[79]);
-            sb.AppendFormat("        [80]: {0}\n", mDestPath[80]);
-            sb.AppendFormat("        [81]: {0}\n", mDestPath[81]);
-            sb.AppendFormat("        [82]: {0}\n", mDestPath[82]);
-            sb.AppendFormat("        [83]: {0}\n", mDestPath[83]);
-            sb.AppendFormat("        [84]: {0}\n", mDestPath[84]);
-            sb.AppendFormat("        [85]: {0}\n", mDestPath[85]);
-            sb.AppendFormat("        [86]: {0}\n", mDestPath[86]);
-            sb.AppendFormat("        [87]: {0}\n", mDestPath[87]);
-            sb.AppendFormat("        [88]: {0}\n", mDestPath[88]);
-            sb.AppendFormat("        [89]: {0}\n", mDestPath[89]);
-            sb.AppendFormat("        [90]: {0}\n", mDestPath[90]);
-            sb.AppendFormat("        [91]: {0}\n", mDestPath[91]);
-            sb.AppendFormat("        [92]: {0}\n", mDestPath[92]);
-            sb.AppendFormat("        [93]: {0}\n", mDestPath[93]);
-            sb.AppendFormat("        [94]: {0}\n", mDestPath[94]);
-            sb.AppendFormat("        [95]: {0}\n", mDestPath[95]);
-            sb.AppendFormat("        [96]: {0}\n", mDestPath[96]);
-            sb.AppendFormat("        [97]: {0}\n", mDestPath[97]);
-            sb.AppendFormat("        [98]: {0}\n", mDestPath[98]);
-            sb.AppendFormat("        [99]: {0}\n", mDestPath[99]);
-            sb.AppendFormat("        [100]: {0}\n", mDestPath[100]);
-            sb.AppendFormat("        [101]: {0}\n", mDestPath[101]);
-            sb.AppendFormat("        [102]: {0}\n", mDestPath[102]);
-            sb.AppendFormat("        [103]: {0}\n", mDestPath[103]);
-            sb.AppendFormat("        [104]: {0}\n", mDestPath[104]);
-            sb.AppendFormat("        [105]: {0}\n", mDestPath[105]);
-            sb.AppendFormat("        [106]: {0}\n", mDestPath[106]);
-            sb.AppendFormat("        [107]: {0}\n", mDestPath[107]);
-            sb.AppendFormat("        [108]: {0}\n", mDestPath[108]);
-            sb.AppendFormat("        [109]: {0}\n", mDestPath[109]);
-            sb.AppendFormat("        [110]: {0}\n", mDestPath[110]);
-            sb.AppendFormat("        [111]: {0}\n", mDestPath[111]);
-            sb.AppendFormat("        [112]: {0}\n", mDestPath[112]);
-            sb.AppendFormat("        [113]: {0}\n", mDestPath[113]);
-            sb.AppendFormat("        [114]: {0}\n", mDestPath[114]);
-            sb.AppendFormat("        [115]: {0}\n", mDestPath[115]);
-            sb.AppendFormat("        [116]: {0}\n", mDestPath[116]);
-            sb.AppendFormat("        [117]: {0}\n", mDestPath[117]);
-            sb.AppendFormat("        [118]: {0}\n", mDestPath[118]);
-            sb.AppendFormat("        [119]: {0}\n", mDestPath[119]);
-            sb.AppendFormat("        [120]: {0}\n", mDestPath[120]);
-            sb.AppendFormat("        [121]: {0}\n", mDestPath[121]);
-            sb.AppendFormat("        [122]: {0}\n", mDestPath[122]);
-            sb.AppendFormat("        [123]: {0}\n", mDestPath[123]);
-            sb.AppendFormat("        [124]: {0}\n", mDestPath[124]);
-            sb.AppendFormat("        [125]: {0}\n", mDestPath[125]);
-            sb.AppendFormat("        [126]: {0}\n", mDestPath[126]);
-            sb.AppendFormat("        [127]: {0}\n", mDestPath[127]);
-            sb.AppendFormat("        [128]: {0}\n", mDestPath[128]);
-            sb.AppendFormat("        [129]: {0}\n", mDestPath[129]);
-            sb.AppendFormat("        [130]: {0}\n", mDestPath[130]);
-            sb.AppendFormat("        [131]: {0}\n", mDestPath[131]);
-            sb.AppendFormat("        [132]: {0}\n", mDestPath[132]);
-            sb.AppendFormat("        [133]: {0}\n", mDestPath[133]);
-            sb.AppendFormat("        [134]: {0}\n", mDestPath[134]);
-            sb.AppendFormat("        [135]: {0}\n", mDestPath[135]);
-            sb.AppendFormat("        [136]: {0}\n", mDestPath[136]);
-            sb.AppendFormat("        [137]: {0}\n", mDestPath[137]);
-            sb.AppendFormat("        [138]: {0}\n", mDestPath[138]);
-            sb.AppendFormat("        [139]: {0}\n", mDestPath[139]);
-            sb.AppendFormat("        [140]: {0}\n", mDestPath[140]);
-            sb.AppendFormat("        [141]: {0}\n", mDestPath[141]);
-            sb.AppendFormat("        [142]: {0}\n", mDestPath[142]);
-            sb.AppendFormat("        [143]: {0}\n", mDestPath[143]);
-            sb.AppendFormat("        [144]: {0}\n", mDestPath[144]);
-            sb.AppendFormat("        [145]: {0}\n", mDestPath[145]);
-            sb.AppendFormat("        [146]: {0}\n", mDestPath[146]);
-            sb.AppendFormat("        [147]: {0}\n", mDestPath[147]);
-            sb.AppendFormat("        [148]: {0}\n", mDestPath[148]);
-            sb.AppendFormat("        [149]: {0}\n", mDestPath[149]);
-            sb.AppendFormat("        [150]: {0}\n", mDestPath[150]);
-            sb.AppendFormat("        [151]: {0}\n", mDestPath[151]);
-            sb.AppendFormat("        [152]: {0}\n", mDestPath[152]);
-            sb.AppendFormat("        [153]: {0}\n", mDestPath[153]);
-            sb.AppendFormat("        [154]: {0}\n", mDestPath[154]);
-            sb.AppendFormat("        [155]: {0}\n", mDestPath[155]);
-            sb.AppendFormat("        [156]: {0}\n", mDestPath[156]);
-            sb.AppendFormat("        [157]: {0}\n", mDestPath[157]);
-            sb.AppendFormat("        [158]: {0}\n", mDestPath[158]);
-            sb.AppendFormat("        [159]: {0}\n", mDestPath[159]);
-            sb.AppendFormat("        [160]: {0}\n", mDestPath[160]);
-            sb.AppendFormat("        [161]: {0}\n", mDestPath[161]);
-            sb.AppendFormat("        [162]: {0}\n", mDestPath[162]);
-            sb.AppendFormat("        [163]: {0}\n", mDestPath[163]);
-            sb.AppendFormat("        [164]: {0}\n", mDestPath[164]);
-            sb.AppendFormat("        [165]: {0}\n", mDestPath[165]);
-            sb.AppendFormat("        [166]: {0}\n", mDestPath[166]);
-            sb.AppendFormat("        [167]: {0}\n", mDestPath[167]);
-            sb.AppendFormat("        [168]: {0}\n", mDestPath[168]);
-            sb.AppendFormat("        [169]: {0}\n", mDestPath[169]);
-            sb.AppendFormat("        [170]: {0}\n", mDestPath[170]);
-            sb.AppendFormat("        [171]: {0}\n", mDestPath[171]);
-            sb.AppendFormat("        [172]: {0}\n", mDestPath[172]);
-            sb.AppendFormat("        [173]: {0}\n", mDestPath[173]);
-            sb.AppendFormat("        [174]: {0}\n", mDestPath[174]);
-            sb.AppendFormat("        [175]: {0}\n", mDestPath[175]);
-            sb.AppendFormat("        [176]: {0}\n", mDestPath[176]);
-            sb.AppendFormat("        [177]: {0}\n", mDestPath[177]);
-            sb.AppendFormat("        [178]: {0}\n", mDestPath[178]);
-            sb.AppendFormat("        [179]: {0}\n", mDestPath[179]);
-            sb.AppendFormat("        [180]: {0}\n", mDestPath[180]);
-            sb.AppendFormat("        [181]: {0}\n", mDestPath[181]);
-            sb.AppendFormat("        [182]: {0}\n", mDestPath[182]);
-            sb.AppendFormat("        [183]: {0}\n", mDestPath[183]);
-            sb.AppendFormat("        [184]: {0}\n", mDestPath[184]);
-            sb.AppendFormat("        [185]: {0}\n", mDestPath[185]);
-            sb.AppendFormat("        [186]: {0}\n", mDestPath[186]);
-            sb.AppendFormat("        [187]: {0}\n", mDestPath[187]);
-            sb.AppendFormat("        [188]: {0}\n", mDestPath[188]);
-            sb.AppendFormat("        [189]: {0}\n", mDestPath[189]);
-            sb.AppendFormat("        [190]: {0}\n", mDestPath[190]);
-            sb.AppendFormat("        [191]: {0}\n", mDestPath[191]);
-            sb.AppendFormat("        [192]: {0}\n", mDestPath[192]);
-            sb.AppendFormat("        [193]: {0}\n", mDestPath[193]);
-            sb.AppendFormat("        [194]: {0}\n", mDestPath[194]);
-            sb.AppendFormat("        [195]: {0}\n", mDestPath[195]);
-            sb.AppendFormat("        [196]: {0}\n", mDestPath[196]);
-            sb.AppendFormat("        [197]: {0}\n", mDestPath[197]);
-            sb.AppendFormat("        [198]: {0}\n", mDestPath[198]);
-            sb.AppendFormat("        [199]: {0}\n", mDestPath[199]);
-            sb.AppendFormat("        [200]: {0}\n", mDestPath[200]);
-            sb.AppendFormat("        [201]: {0}\n", mDestPath[201]);
-            sb.AppendFormat("        [202]: {0}\n", mDestPath[202]);
-            sb.AppendFormat("        [203]: {0}\n", mDestPath[203]);
-            sb.AppendFormat("        [204]: {0}\n", mDestPath[204]);
-            sb.AppendFormat("        [205]: {0}\n", mDestPath[205]);
-            sb.AppendFormat("        [206]: {0}\n", mDestPath[206]);
-            sb.AppendFormat("        [207]: {0}\n", mDestPath[207]);
-            sb.AppendFormat("        [208]: {0}\n", mDestPath[208]);
-            sb.AppendFormat("        [209]: {0}\n", mDestPath[209]);
-            sb.AppendFormat("        [210]: {0}\n", mDestPath[210]);
-            sb.AppendFormat("        [211]: {0}\n", mDestPath[211]);
-            sb.AppendFormat("        [212]: {0}\n", mDestPath[212]);
-            sb.AppendFormat("        [213]: {0}\n", mDestPath[213]);
-            sb.AppendFormat("        [214]: {0}\n", mDestPath[214]);
-            sb.AppendFormat("        [215]: {0}\n", mDestPath[215]);
-            sb.AppendFormat("        [216]: {0}\n", mDestPath[216]);
-            sb.AppendFormat("        [217]: {0}\n", mDestPath[217]);
-            sb.AppendFormat("        [218]: {0}\n", mDestPath[218]);
-            sb.AppendFormat("        [219]: {0}\n", mDestPath[219]);
-            sb.AppendFormat("        [220]: {0}\n", mDestPath[220]);
-            sb.AppendFormat("        [221]: {0}\n", mDestPath[221]);
-            sb.AppendFormat("        [222]: {0}\n", mDestPath[222]);
-            sb.AppendFormat("        [223]: {0}\n", mDestPath[223]);
-            sb.AppendFormat("        [224]: {0}\n", mDestPath[224]);
-            sb.AppendFormat("        [225]: {0}\n", mDestPath[225]);
-            sb.AppendFormat("        [226]: {0}\n", mDestPath[226]);
-            sb.AppendFormat("        [227]: {0}\n", mDestPath[227]);
-            sb.AppendFormat("        [228]: {0}\n", mDestPath[228]);
-            sb.AppendFormat("        [229]: {0}\n", mDestPath[229]);
-            sb.AppendFormat("        [230]: {0}\n", mDestPath[230]);
-            sb.AppendFormat("        [231]: {0}\n", mDestPath[231]);
-            sb.AppendFormat("        [232]: {0}\n", mDestPath[232]);
-            sb.AppendFormat("        [233]: {0}\n", mDestPath[233]);
-            sb.AppendFormat("        [234]: {0}\n", mDestPath[234]);
-            sb.AppendFormat("        [235]: {0}\n", mDestPath[235]);
-            sb.AppendFormat("        [236]: {0}\n", mDestPath[236]);
-            sb.AppendFormat("        [237]: {0}\n", mDestPath[237]);
-            sb.AppendFormat("        [238]: {0}\n", mDestPath[238]);
-            sb.AppendFormat("        [239]: {0}\n", mDestPath[239]);
-            sb.AppendFormat("    Direction: {0}\n", mDirection);
-            sb.AppendFormat("    Flags: {0}\n", mFlags);
+            mMetadata.Fields.Add("TransferUid", new UasFieldMetadata() {
+                Name = "TransferUid",
+                Description = "Unique transfer ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("FileSize", new UasFieldMetadata() {
+                Name = "FileSize",
+                Description = "File size in bytes",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("DestPath", new UasFieldMetadata() {
+                Name = "DestPath",
+                Description = "Destination path",
+                NumElements = 240,
+            });
+
+            mMetadata.Fields.Add("Direction", new UasFieldMetadata() {
+                Name = "Direction",
+                Description = "Transfer direction: 0: from requester, 1: to requester",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Flags", new UasFieldMetadata() {
+                Name = "Flags",
+                Description = "RESERVED",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTransferUid;
         private UInt32 mFileSize;
         private char[] mDestPath = new char[240];
@@ -11579,258 +13484,31 @@ namespace MavLinkNet
             this.mFlags = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Get directory listing"
+            };
 
-            sb.Append("FileTransferDirList \n");
-            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
-            sb.Append("    DirPath\n");
-            sb.AppendFormat("        [0]: {0}\n", mDirPath[0]);
-            sb.AppendFormat("        [1]: {0}\n", mDirPath[1]);
-            sb.AppendFormat("        [2]: {0}\n", mDirPath[2]);
-            sb.AppendFormat("        [3]: {0}\n", mDirPath[3]);
-            sb.AppendFormat("        [4]: {0}\n", mDirPath[4]);
-            sb.AppendFormat("        [5]: {0}\n", mDirPath[5]);
-            sb.AppendFormat("        [6]: {0}\n", mDirPath[6]);
-            sb.AppendFormat("        [7]: {0}\n", mDirPath[7]);
-            sb.AppendFormat("        [8]: {0}\n", mDirPath[8]);
-            sb.AppendFormat("        [9]: {0}\n", mDirPath[9]);
-            sb.AppendFormat("        [10]: {0}\n", mDirPath[10]);
-            sb.AppendFormat("        [11]: {0}\n", mDirPath[11]);
-            sb.AppendFormat("        [12]: {0}\n", mDirPath[12]);
-            sb.AppendFormat("        [13]: {0}\n", mDirPath[13]);
-            sb.AppendFormat("        [14]: {0}\n", mDirPath[14]);
-            sb.AppendFormat("        [15]: {0}\n", mDirPath[15]);
-            sb.AppendFormat("        [16]: {0}\n", mDirPath[16]);
-            sb.AppendFormat("        [17]: {0}\n", mDirPath[17]);
-            sb.AppendFormat("        [18]: {0}\n", mDirPath[18]);
-            sb.AppendFormat("        [19]: {0}\n", mDirPath[19]);
-            sb.AppendFormat("        [20]: {0}\n", mDirPath[20]);
-            sb.AppendFormat("        [21]: {0}\n", mDirPath[21]);
-            sb.AppendFormat("        [22]: {0}\n", mDirPath[22]);
-            sb.AppendFormat("        [23]: {0}\n", mDirPath[23]);
-            sb.AppendFormat("        [24]: {0}\n", mDirPath[24]);
-            sb.AppendFormat("        [25]: {0}\n", mDirPath[25]);
-            sb.AppendFormat("        [26]: {0}\n", mDirPath[26]);
-            sb.AppendFormat("        [27]: {0}\n", mDirPath[27]);
-            sb.AppendFormat("        [28]: {0}\n", mDirPath[28]);
-            sb.AppendFormat("        [29]: {0}\n", mDirPath[29]);
-            sb.AppendFormat("        [30]: {0}\n", mDirPath[30]);
-            sb.AppendFormat("        [31]: {0}\n", mDirPath[31]);
-            sb.AppendFormat("        [32]: {0}\n", mDirPath[32]);
-            sb.AppendFormat("        [33]: {0}\n", mDirPath[33]);
-            sb.AppendFormat("        [34]: {0}\n", mDirPath[34]);
-            sb.AppendFormat("        [35]: {0}\n", mDirPath[35]);
-            sb.AppendFormat("        [36]: {0}\n", mDirPath[36]);
-            sb.AppendFormat("        [37]: {0}\n", mDirPath[37]);
-            sb.AppendFormat("        [38]: {0}\n", mDirPath[38]);
-            sb.AppendFormat("        [39]: {0}\n", mDirPath[39]);
-            sb.AppendFormat("        [40]: {0}\n", mDirPath[40]);
-            sb.AppendFormat("        [41]: {0}\n", mDirPath[41]);
-            sb.AppendFormat("        [42]: {0}\n", mDirPath[42]);
-            sb.AppendFormat("        [43]: {0}\n", mDirPath[43]);
-            sb.AppendFormat("        [44]: {0}\n", mDirPath[44]);
-            sb.AppendFormat("        [45]: {0}\n", mDirPath[45]);
-            sb.AppendFormat("        [46]: {0}\n", mDirPath[46]);
-            sb.AppendFormat("        [47]: {0}\n", mDirPath[47]);
-            sb.AppendFormat("        [48]: {0}\n", mDirPath[48]);
-            sb.AppendFormat("        [49]: {0}\n", mDirPath[49]);
-            sb.AppendFormat("        [50]: {0}\n", mDirPath[50]);
-            sb.AppendFormat("        [51]: {0}\n", mDirPath[51]);
-            sb.AppendFormat("        [52]: {0}\n", mDirPath[52]);
-            sb.AppendFormat("        [53]: {0}\n", mDirPath[53]);
-            sb.AppendFormat("        [54]: {0}\n", mDirPath[54]);
-            sb.AppendFormat("        [55]: {0}\n", mDirPath[55]);
-            sb.AppendFormat("        [56]: {0}\n", mDirPath[56]);
-            sb.AppendFormat("        [57]: {0}\n", mDirPath[57]);
-            sb.AppendFormat("        [58]: {0}\n", mDirPath[58]);
-            sb.AppendFormat("        [59]: {0}\n", mDirPath[59]);
-            sb.AppendFormat("        [60]: {0}\n", mDirPath[60]);
-            sb.AppendFormat("        [61]: {0}\n", mDirPath[61]);
-            sb.AppendFormat("        [62]: {0}\n", mDirPath[62]);
-            sb.AppendFormat("        [63]: {0}\n", mDirPath[63]);
-            sb.AppendFormat("        [64]: {0}\n", mDirPath[64]);
-            sb.AppendFormat("        [65]: {0}\n", mDirPath[65]);
-            sb.AppendFormat("        [66]: {0}\n", mDirPath[66]);
-            sb.AppendFormat("        [67]: {0}\n", mDirPath[67]);
-            sb.AppendFormat("        [68]: {0}\n", mDirPath[68]);
-            sb.AppendFormat("        [69]: {0}\n", mDirPath[69]);
-            sb.AppendFormat("        [70]: {0}\n", mDirPath[70]);
-            sb.AppendFormat("        [71]: {0}\n", mDirPath[71]);
-            sb.AppendFormat("        [72]: {0}\n", mDirPath[72]);
-            sb.AppendFormat("        [73]: {0}\n", mDirPath[73]);
-            sb.AppendFormat("        [74]: {0}\n", mDirPath[74]);
-            sb.AppendFormat("        [75]: {0}\n", mDirPath[75]);
-            sb.AppendFormat("        [76]: {0}\n", mDirPath[76]);
-            sb.AppendFormat("        [77]: {0}\n", mDirPath[77]);
-            sb.AppendFormat("        [78]: {0}\n", mDirPath[78]);
-            sb.AppendFormat("        [79]: {0}\n", mDirPath[79]);
-            sb.AppendFormat("        [80]: {0}\n", mDirPath[80]);
-            sb.AppendFormat("        [81]: {0}\n", mDirPath[81]);
-            sb.AppendFormat("        [82]: {0}\n", mDirPath[82]);
-            sb.AppendFormat("        [83]: {0}\n", mDirPath[83]);
-            sb.AppendFormat("        [84]: {0}\n", mDirPath[84]);
-            sb.AppendFormat("        [85]: {0}\n", mDirPath[85]);
-            sb.AppendFormat("        [86]: {0}\n", mDirPath[86]);
-            sb.AppendFormat("        [87]: {0}\n", mDirPath[87]);
-            sb.AppendFormat("        [88]: {0}\n", mDirPath[88]);
-            sb.AppendFormat("        [89]: {0}\n", mDirPath[89]);
-            sb.AppendFormat("        [90]: {0}\n", mDirPath[90]);
-            sb.AppendFormat("        [91]: {0}\n", mDirPath[91]);
-            sb.AppendFormat("        [92]: {0}\n", mDirPath[92]);
-            sb.AppendFormat("        [93]: {0}\n", mDirPath[93]);
-            sb.AppendFormat("        [94]: {0}\n", mDirPath[94]);
-            sb.AppendFormat("        [95]: {0}\n", mDirPath[95]);
-            sb.AppendFormat("        [96]: {0}\n", mDirPath[96]);
-            sb.AppendFormat("        [97]: {0}\n", mDirPath[97]);
-            sb.AppendFormat("        [98]: {0}\n", mDirPath[98]);
-            sb.AppendFormat("        [99]: {0}\n", mDirPath[99]);
-            sb.AppendFormat("        [100]: {0}\n", mDirPath[100]);
-            sb.AppendFormat("        [101]: {0}\n", mDirPath[101]);
-            sb.AppendFormat("        [102]: {0}\n", mDirPath[102]);
-            sb.AppendFormat("        [103]: {0}\n", mDirPath[103]);
-            sb.AppendFormat("        [104]: {0}\n", mDirPath[104]);
-            sb.AppendFormat("        [105]: {0}\n", mDirPath[105]);
-            sb.AppendFormat("        [106]: {0}\n", mDirPath[106]);
-            sb.AppendFormat("        [107]: {0}\n", mDirPath[107]);
-            sb.AppendFormat("        [108]: {0}\n", mDirPath[108]);
-            sb.AppendFormat("        [109]: {0}\n", mDirPath[109]);
-            sb.AppendFormat("        [110]: {0}\n", mDirPath[110]);
-            sb.AppendFormat("        [111]: {0}\n", mDirPath[111]);
-            sb.AppendFormat("        [112]: {0}\n", mDirPath[112]);
-            sb.AppendFormat("        [113]: {0}\n", mDirPath[113]);
-            sb.AppendFormat("        [114]: {0}\n", mDirPath[114]);
-            sb.AppendFormat("        [115]: {0}\n", mDirPath[115]);
-            sb.AppendFormat("        [116]: {0}\n", mDirPath[116]);
-            sb.AppendFormat("        [117]: {0}\n", mDirPath[117]);
-            sb.AppendFormat("        [118]: {0}\n", mDirPath[118]);
-            sb.AppendFormat("        [119]: {0}\n", mDirPath[119]);
-            sb.AppendFormat("        [120]: {0}\n", mDirPath[120]);
-            sb.AppendFormat("        [121]: {0}\n", mDirPath[121]);
-            sb.AppendFormat("        [122]: {0}\n", mDirPath[122]);
-            sb.AppendFormat("        [123]: {0}\n", mDirPath[123]);
-            sb.AppendFormat("        [124]: {0}\n", mDirPath[124]);
-            sb.AppendFormat("        [125]: {0}\n", mDirPath[125]);
-            sb.AppendFormat("        [126]: {0}\n", mDirPath[126]);
-            sb.AppendFormat("        [127]: {0}\n", mDirPath[127]);
-            sb.AppendFormat("        [128]: {0}\n", mDirPath[128]);
-            sb.AppendFormat("        [129]: {0}\n", mDirPath[129]);
-            sb.AppendFormat("        [130]: {0}\n", mDirPath[130]);
-            sb.AppendFormat("        [131]: {0}\n", mDirPath[131]);
-            sb.AppendFormat("        [132]: {0}\n", mDirPath[132]);
-            sb.AppendFormat("        [133]: {0}\n", mDirPath[133]);
-            sb.AppendFormat("        [134]: {0}\n", mDirPath[134]);
-            sb.AppendFormat("        [135]: {0}\n", mDirPath[135]);
-            sb.AppendFormat("        [136]: {0}\n", mDirPath[136]);
-            sb.AppendFormat("        [137]: {0}\n", mDirPath[137]);
-            sb.AppendFormat("        [138]: {0}\n", mDirPath[138]);
-            sb.AppendFormat("        [139]: {0}\n", mDirPath[139]);
-            sb.AppendFormat("        [140]: {0}\n", mDirPath[140]);
-            sb.AppendFormat("        [141]: {0}\n", mDirPath[141]);
-            sb.AppendFormat("        [142]: {0}\n", mDirPath[142]);
-            sb.AppendFormat("        [143]: {0}\n", mDirPath[143]);
-            sb.AppendFormat("        [144]: {0}\n", mDirPath[144]);
-            sb.AppendFormat("        [145]: {0}\n", mDirPath[145]);
-            sb.AppendFormat("        [146]: {0}\n", mDirPath[146]);
-            sb.AppendFormat("        [147]: {0}\n", mDirPath[147]);
-            sb.AppendFormat("        [148]: {0}\n", mDirPath[148]);
-            sb.AppendFormat("        [149]: {0}\n", mDirPath[149]);
-            sb.AppendFormat("        [150]: {0}\n", mDirPath[150]);
-            sb.AppendFormat("        [151]: {0}\n", mDirPath[151]);
-            sb.AppendFormat("        [152]: {0}\n", mDirPath[152]);
-            sb.AppendFormat("        [153]: {0}\n", mDirPath[153]);
-            sb.AppendFormat("        [154]: {0}\n", mDirPath[154]);
-            sb.AppendFormat("        [155]: {0}\n", mDirPath[155]);
-            sb.AppendFormat("        [156]: {0}\n", mDirPath[156]);
-            sb.AppendFormat("        [157]: {0}\n", mDirPath[157]);
-            sb.AppendFormat("        [158]: {0}\n", mDirPath[158]);
-            sb.AppendFormat("        [159]: {0}\n", mDirPath[159]);
-            sb.AppendFormat("        [160]: {0}\n", mDirPath[160]);
-            sb.AppendFormat("        [161]: {0}\n", mDirPath[161]);
-            sb.AppendFormat("        [162]: {0}\n", mDirPath[162]);
-            sb.AppendFormat("        [163]: {0}\n", mDirPath[163]);
-            sb.AppendFormat("        [164]: {0}\n", mDirPath[164]);
-            sb.AppendFormat("        [165]: {0}\n", mDirPath[165]);
-            sb.AppendFormat("        [166]: {0}\n", mDirPath[166]);
-            sb.AppendFormat("        [167]: {0}\n", mDirPath[167]);
-            sb.AppendFormat("        [168]: {0}\n", mDirPath[168]);
-            sb.AppendFormat("        [169]: {0}\n", mDirPath[169]);
-            sb.AppendFormat("        [170]: {0}\n", mDirPath[170]);
-            sb.AppendFormat("        [171]: {0}\n", mDirPath[171]);
-            sb.AppendFormat("        [172]: {0}\n", mDirPath[172]);
-            sb.AppendFormat("        [173]: {0}\n", mDirPath[173]);
-            sb.AppendFormat("        [174]: {0}\n", mDirPath[174]);
-            sb.AppendFormat("        [175]: {0}\n", mDirPath[175]);
-            sb.AppendFormat("        [176]: {0}\n", mDirPath[176]);
-            sb.AppendFormat("        [177]: {0}\n", mDirPath[177]);
-            sb.AppendFormat("        [178]: {0}\n", mDirPath[178]);
-            sb.AppendFormat("        [179]: {0}\n", mDirPath[179]);
-            sb.AppendFormat("        [180]: {0}\n", mDirPath[180]);
-            sb.AppendFormat("        [181]: {0}\n", mDirPath[181]);
-            sb.AppendFormat("        [182]: {0}\n", mDirPath[182]);
-            sb.AppendFormat("        [183]: {0}\n", mDirPath[183]);
-            sb.AppendFormat("        [184]: {0}\n", mDirPath[184]);
-            sb.AppendFormat("        [185]: {0}\n", mDirPath[185]);
-            sb.AppendFormat("        [186]: {0}\n", mDirPath[186]);
-            sb.AppendFormat("        [187]: {0}\n", mDirPath[187]);
-            sb.AppendFormat("        [188]: {0}\n", mDirPath[188]);
-            sb.AppendFormat("        [189]: {0}\n", mDirPath[189]);
-            sb.AppendFormat("        [190]: {0}\n", mDirPath[190]);
-            sb.AppendFormat("        [191]: {0}\n", mDirPath[191]);
-            sb.AppendFormat("        [192]: {0}\n", mDirPath[192]);
-            sb.AppendFormat("        [193]: {0}\n", mDirPath[193]);
-            sb.AppendFormat("        [194]: {0}\n", mDirPath[194]);
-            sb.AppendFormat("        [195]: {0}\n", mDirPath[195]);
-            sb.AppendFormat("        [196]: {0}\n", mDirPath[196]);
-            sb.AppendFormat("        [197]: {0}\n", mDirPath[197]);
-            sb.AppendFormat("        [198]: {0}\n", mDirPath[198]);
-            sb.AppendFormat("        [199]: {0}\n", mDirPath[199]);
-            sb.AppendFormat("        [200]: {0}\n", mDirPath[200]);
-            sb.AppendFormat("        [201]: {0}\n", mDirPath[201]);
-            sb.AppendFormat("        [202]: {0}\n", mDirPath[202]);
-            sb.AppendFormat("        [203]: {0}\n", mDirPath[203]);
-            sb.AppendFormat("        [204]: {0}\n", mDirPath[204]);
-            sb.AppendFormat("        [205]: {0}\n", mDirPath[205]);
-            sb.AppendFormat("        [206]: {0}\n", mDirPath[206]);
-            sb.AppendFormat("        [207]: {0}\n", mDirPath[207]);
-            sb.AppendFormat("        [208]: {0}\n", mDirPath[208]);
-            sb.AppendFormat("        [209]: {0}\n", mDirPath[209]);
-            sb.AppendFormat("        [210]: {0}\n", mDirPath[210]);
-            sb.AppendFormat("        [211]: {0}\n", mDirPath[211]);
-            sb.AppendFormat("        [212]: {0}\n", mDirPath[212]);
-            sb.AppendFormat("        [213]: {0}\n", mDirPath[213]);
-            sb.AppendFormat("        [214]: {0}\n", mDirPath[214]);
-            sb.AppendFormat("        [215]: {0}\n", mDirPath[215]);
-            sb.AppendFormat("        [216]: {0}\n", mDirPath[216]);
-            sb.AppendFormat("        [217]: {0}\n", mDirPath[217]);
-            sb.AppendFormat("        [218]: {0}\n", mDirPath[218]);
-            sb.AppendFormat("        [219]: {0}\n", mDirPath[219]);
-            sb.AppendFormat("        [220]: {0}\n", mDirPath[220]);
-            sb.AppendFormat("        [221]: {0}\n", mDirPath[221]);
-            sb.AppendFormat("        [222]: {0}\n", mDirPath[222]);
-            sb.AppendFormat("        [223]: {0}\n", mDirPath[223]);
-            sb.AppendFormat("        [224]: {0}\n", mDirPath[224]);
-            sb.AppendFormat("        [225]: {0}\n", mDirPath[225]);
-            sb.AppendFormat("        [226]: {0}\n", mDirPath[226]);
-            sb.AppendFormat("        [227]: {0}\n", mDirPath[227]);
-            sb.AppendFormat("        [228]: {0}\n", mDirPath[228]);
-            sb.AppendFormat("        [229]: {0}\n", mDirPath[229]);
-            sb.AppendFormat("        [230]: {0}\n", mDirPath[230]);
-            sb.AppendFormat("        [231]: {0}\n", mDirPath[231]);
-            sb.AppendFormat("        [232]: {0}\n", mDirPath[232]);
-            sb.AppendFormat("        [233]: {0}\n", mDirPath[233]);
-            sb.AppendFormat("        [234]: {0}\n", mDirPath[234]);
-            sb.AppendFormat("        [235]: {0}\n", mDirPath[235]);
-            sb.AppendFormat("        [236]: {0}\n", mDirPath[236]);
-            sb.AppendFormat("        [237]: {0}\n", mDirPath[237]);
-            sb.AppendFormat("        [238]: {0}\n", mDirPath[238]);
-            sb.AppendFormat("        [239]: {0}\n", mDirPath[239]);
-            sb.AppendFormat("    Flags: {0}\n", mFlags);
+            mMetadata.Fields.Add("TransferUid", new UasFieldMetadata() {
+                Name = "TransferUid",
+                Description = "Unique transfer ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("DirPath", new UasFieldMetadata() {
+                Name = "DirPath",
+                Description = "Directory path to list",
+                NumElements = 240,
+            });
+
+            mMetadata.Fields.Add("Flags", new UasFieldMetadata() {
+                Name = "Flags",
+                Description = "RESERVED",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTransferUid;
         private char[] mDirPath = new char[240];
         private byte mFlags;
@@ -11879,17 +13557,25 @@ namespace MavLinkNet
             this.mResult = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "File transfer result"
+            };
 
-            sb.Append("FileTransferRes \n");
-            sb.AppendFormat("    TransferUid: {0}\n", mTransferUid);
-            sb.AppendFormat("    Result: {0}\n", mResult);
+            mMetadata.Fields.Add("TransferUid", new UasFieldMetadata() {
+                Name = "TransferUid",
+                Description = "Unique transfer ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Result", new UasFieldMetadata() {
+                Name = "Result",
+                Description = "0: OK, 1: not permitted, 2: bad path / file name, 3: no space left on device",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTransferUid;
         private byte mResult;
     }
@@ -12047,28 +13733,91 @@ namespace MavLinkNet
             this.mSatellitesVisible = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "The global position, as returned by the Global Positioning System (GPS). This is                   NOT the global position estimate of the sytem, but rather a RAW sensor value. See message GLOBAL_POSITION for the global position estimate. Coordinate frame is right-handed, Z-axis up (GPS frame)."
+            };
 
-            sb.Append("HilGps \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    Eph: {0}\n", mEph);
-            sb.AppendFormat("    Epv: {0}\n", mEpv);
-            sb.AppendFormat("    Vel: {0}\n", mVel);
-            sb.AppendFormat("    Vn: {0}\n", mVn);
-            sb.AppendFormat("    Ve: {0}\n", mVe);
-            sb.AppendFormat("    Vd: {0}\n", mVd);
-            sb.AppendFormat("    Cog: {0}\n", mCog);
-            sb.AppendFormat("    FixType: {0}\n", mFixType);
-            sb.AppendFormat("    SatellitesVisible: {0}\n", mSatellitesVisible);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude (WGS84), in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude (WGS84), in meters * 1000 (positive for up)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Eph", new UasFieldMetadata() {
+                Name = "Eph",
+                Description = "GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Epv", new UasFieldMetadata() {
+                Name = "Epv",
+                Description = "GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vel", new UasFieldMetadata() {
+                Name = "Vel",
+                Description = "GPS ground speed (m/s * 100). If unknown, set to: 65535",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vn", new UasFieldMetadata() {
+                Name = "Vn",
+                Description = "GPS velocity in cm/s in NORTH direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ve", new UasFieldMetadata() {
+                Name = "Ve",
+                Description = "GPS velocity in cm/s in EAST direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vd", new UasFieldMetadata() {
+                Name = "Vd",
+                Description = "GPS velocity in cm/s in DOWN direction in earth-fixed NED frame",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Cog", new UasFieldMetadata() {
+                Name = "Cog",
+                Description = "Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: 65535",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FixType", new UasFieldMetadata() {
+                Name = "FixType",
+                Description = "0-1: no fix, 2: 2D fix, 3: 3D fix. Some applications will not use the value of this field unless it is at least two, so always correctly fill in the fix.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SatellitesVisible", new UasFieldMetadata() {
+                Name = "SatellitesVisible",
+                Description = "Number of satellites visible. If unknown, set to 255",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private Int32 mLat;
         private Int32 mLon;
@@ -12187,23 +13936,61 @@ namespace MavLinkNet
             this.mQuality = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Simulated optical flow from a flow sensor (e.g. optical mouse sensor)"
+            };
 
-            sb.Append("HilOpticalFlow \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    FlowCompMX: {0}\n", mFlowCompMX);
-            sb.AppendFormat("    FlowCompMY: {0}\n", mFlowCompMY);
-            sb.AppendFormat("    GroundDistance: {0}\n", mGroundDistance);
-            sb.AppendFormat("    FlowX: {0}\n", mFlowX);
-            sb.AppendFormat("    FlowY: {0}\n", mFlowY);
-            sb.AppendFormat("    SensorId: {0}\n", mSensorId);
-            sb.AppendFormat("    Quality: {0}\n", mQuality);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (UNIX)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("FlowCompMX", new UasFieldMetadata() {
+                Name = "FlowCompMX",
+                Description = "Flow in meters in x-sensor direction, angular-speed compensated",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowCompMY", new UasFieldMetadata() {
+                Name = "FlowCompMY",
+                Description = "Flow in meters in y-sensor direction, angular-speed compensated",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("GroundDistance", new UasFieldMetadata() {
+                Name = "GroundDistance",
+                Description = "Ground distance in meters. Positive value: distance known. Negative value: Unknown distance",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowX", new UasFieldMetadata() {
+                Name = "FlowX",
+                Description = "Flow in pixels in x-sensor direction",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FlowY", new UasFieldMetadata() {
+                Name = "FlowY",
+                Description = "Flow in pixels in y-sensor direction",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SensorId", new UasFieldMetadata() {
+                Name = "SensorId",
+                Description = "Sensor ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Quality", new UasFieldMetadata() {
+                Name = "Quality",
+                Description = "Optical flow quality / confidence. 0: bad, 255: maximum quality",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mFlowCompMX;
         private float mFlowCompMY;
@@ -12403,35 +14190,109 @@ namespace MavLinkNet
             this.mZacc = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Sent from simulation to autopilot, avoids in contrast to HIL_STATE singularities. This packet is useful for high throughput applications such as hardware in the loop simulations."
+            };
 
-            sb.Append("HilStateQuaternion \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.Append("    AttitudeQuaternion\n");
-            sb.AppendFormat("        [0]: {0}\n", mAttitudeQuaternion[0]);
-            sb.AppendFormat("        [1]: {0}\n", mAttitudeQuaternion[1]);
-            sb.AppendFormat("        [2]: {0}\n", mAttitudeQuaternion[2]);
-            sb.AppendFormat("        [3]: {0}\n", mAttitudeQuaternion[3]);
-            sb.AppendFormat("    Rollspeed: {0}\n", mRollspeed);
-            sb.AppendFormat("    Pitchspeed: {0}\n", mPitchspeed);
-            sb.AppendFormat("    Yawspeed: {0}\n", mYawspeed);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lon: {0}\n", mLon);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    Vx: {0}\n", mVx);
-            sb.AppendFormat("    Vy: {0}\n", mVy);
-            sb.AppendFormat("    Vz: {0}\n", mVz);
-            sb.AppendFormat("    IndAirspeed: {0}\n", mIndAirspeed);
-            sb.AppendFormat("    TrueAirspeed: {0}\n", mTrueAirspeed);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp (microseconds since UNIX epoch or microseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("AttitudeQuaternion", new UasFieldMetadata() {
+                Name = "AttitudeQuaternion",
+                Description = "Vehicle attitude expressed as normalized quaternion",
+                NumElements = 4,
+            });
+
+            mMetadata.Fields.Add("Rollspeed", new UasFieldMetadata() {
+                Name = "Rollspeed",
+                Description = "Body frame roll / phi angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pitchspeed", new UasFieldMetadata() {
+                Name = "Pitchspeed",
+                Description = "Body frame pitch / theta angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yawspeed", new UasFieldMetadata() {
+                Name = "Yawspeed",
+                Description = "Body frame yaw / psi angular speed (rad/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lon", new UasFieldMetadata() {
+                Name = "Lon",
+                Description = "Longitude, expressed as * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Altitude in meters, expressed as * 1000 (millimeters)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vx", new UasFieldMetadata() {
+                Name = "Vx",
+                Description = "Ground X Speed (Latitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vy", new UasFieldMetadata() {
+                Name = "Vy",
+                Description = "Ground Y Speed (Longitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vz", new UasFieldMetadata() {
+                Name = "Vz",
+                Description = "Ground Z Speed (Altitude), expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("IndAirspeed", new UasFieldMetadata() {
+                Name = "IndAirspeed",
+                Description = "Indicated airspeed, expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TrueAirspeed", new UasFieldMetadata() {
+                Name = "TrueAirspeed",
+                Description = "True airspeed, expressed as m/s * 100",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration (mg)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration (mg)",
+                NumElements = 1,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float[] mAttitudeQuaternion = new float[4];
         private float mRollspeed;
@@ -12583,26 +14444,79 @@ namespace MavLinkNet
             this.mBatteryRemaining = s.ReadSByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Transmitte battery informations for a accu pack."
+            };
 
-            sb.Append("BatteryStatus \n");
-            sb.AppendFormat("    CurrentConsumed: {0}\n", mCurrentConsumed);
-            sb.AppendFormat("    EnergyConsumed: {0}\n", mEnergyConsumed);
-            sb.AppendFormat("    VoltageCell1: {0}\n", mVoltageCell1);
-            sb.AppendFormat("    VoltageCell2: {0}\n", mVoltageCell2);
-            sb.AppendFormat("    VoltageCell3: {0}\n", mVoltageCell3);
-            sb.AppendFormat("    VoltageCell4: {0}\n", mVoltageCell4);
-            sb.AppendFormat("    VoltageCell5: {0}\n", mVoltageCell5);
-            sb.AppendFormat("    VoltageCell6: {0}\n", mVoltageCell6);
-            sb.AppendFormat("    CurrentBattery: {0}\n", mCurrentBattery);
-            sb.AppendFormat("    AccuId: {0}\n", mAccuId);
-            sb.AppendFormat("    BatteryRemaining: {0}\n", mBatteryRemaining);
+            mMetadata.Fields.Add("CurrentConsumed", new UasFieldMetadata() {
+                Name = "CurrentConsumed",
+                Description = "Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("EnergyConsumed", new UasFieldMetadata() {
+                Name = "EnergyConsumed",
+                Description = "Consumed energy, in 100*Joules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell1", new UasFieldMetadata() {
+                Name = "VoltageCell1",
+                Description = "Battery voltage of cell 1, in millivolts (1 = 1 millivolt)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell2", new UasFieldMetadata() {
+                Name = "VoltageCell2",
+                Description = "Battery voltage of cell 2, in millivolts (1 = 1 millivolt), -1: no cell",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell3", new UasFieldMetadata() {
+                Name = "VoltageCell3",
+                Description = "Battery voltage of cell 3, in millivolts (1 = 1 millivolt), -1: no cell",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell4", new UasFieldMetadata() {
+                Name = "VoltageCell4",
+                Description = "Battery voltage of cell 4, in millivolts (1 = 1 millivolt), -1: no cell",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell5", new UasFieldMetadata() {
+                Name = "VoltageCell5",
+                Description = "Battery voltage of cell 5, in millivolts (1 = 1 millivolt), -1: no cell",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("VoltageCell6", new UasFieldMetadata() {
+                Name = "VoltageCell6",
+                Description = "Battery voltage of cell 6, in millivolts (1 = 1 millivolt), -1: no cell",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CurrentBattery", new UasFieldMetadata() {
+                Name = "CurrentBattery",
+                Description = "Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AccuId", new UasFieldMetadata() {
+                Name = "AccuId",
+                Description = "Accupack ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BatteryRemaining", new UasFieldMetadata() {
+                Name = "BatteryRemaining",
+                Description = "Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery",
+                NumElements = 1,
+            });
+
         }
-
         private Int32 mCurrentConsumed;
         private Int32 mEnergyConsumed;
         private UInt16 mVoltageCell1;
@@ -12729,24 +14643,67 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the 8 DOF setpoint for a controller."
+            };
 
-            sb.Append("Setpoint8dof \n");
-            sb.AppendFormat("    Val1: {0}\n", mVal1);
-            sb.AppendFormat("    Val2: {0}\n", mVal2);
-            sb.AppendFormat("    Val3: {0}\n", mVal3);
-            sb.AppendFormat("    Val4: {0}\n", mVal4);
-            sb.AppendFormat("    Val5: {0}\n", mVal5);
-            sb.AppendFormat("    Val6: {0}\n", mVal6);
-            sb.AppendFormat("    Val7: {0}\n", mVal7);
-            sb.AppendFormat("    Val8: {0}\n", mVal8);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            mMetadata.Fields.Add("Val1", new UasFieldMetadata() {
+                Name = "Val1",
+                Description = "Value 1",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Val2", new UasFieldMetadata() {
+                Name = "Val2",
+                Description = "Value 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val3", new UasFieldMetadata() {
+                Name = "Val3",
+                Description = "Value 3",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val4", new UasFieldMetadata() {
+                Name = "Val4",
+                Description = "Value 4",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val5", new UasFieldMetadata() {
+                Name = "Val5",
+                Description = "Value 5",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val6", new UasFieldMetadata() {
+                Name = "Val6",
+                Description = "Value 6",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val7", new UasFieldMetadata() {
+                Name = "Val7",
+                Description = "Value 7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Val8", new UasFieldMetadata() {
+                Name = "Val8",
+                Description = "Value 8",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
         }
-
         private float mVal1;
         private float mVal2;
         private float mVal3;
@@ -12851,22 +14808,55 @@ namespace MavLinkNet
             this.mTargetSystem = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Set the 6 DOF setpoint for a attitude and position controller."
+            };
 
-            sb.Append("Setpoint6dof \n");
-            sb.AppendFormat("    TransX: {0}\n", mTransX);
-            sb.AppendFormat("    TransY: {0}\n", mTransY);
-            sb.AppendFormat("    TransZ: {0}\n", mTransZ);
-            sb.AppendFormat("    RotX: {0}\n", mRotX);
-            sb.AppendFormat("    RotY: {0}\n", mRotY);
-            sb.AppendFormat("    RotZ: {0}\n", mRotZ);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
+            mMetadata.Fields.Add("TransX", new UasFieldMetadata() {
+                Name = "TransX",
+                Description = "Translational Component in x",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TransY", new UasFieldMetadata() {
+                Name = "TransY",
+                Description = "Translational Component in y",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TransZ", new UasFieldMetadata() {
+                Name = "TransZ",
+                Description = "Translational Component in z",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RotX", new UasFieldMetadata() {
+                Name = "RotX",
+                Description = "Rotational Component in x",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RotY", new UasFieldMetadata() {
+                Name = "RotY",
+                Description = "Rotational Component in y",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RotZ", new UasFieldMetadata() {
+                Name = "RotZ",
+                Description = "Rotational Component in z",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
         }
-
         private float mTransX;
         private float mTransY;
         private float mTransZ;
@@ -13001,51 +14991,37 @@ namespace MavLinkNet
             this.mValue[31] = s.ReadSByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Send raw controller memory. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output."
+            };
 
-            sb.Append("MemoryVect \n");
-            sb.AppendFormat("    Address: {0}\n", mAddress);
-            sb.AppendFormat("    Ver: {0}\n", mVer);
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.Append("    Value\n");
-            sb.AppendFormat("        [0]: {0}\n", mValue[0]);
-            sb.AppendFormat("        [1]: {0}\n", mValue[1]);
-            sb.AppendFormat("        [2]: {0}\n", mValue[2]);
-            sb.AppendFormat("        [3]: {0}\n", mValue[3]);
-            sb.AppendFormat("        [4]: {0}\n", mValue[4]);
-            sb.AppendFormat("        [5]: {0}\n", mValue[5]);
-            sb.AppendFormat("        [6]: {0}\n", mValue[6]);
-            sb.AppendFormat("        [7]: {0}\n", mValue[7]);
-            sb.AppendFormat("        [8]: {0}\n", mValue[8]);
-            sb.AppendFormat("        [9]: {0}\n", mValue[9]);
-            sb.AppendFormat("        [10]: {0}\n", mValue[10]);
-            sb.AppendFormat("        [11]: {0}\n", mValue[11]);
-            sb.AppendFormat("        [12]: {0}\n", mValue[12]);
-            sb.AppendFormat("        [13]: {0}\n", mValue[13]);
-            sb.AppendFormat("        [14]: {0}\n", mValue[14]);
-            sb.AppendFormat("        [15]: {0}\n", mValue[15]);
-            sb.AppendFormat("        [16]: {0}\n", mValue[16]);
-            sb.AppendFormat("        [17]: {0}\n", mValue[17]);
-            sb.AppendFormat("        [18]: {0}\n", mValue[18]);
-            sb.AppendFormat("        [19]: {0}\n", mValue[19]);
-            sb.AppendFormat("        [20]: {0}\n", mValue[20]);
-            sb.AppendFormat("        [21]: {0}\n", mValue[21]);
-            sb.AppendFormat("        [22]: {0}\n", mValue[22]);
-            sb.AppendFormat("        [23]: {0}\n", mValue[23]);
-            sb.AppendFormat("        [24]: {0}\n", mValue[24]);
-            sb.AppendFormat("        [25]: {0}\n", mValue[25]);
-            sb.AppendFormat("        [26]: {0}\n", mValue[26]);
-            sb.AppendFormat("        [27]: {0}\n", mValue[27]);
-            sb.AppendFormat("        [28]: {0}\n", mValue[28]);
-            sb.AppendFormat("        [29]: {0}\n", mValue[29]);
-            sb.AppendFormat("        [30]: {0}\n", mValue[30]);
-            sb.AppendFormat("        [31]: {0}\n", mValue[31]);
+            mMetadata.Fields.Add("Address", new UasFieldMetadata() {
+                Name = "Address",
+                Description = "Starting address of the debug variables",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Ver", new UasFieldMetadata() {
+                Name = "Ver",
+                Description = "Version code of the type variable. 0=unknown, type ignored and assumed int16_t. 1=as below",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "Type code of the memory variables. for ver = 1: 0=16 x int16_t, 1=16 x uint16_t, 2=16 x Q15, 3=16 x 1Q14",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Value", new UasFieldMetadata() {
+                Name = "Value",
+                Description = "Memory contents at specified address",
+                NumElements = 32,
+            });
+
         }
-
         private UInt16 mAddress;
         private byte mVer;
         private byte mType;
@@ -13140,30 +15116,43 @@ namespace MavLinkNet
             this.mName[9] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = ""
+            };
 
-            sb.Append("DebugVect \n");
-            sb.AppendFormat("    TimeUsec: {0}\n", mTimeUsec);
-            sb.AppendFormat("    X: {0}\n", mX);
-            sb.AppendFormat("    Y: {0}\n", mY);
-            sb.AppendFormat("    Z: {0}\n", mZ);
-            sb.Append("    Name\n");
-            sb.AppendFormat("        [0]: {0}\n", mName[0]);
-            sb.AppendFormat("        [1]: {0}\n", mName[1]);
-            sb.AppendFormat("        [2]: {0}\n", mName[2]);
-            sb.AppendFormat("        [3]: {0}\n", mName[3]);
-            sb.AppendFormat("        [4]: {0}\n", mName[4]);
-            sb.AppendFormat("        [5]: {0}\n", mName[5]);
-            sb.AppendFormat("        [6]: {0}\n", mName[6]);
-            sb.AppendFormat("        [7]: {0}\n", mName[7]);
-            sb.AppendFormat("        [8]: {0}\n", mName[8]);
-            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+            mMetadata.Fields.Add("TimeUsec", new UasFieldMetadata() {
+                Name = "TimeUsec",
+                Description = "Timestamp",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("X", new UasFieldMetadata() {
+                Name = "X",
+                Description = "x",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Y", new UasFieldMetadata() {
+                Name = "Y",
+                Description = "y",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Z", new UasFieldMetadata() {
+                Name = "Z",
+                Description = "z",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Name", new UasFieldMetadata() {
+                Name = "Name",
+                Description = "Name",
+                NumElements = 10,
+            });
+
         }
-
         private UInt64 mTimeUsec;
         private float mX;
         private float mY;
@@ -13242,28 +15231,31 @@ namespace MavLinkNet
             this.mName[9] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Send a key-value pair as float. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output."
+            };
 
-            sb.Append("NamedValueFloat \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Value: {0}\n", mValue);
-            sb.Append("    Name\n");
-            sb.AppendFormat("        [0]: {0}\n", mName[0]);
-            sb.AppendFormat("        [1]: {0}\n", mName[1]);
-            sb.AppendFormat("        [2]: {0}\n", mName[2]);
-            sb.AppendFormat("        [3]: {0}\n", mName[3]);
-            sb.AppendFormat("        [4]: {0}\n", mName[4]);
-            sb.AppendFormat("        [5]: {0}\n", mName[5]);
-            sb.AppendFormat("        [6]: {0}\n", mName[6]);
-            sb.AppendFormat("        [7]: {0}\n", mName[7]);
-            sb.AppendFormat("        [8]: {0}\n", mName[8]);
-            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Value", new UasFieldMetadata() {
+                Name = "Value",
+                Description = "Floating point value",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Name", new UasFieldMetadata() {
+                Name = "Name",
+                Description = "Name of the debug variable",
+                NumElements = 10,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private float mValue;
         private char[] mName = new char[10];
@@ -13340,28 +15332,31 @@ namespace MavLinkNet
             this.mName[9] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Send a key-value pair as integer. The use of this message is discouraged for normal packets, but a quite efficient way for testing new messages and getting experimental debug output."
+            };
 
-            sb.Append("NamedValueInt \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Value: {0}\n", mValue);
-            sb.Append("    Name\n");
-            sb.AppendFormat("        [0]: {0}\n", mName[0]);
-            sb.AppendFormat("        [1]: {0}\n", mName[1]);
-            sb.AppendFormat("        [2]: {0}\n", mName[2]);
-            sb.AppendFormat("        [3]: {0}\n", mName[3]);
-            sb.AppendFormat("        [4]: {0}\n", mName[4]);
-            sb.AppendFormat("        [5]: {0}\n", mName[5]);
-            sb.AppendFormat("        [6]: {0}\n", mName[6]);
-            sb.AppendFormat("        [7]: {0}\n", mName[7]);
-            sb.AppendFormat("        [8]: {0}\n", mName[8]);
-            sb.AppendFormat("        [9]: {0}\n", mName[9]);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Value", new UasFieldMetadata() {
+                Name = "Value",
+                Description = "Signed integer value",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Name", new UasFieldMetadata() {
+                Name = "Name",
+                Description = "Name of the debug variable",
+                NumElements = 10,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private Int32 mValue;
         private char[] mName = new char[10];
@@ -13508,67 +15503,26 @@ namespace MavLinkNet
             this.mText[49] = s.ReadChar();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status text message. These messages are printed in yellow in the COMM console of QGroundControl. WARNING: They consume quite some bandwidth, so use only for important status and error messages. If implemented wisely, these messages are buffered on the MCU and sent only at a limited rate (e.g. 10 Hz)."
+            };
 
-            sb.Append("Statustext \n");
-            sb.AppendFormat("    Severity: {0}\n", mSeverity);
-            sb.Append("    Text\n");
-            sb.AppendFormat("        [0]: {0}\n", mText[0]);
-            sb.AppendFormat("        [1]: {0}\n", mText[1]);
-            sb.AppendFormat("        [2]: {0}\n", mText[2]);
-            sb.AppendFormat("        [3]: {0}\n", mText[3]);
-            sb.AppendFormat("        [4]: {0}\n", mText[4]);
-            sb.AppendFormat("        [5]: {0}\n", mText[5]);
-            sb.AppendFormat("        [6]: {0}\n", mText[6]);
-            sb.AppendFormat("        [7]: {0}\n", mText[7]);
-            sb.AppendFormat("        [8]: {0}\n", mText[8]);
-            sb.AppendFormat("        [9]: {0}\n", mText[9]);
-            sb.AppendFormat("        [10]: {0}\n", mText[10]);
-            sb.AppendFormat("        [11]: {0}\n", mText[11]);
-            sb.AppendFormat("        [12]: {0}\n", mText[12]);
-            sb.AppendFormat("        [13]: {0}\n", mText[13]);
-            sb.AppendFormat("        [14]: {0}\n", mText[14]);
-            sb.AppendFormat("        [15]: {0}\n", mText[15]);
-            sb.AppendFormat("        [16]: {0}\n", mText[16]);
-            sb.AppendFormat("        [17]: {0}\n", mText[17]);
-            sb.AppendFormat("        [18]: {0}\n", mText[18]);
-            sb.AppendFormat("        [19]: {0}\n", mText[19]);
-            sb.AppendFormat("        [20]: {0}\n", mText[20]);
-            sb.AppendFormat("        [21]: {0}\n", mText[21]);
-            sb.AppendFormat("        [22]: {0}\n", mText[22]);
-            sb.AppendFormat("        [23]: {0}\n", mText[23]);
-            sb.AppendFormat("        [24]: {0}\n", mText[24]);
-            sb.AppendFormat("        [25]: {0}\n", mText[25]);
-            sb.AppendFormat("        [26]: {0}\n", mText[26]);
-            sb.AppendFormat("        [27]: {0}\n", mText[27]);
-            sb.AppendFormat("        [28]: {0}\n", mText[28]);
-            sb.AppendFormat("        [29]: {0}\n", mText[29]);
-            sb.AppendFormat("        [30]: {0}\n", mText[30]);
-            sb.AppendFormat("        [31]: {0}\n", mText[31]);
-            sb.AppendFormat("        [32]: {0}\n", mText[32]);
-            sb.AppendFormat("        [33]: {0}\n", mText[33]);
-            sb.AppendFormat("        [34]: {0}\n", mText[34]);
-            sb.AppendFormat("        [35]: {0}\n", mText[35]);
-            sb.AppendFormat("        [36]: {0}\n", mText[36]);
-            sb.AppendFormat("        [37]: {0}\n", mText[37]);
-            sb.AppendFormat("        [38]: {0}\n", mText[38]);
-            sb.AppendFormat("        [39]: {0}\n", mText[39]);
-            sb.AppendFormat("        [40]: {0}\n", mText[40]);
-            sb.AppendFormat("        [41]: {0}\n", mText[41]);
-            sb.AppendFormat("        [42]: {0}\n", mText[42]);
-            sb.AppendFormat("        [43]: {0}\n", mText[43]);
-            sb.AppendFormat("        [44]: {0}\n", mText[44]);
-            sb.AppendFormat("        [45]: {0}\n", mText[45]);
-            sb.AppendFormat("        [46]: {0}\n", mText[46]);
-            sb.AppendFormat("        [47]: {0}\n", mText[47]);
-            sb.AppendFormat("        [48]: {0}\n", mText[48]);
-            sb.AppendFormat("        [49]: {0}\n", mText[49]);
+            mMetadata.Fields.Add("Severity", new UasFieldMetadata() {
+                Name = "Severity",
+                Description = "Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavSeverity"),
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Text", new UasFieldMetadata() {
+                Name = "Text",
+                Description = "Status text message, without null termination character",
+                NumElements = 50,
+            });
+
         }
-
         private MavSeverity mSeverity;
         private char[] mText = new char[50];
     }
@@ -13626,18 +15580,31 @@ namespace MavLinkNet
             this.mValue = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Send a debug value. The index is used to discriminate between values. These values show up in the plot of QGroundControl as DEBUG N."
+            };
 
-            sb.Append("Debug \n");
-            sb.AppendFormat("    TimeBootMs: {0}\n", mTimeBootMs);
-            sb.AppendFormat("    Ind: {0}\n", mInd);
-            sb.AppendFormat("    Value: {0}\n", mValue);
+            mMetadata.Fields.Add("TimeBootMs", new UasFieldMetadata() {
+                Name = "TimeBootMs",
+                Description = "Timestamp (milliseconds since system boot)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Ind", new UasFieldMetadata() {
+                Name = "Ind",
+                Description = "index of debug variable",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Value", new UasFieldMetadata() {
+                Name = "Value",
+                Description = "DEBUG value",
+                NumElements = 1,
+            });
+
         }
-
         private UInt32 mTimeBootMs;
         private byte mInd;
         private float mValue;
@@ -13786,27 +15753,85 @@ namespace MavLinkNet
             this.mMagOfsZ = s.ReadInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Offsets and calibrations values for hardware          sensors. This makes it easier to debug the calibration process."
+            };
 
-            sb.Append("SensorOffsets \n");
-            sb.AppendFormat("    MagDeclination: {0}\n", mMagDeclination);
-            sb.AppendFormat("    RawPress: {0}\n", mRawPress);
-            sb.AppendFormat("    RawTemp: {0}\n", mRawTemp);
-            sb.AppendFormat("    GyroCalX: {0}\n", mGyroCalX);
-            sb.AppendFormat("    GyroCalY: {0}\n", mGyroCalY);
-            sb.AppendFormat("    GyroCalZ: {0}\n", mGyroCalZ);
-            sb.AppendFormat("    AccelCalX: {0}\n", mAccelCalX);
-            sb.AppendFormat("    AccelCalY: {0}\n", mAccelCalY);
-            sb.AppendFormat("    AccelCalZ: {0}\n", mAccelCalZ);
-            sb.AppendFormat("    MagOfsX: {0}\n", mMagOfsX);
-            sb.AppendFormat("    MagOfsY: {0}\n", mMagOfsY);
-            sb.AppendFormat("    MagOfsZ: {0}\n", mMagOfsZ);
+            mMetadata.Fields.Add("MagDeclination", new UasFieldMetadata() {
+                Name = "MagDeclination",
+                Description = "magnetic declination (radians)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("RawPress", new UasFieldMetadata() {
+                Name = "RawPress",
+                Description = "raw pressure from barometer",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RawTemp", new UasFieldMetadata() {
+                Name = "RawTemp",
+                Description = "raw temperature from barometer",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("GyroCalX", new UasFieldMetadata() {
+                Name = "GyroCalX",
+                Description = "gyro X calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("GyroCalY", new UasFieldMetadata() {
+                Name = "GyroCalY",
+                Description = "gyro Y calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("GyroCalZ", new UasFieldMetadata() {
+                Name = "GyroCalZ",
+                Description = "gyro Z calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AccelCalX", new UasFieldMetadata() {
+                Name = "AccelCalX",
+                Description = "accel X calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AccelCalY", new UasFieldMetadata() {
+                Name = "AccelCalY",
+                Description = "accel Y calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AccelCalZ", new UasFieldMetadata() {
+                Name = "AccelCalZ",
+                Description = "accel Z calibration",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MagOfsX", new UasFieldMetadata() {
+                Name = "MagOfsX",
+                Description = "magnetometer X offset",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MagOfsY", new UasFieldMetadata() {
+                Name = "MagOfsY",
+                Description = "magnetometer Y offset",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MagOfsZ", new UasFieldMetadata() {
+                Name = "MagOfsZ",
+                Description = "magnetometer Z offset",
+                NumElements = 1,
+            });
+
         }
-
         private float mMagDeclination;
         private Int32 mRawPress;
         private Int32 mRawTemp;
@@ -13894,20 +15919,43 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "set the magnetometer offsets"
+            };
 
-            sb.Append("SetMagOffsets \n");
-            sb.AppendFormat("    MagOfsX: {0}\n", mMagOfsX);
-            sb.AppendFormat("    MagOfsY: {0}\n", mMagOfsY);
-            sb.AppendFormat("    MagOfsZ: {0}\n", mMagOfsZ);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("MagOfsX", new UasFieldMetadata() {
+                Name = "MagOfsX",
+                Description = "magnetometer X offset",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("MagOfsY", new UasFieldMetadata() {
+                Name = "MagOfsY",
+                Description = "magnetometer Y offset",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MagOfsZ", new UasFieldMetadata() {
+                Name = "MagOfsZ",
+                Description = "magnetometer Z offset",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private Int16 mMagOfsX;
         private Int16 mMagOfsY;
         private Int16 mMagOfsZ;
@@ -13958,17 +16006,25 @@ namespace MavLinkNet
             this.mFreemem = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "state of APM memory"
+            };
 
-            sb.Append("Meminfo \n");
-            sb.AppendFormat("    Brkval: {0}\n", mBrkval);
-            sb.AppendFormat("    Freemem: {0}\n", mFreemem);
+            mMetadata.Fields.Add("Brkval", new UasFieldMetadata() {
+                Name = "Brkval",
+                Description = "heap top",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Freemem", new UasFieldMetadata() {
+                Name = "Freemem",
+                Description = "free memory",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mBrkval;
         private UInt16 mFreemem;
     }
@@ -14056,21 +16112,49 @@ namespace MavLinkNet
             this.mAdc6 = s.ReadUInt16();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "raw ADC output"
+            };
 
-            sb.Append("ApAdc \n");
-            sb.AppendFormat("    Adc1: {0}\n", mAdc1);
-            sb.AppendFormat("    Adc2: {0}\n", mAdc2);
-            sb.AppendFormat("    Adc3: {0}\n", mAdc3);
-            sb.AppendFormat("    Adc4: {0}\n", mAdc4);
-            sb.AppendFormat("    Adc5: {0}\n", mAdc5);
-            sb.AppendFormat("    Adc6: {0}\n", mAdc6);
+            mMetadata.Fields.Add("Adc1", new UasFieldMetadata() {
+                Name = "Adc1",
+                Description = "ADC output 1",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Adc2", new UasFieldMetadata() {
+                Name = "Adc2",
+                Description = "ADC output 2",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Adc3", new UasFieldMetadata() {
+                Name = "Adc3",
+                Description = "ADC output 3",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Adc4", new UasFieldMetadata() {
+                Name = "Adc4",
+                Description = "ADC output 4",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Adc5", new UasFieldMetadata() {
+                Name = "Adc5",
+                Description = "ADC output 5",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Adc6", new UasFieldMetadata() {
+                Name = "Adc6",
+                Description = "ADC output 6",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mAdc1;
         private UInt16 mAdc2;
         private UInt16 mAdc3;
@@ -14212,26 +16296,79 @@ namespace MavLinkNet
             this.mExtraParam = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Configure on-board Camera Control System."
+            };
 
-            sb.Append("DigicamConfigure \n");
-            sb.AppendFormat("    ExtraValue: {0}\n", mExtraValue);
-            sb.AppendFormat("    ShutterSpeed: {0}\n", mShutterSpeed);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Mode: {0}\n", mMode);
-            sb.AppendFormat("    Aperture: {0}\n", mAperture);
-            sb.AppendFormat("    Iso: {0}\n", mIso);
-            sb.AppendFormat("    ExposureType: {0}\n", mExposureType);
-            sb.AppendFormat("    CommandId: {0}\n", mCommandId);
-            sb.AppendFormat("    EngineCutOff: {0}\n", mEngineCutOff);
-            sb.AppendFormat("    ExtraParam: {0}\n", mExtraParam);
+            mMetadata.Fields.Add("ExtraValue", new UasFieldMetadata() {
+                Name = "ExtraValue",
+                Description = "Correspondent value to given extra_param",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("ShutterSpeed", new UasFieldMetadata() {
+                Name = "ShutterSpeed",
+                Description = "Divisor number //e.g. 1000 means 1/1000 (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Mode", new UasFieldMetadata() {
+                Name = "Mode",
+                Description = "Mode enumeration from 1 to N //P, TV, AV, M, Etc (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Aperture", new UasFieldMetadata() {
+                Name = "Aperture",
+                Description = "F stop number x 10 //e.g. 28 means 2.8 (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Iso", new UasFieldMetadata() {
+                Name = "Iso",
+                Description = "ISO enumeration from 1 to N //e.g. 80, 100, 200, Etc (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ExposureType", new UasFieldMetadata() {
+                Name = "ExposureType",
+                Description = "Exposure type enumeration from 1 to N (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CommandId", new UasFieldMetadata() {
+                Name = "CommandId",
+                Description = "Command Identity (incremental loop: 0 to 255)//A command sent multiple times will be executed or pooled just once",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("EngineCutOff", new UasFieldMetadata() {
+                Name = "EngineCutOff",
+                Description = "Main engine cut-off time before camera trigger in seconds/10 (0 means no cut-off)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ExtraParam", new UasFieldMetadata() {
+                Name = "ExtraParam",
+                Description = "Extra parameters enumeration (0 means ignore)",
+                NumElements = 1,
+            });
+
         }
-
         private float mExtraValue;
         private UInt16 mShutterSpeed;
         private byte mTargetSystem;
@@ -14368,25 +16505,73 @@ namespace MavLinkNet
             this.mExtraParam = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Control on-board Camera Control System to take shots."
+            };
 
-            sb.Append("DigicamControl \n");
-            sb.AppendFormat("    ExtraValue: {0}\n", mExtraValue);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Session: {0}\n", mSession);
-            sb.AppendFormat("    ZoomPos: {0}\n", mZoomPos);
-            sb.AppendFormat("    ZoomStep: {0}\n", mZoomStep);
-            sb.AppendFormat("    FocusLock: {0}\n", mFocusLock);
-            sb.AppendFormat("    Shot: {0}\n", mShot);
-            sb.AppendFormat("    CommandId: {0}\n", mCommandId);
-            sb.AppendFormat("    ExtraParam: {0}\n", mExtraParam);
+            mMetadata.Fields.Add("ExtraValue", new UasFieldMetadata() {
+                Name = "ExtraValue",
+                Description = "Correspondent value to given extra_param",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Session", new UasFieldMetadata() {
+                Name = "Session",
+                Description = "0: stop, 1: start or keep it up //Session control e.g. show/hide lens",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ZoomPos", new UasFieldMetadata() {
+                Name = "ZoomPos",
+                Description = "1 to N //Zoom's absolute position (0 means ignore)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ZoomStep", new UasFieldMetadata() {
+                Name = "ZoomStep",
+                Description = "-100 to 100 //Zooming step value to offset zoom from the current position",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("FocusLock", new UasFieldMetadata() {
+                Name = "FocusLock",
+                Description = "0: unlock focus or keep unlocked, 1: lock focus or keep locked, 3: re-lock focus",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Shot", new UasFieldMetadata() {
+                Name = "Shot",
+                Description = "0: ignore, 1: shot or start filming",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("CommandId", new UasFieldMetadata() {
+                Name = "CommandId",
+                Description = "Command Identity (incremental loop: 0 to 255)//A command sent multiple times will be executed or pooled just once",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ExtraParam", new UasFieldMetadata() {
+                Name = "ExtraParam",
+                Description = "Extra parameters enumeration (0 means ignore)",
+                NumElements = 1,
+            });
+
         }
-
         private float mExtraValue;
         private byte mTargetSystem;
         private byte mTargetComponent;
@@ -14482,21 +16667,50 @@ namespace MavLinkNet
             this.mStabYaw = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Message to configure a camera mount, directional antenna, etc."
+            };
 
-            sb.Append("MountConfigure \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    MountMode: {0}\n", mMountMode);
-            sb.AppendFormat("    StabRoll: {0}\n", mStabRoll);
-            sb.AppendFormat("    StabPitch: {0}\n", mStabPitch);
-            sb.AppendFormat("    StabYaw: {0}\n", mStabYaw);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("MountMode", new UasFieldMetadata() {
+                Name = "MountMode",
+                Description = "mount operating mode (see MAV_MOUNT_MODE enum)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("MavMountMode"),
+            });
+
+            mMetadata.Fields.Add("StabRoll", new UasFieldMetadata() {
+                Name = "StabRoll",
+                Description = "(1 = yes, 0 = no)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StabPitch", new UasFieldMetadata() {
+                Name = "StabPitch",
+                Description = "(1 = yes, 0 = no)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StabYaw", new UasFieldMetadata() {
+                Name = "StabYaw",
+                Description = "(1 = yes, 0 = no)",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
         private MavMountMode mMountMode;
@@ -14555,7 +16769,7 @@ namespace MavLinkNet
         }
 
         /// <summary>
-        /// if "1" it will save current trimmed position on EEPROM (just valid for NEUTRAL and LANDING)
+        /// if '1' it will save current trimmed position on EEPROM (just valid for NEUTRAL and LANDING)
         /// </summary>
         public byte SavePosition {
             get { return mSavePosition; }
@@ -14588,21 +16802,49 @@ namespace MavLinkNet
             this.mSavePosition = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Message to control a camera mount, directional antenna, etc."
+            };
 
-            sb.Append("MountControl \n");
-            sb.AppendFormat("    InputA: {0}\n", mInputA);
-            sb.AppendFormat("    InputB: {0}\n", mInputB);
-            sb.AppendFormat("    InputC: {0}\n", mInputC);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    SavePosition: {0}\n", mSavePosition);
+            mMetadata.Fields.Add("InputA", new UasFieldMetadata() {
+                Name = "InputA",
+                Description = "pitch(deg*100) or lat, depending on mount mode",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("InputB", new UasFieldMetadata() {
+                Name = "InputB",
+                Description = "roll(deg*100) or lon depending on mount mode",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("InputC", new UasFieldMetadata() {
+                Name = "InputC",
+                Description = "yaw(deg*100) or alt (in cm) depending on mount mode",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SavePosition", new UasFieldMetadata() {
+                Name = "SavePosition",
+                Description = "if '1' it will save current trimmed position on EEPROM (just valid for NEUTRAL and LANDING)",
+                NumElements = 1,
+            });
+
         }
-
         private Int32 mInputA;
         private Int32 mInputB;
         private Int32 mInputC;
@@ -14684,20 +16926,43 @@ namespace MavLinkNet
             this.mTargetComponent = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Message with some status from APM to GCS about camera or antenna mount"
+            };
 
-            sb.Append("MountStatus \n");
-            sb.AppendFormat("    PointingA: {0}\n", mPointingA);
-            sb.AppendFormat("    PointingB: {0}\n", mPointingB);
-            sb.AppendFormat("    PointingC: {0}\n", mPointingC);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
+            mMetadata.Fields.Add("PointingA", new UasFieldMetadata() {
+                Name = "PointingA",
+                Description = "pitch(deg*100) or lat, depending on mount mode",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("PointingB", new UasFieldMetadata() {
+                Name = "PointingB",
+                Description = "roll(deg*100) or lon depending on mount mode",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("PointingC", new UasFieldMetadata() {
+                Name = "PointingC",
+                Description = "yaw(deg*100) or alt (in cm) depending on mount mode",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
         }
-
         private Int32 mPointingA;
         private Int32 mPointingB;
         private Int32 mPointingC;
@@ -14788,21 +17053,49 @@ namespace MavLinkNet
             this.mCount = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "A fence point. Used to set a point when from  	      GCS -> MAV. Also used to return a point from MAV -> GCS"
+            };
 
-            sb.Append("FencePoint \n");
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lng: {0}\n", mLng);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Idx: {0}\n", mIdx);
-            sb.AppendFormat("    Count: {0}\n", mCount);
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude of point",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Lng", new UasFieldMetadata() {
+                Name = "Lng",
+                Description = "Longitude of point",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Idx", new UasFieldMetadata() {
+                Name = "Idx",
+                Description = "point index (first point is 1, 0 is for return point)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Count", new UasFieldMetadata() {
+                Name = "Count",
+                Description = "total number of points (for sanity checking)",
+                NumElements = 1,
+            });
+
         }
-
         private float mLat;
         private float mLng;
         private byte mTargetSystem;
@@ -14864,18 +17157,31 @@ namespace MavLinkNet
             this.mIdx = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request a current fence point from MAV"
+            };
 
-            sb.Append("FenceFetchPoint \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Idx: {0}\n", mIdx);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Idx", new UasFieldMetadata() {
+                Name = "Idx",
+                Description = "point index (first point is 1, 0 is for return point)",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
         private byte mIdx;
@@ -14944,19 +17250,38 @@ namespace MavLinkNet
             this.mBreachType = (FenceBreach)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of geo-fencing. Sent in extended  	    status stream when fencing enabled"
+            };
 
-            sb.Append("FenceStatus \n");
-            sb.AppendFormat("    BreachTime: {0}\n", mBreachTime);
-            sb.AppendFormat("    BreachCount: {0}\n", mBreachCount);
-            sb.AppendFormat("    BreachStatus: {0}\n", mBreachStatus);
-            sb.AppendFormat("    BreachType: {0}\n", mBreachType);
+            mMetadata.Fields.Add("BreachTime", new UasFieldMetadata() {
+                Name = "BreachTime",
+                Description = "time of last breach in milliseconds since boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("BreachCount", new UasFieldMetadata() {
+                Name = "BreachCount",
+                Description = "number of fence breaches",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BreachStatus", new UasFieldMetadata() {
+                Name = "BreachStatus",
+                Description = "0 if currently inside fence, 1 if outside",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BreachType", new UasFieldMetadata() {
+                Name = "BreachType",
+                Description = "last breach type (see FENCE_BREACH_* enum)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("FenceBreach"),
+            });
+
         }
-
         private UInt32 mBreachTime;
         private UInt16 mBreachCount;
         private byte mBreachStatus;
@@ -15056,22 +17381,55 @@ namespace MavLinkNet
             this.mErrorYaw = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of DCM attitude estimator"
+            };
 
-            sb.Append("Ahrs \n");
-            sb.AppendFormat("    Omegaix: {0}\n", mOmegaix);
-            sb.AppendFormat("    Omegaiy: {0}\n", mOmegaiy);
-            sb.AppendFormat("    Omegaiz: {0}\n", mOmegaiz);
-            sb.AppendFormat("    AccelWeight: {0}\n", mAccelWeight);
-            sb.AppendFormat("    RenormVal: {0}\n", mRenormVal);
-            sb.AppendFormat("    ErrorRp: {0}\n", mErrorRp);
-            sb.AppendFormat("    ErrorYaw: {0}\n", mErrorYaw);
+            mMetadata.Fields.Add("Omegaix", new UasFieldMetadata() {
+                Name = "Omegaix",
+                Description = "X gyro drift estimate rad/s",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Omegaiy", new UasFieldMetadata() {
+                Name = "Omegaiy",
+                Description = "Y gyro drift estimate rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Omegaiz", new UasFieldMetadata() {
+                Name = "Omegaiz",
+                Description = "Z gyro drift estimate rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("AccelWeight", new UasFieldMetadata() {
+                Name = "AccelWeight",
+                Description = "average accel_weight",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("RenormVal", new UasFieldMetadata() {
+                Name = "RenormVal",
+                Description = "average renormalisation value",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorRp", new UasFieldMetadata() {
+                Name = "ErrorRp",
+                Description = "average error_roll_pitch value",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("ErrorYaw", new UasFieldMetadata() {
+                Name = "ErrorYaw",
+                Description = "average error_yaw value",
+                NumElements = 1,
+            });
+
         }
-
         private float mOmegaix;
         private float mOmegaiy;
         private float mOmegaiz;
@@ -15214,26 +17572,79 @@ namespace MavLinkNet
             this.mLng = s.ReadInt32();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of simulation environment, if used"
+            };
 
-            sb.Append("Simstate \n");
-            sb.AppendFormat("    Roll: {0}\n", mRoll);
-            sb.AppendFormat("    Pitch: {0}\n", mPitch);
-            sb.AppendFormat("    Yaw: {0}\n", mYaw);
-            sb.AppendFormat("    Xacc: {0}\n", mXacc);
-            sb.AppendFormat("    Yacc: {0}\n", mYacc);
-            sb.AppendFormat("    Zacc: {0}\n", mZacc);
-            sb.AppendFormat("    Xgyro: {0}\n", mXgyro);
-            sb.AppendFormat("    Ygyro: {0}\n", mYgyro);
-            sb.AppendFormat("    Zgyro: {0}\n", mZgyro);
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lng: {0}\n", mLng);
+            mMetadata.Fields.Add("Roll", new UasFieldMetadata() {
+                Name = "Roll",
+                Description = "Roll angle (rad)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Pitch", new UasFieldMetadata() {
+                Name = "Pitch",
+                Description = "Pitch angle (rad)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yaw", new UasFieldMetadata() {
+                Name = "Yaw",
+                Description = "Yaw angle (rad)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xacc", new UasFieldMetadata() {
+                Name = "Xacc",
+                Description = "X acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Yacc", new UasFieldMetadata() {
+                Name = "Yacc",
+                Description = "Y acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zacc", new UasFieldMetadata() {
+                Name = "Zacc",
+                Description = "Z acceleration m/s/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Xgyro", new UasFieldMetadata() {
+                Name = "Xgyro",
+                Description = "Angular speed around X axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ygyro", new UasFieldMetadata() {
+                Name = "Ygyro",
+                Description = "Angular speed around Y axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Zgyro", new UasFieldMetadata() {
+                Name = "Zgyro",
+                Description = "Angular speed around Z axis rad/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Lng", new UasFieldMetadata() {
+                Name = "Lng",
+                Description = "Longitude in degrees * 1E7",
+                NumElements = 1,
+            });
+
         }
-
         private float mRoll;
         private float mPitch;
         private float mYaw;
@@ -15290,17 +17701,25 @@ namespace MavLinkNet
             this.mI2cerr = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of key hardware"
+            };
 
-            sb.Append("Hwstatus \n");
-            sb.AppendFormat("    Vcc: {0}\n", mVcc);
-            sb.AppendFormat("    I2cerr: {0}\n", mI2cerr);
+            mMetadata.Fields.Add("Vcc", new UasFieldMetadata() {
+                Name = "Vcc",
+                Description = "board voltage (mV)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("I2cerr", new UasFieldMetadata() {
+                Name = "I2cerr",
+                Description = "I2C error count",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mVcc;
         private byte mI2cerr;
     }
@@ -15398,22 +17817,55 @@ namespace MavLinkNet
             this.mRemnoise = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status generated by radio"
+            };
 
-            sb.Append("Radio \n");
-            sb.AppendFormat("    Rxerrors: {0}\n", mRxerrors);
-            sb.AppendFormat("    Fixed: {0}\n", mFixed);
-            sb.AppendFormat("    Rssi: {0}\n", mRssi);
-            sb.AppendFormat("    Remrssi: {0}\n", mRemrssi);
-            sb.AppendFormat("    Txbuf: {0}\n", mTxbuf);
-            sb.AppendFormat("    Noise: {0}\n", mNoise);
-            sb.AppendFormat("    Remnoise: {0}\n", mRemnoise);
+            mMetadata.Fields.Add("Rxerrors", new UasFieldMetadata() {
+                Name = "Rxerrors",
+                Description = "receive errors",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Fixed", new UasFieldMetadata() {
+                Name = "Fixed",
+                Description = "count of error corrected packets",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Rssi", new UasFieldMetadata() {
+                Name = "Rssi",
+                Description = "local signal strength",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Remrssi", new UasFieldMetadata() {
+                Name = "Remrssi",
+                Description = "remote signal strength",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Txbuf", new UasFieldMetadata() {
+                Name = "Txbuf",
+                Description = "how full the tx buffer is as a percentage",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Noise", new UasFieldMetadata() {
+                Name = "Noise",
+                Description = "background noise level",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Remnoise", new UasFieldMetadata() {
+                Name = "Remnoise",
+                Description = "remote background noise level",
+                NumElements = 1,
+            });
+
         }
-
         private UInt16 mRxerrors;
         private UInt16 mFixed;
         private byte mRssi;
@@ -15536,24 +17988,71 @@ namespace MavLinkNet
             this.mModsTriggered = (LimitModule)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Status of AP_Limits. Sent in extended  	    status stream when AP_Limits is enabled"
+            };
 
-            sb.Append("LimitsStatus \n");
-            sb.AppendFormat("    LastTrigger: {0}\n", mLastTrigger);
-            sb.AppendFormat("    LastAction: {0}\n", mLastAction);
-            sb.AppendFormat("    LastRecovery: {0}\n", mLastRecovery);
-            sb.AppendFormat("    LastClear: {0}\n", mLastClear);
-            sb.AppendFormat("    BreachCount: {0}\n", mBreachCount);
-            sb.AppendFormat("    LimitsState: {0}\n", mLimitsState);
-            sb.AppendFormat("    ModsEnabled: {0}\n", mModsEnabled);
-            sb.AppendFormat("    ModsRequired: {0}\n", mModsRequired);
-            sb.AppendFormat("    ModsTriggered: {0}\n", mModsTriggered);
+            mMetadata.Fields.Add("LastTrigger", new UasFieldMetadata() {
+                Name = "LastTrigger",
+                Description = "time of last breach in milliseconds since boot",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("LastAction", new UasFieldMetadata() {
+                Name = "LastAction",
+                Description = "time of last recovery action in milliseconds since boot",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("LastRecovery", new UasFieldMetadata() {
+                Name = "LastRecovery",
+                Description = "time of last successful recovery in milliseconds since boot",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("LastClear", new UasFieldMetadata() {
+                Name = "LastClear",
+                Description = "time of last all-clear in milliseconds since boot",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BreachCount", new UasFieldMetadata() {
+                Name = "BreachCount",
+                Description = "number of fence breaches",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("LimitsState", new UasFieldMetadata() {
+                Name = "LimitsState",
+                Description = "state of AP_Limits, (see enum LimitState, LIMITS_STATE)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("LimitsState"),
+            });
+
+            mMetadata.Fields.Add("ModsEnabled", new UasFieldMetadata() {
+                Name = "ModsEnabled",
+                Description = "AP_Limit_Module bitfield of enabled modules, (see enum moduleid or LIMIT_MODULE)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("LimitModule"),
+            });
+
+            mMetadata.Fields.Add("ModsRequired", new UasFieldMetadata() {
+                Name = "ModsRequired",
+                Description = "AP_Limit_Module bitfield of required modules, (see enum moduleid or LIMIT_MODULE)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("LimitModule"),
+            });
+
+            mMetadata.Fields.Add("ModsTriggered", new UasFieldMetadata() {
+                Name = "ModsTriggered",
+                Description = "AP_Limit_Module bitfield of triggered modules, (see enum moduleid or LIMIT_MODULE)",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("LimitModule"),
+            });
+
         }
-
         private UInt32 mLastTrigger;
         private UInt32 mLastAction;
         private UInt32 mLastRecovery;
@@ -15618,18 +18117,31 @@ namespace MavLinkNet
             this.mSpeedZ = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Wind estimation"
+            };
 
-            sb.Append("Wind \n");
-            sb.AppendFormat("    Direction: {0}\n", mDirection);
-            sb.AppendFormat("    Speed: {0}\n", mSpeed);
-            sb.AppendFormat("    SpeedZ: {0}\n", mSpeedZ);
+            mMetadata.Fields.Add("Direction", new UasFieldMetadata() {
+                Name = "Direction",
+                Description = "wind direction that wind is coming from (degrees)",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Speed", new UasFieldMetadata() {
+                Name = "Speed",
+                Description = "wind speed in ground plane (m/s)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("SpeedZ", new UasFieldMetadata() {
+                Name = "SpeedZ",
+                Description = "vertical wind speed (m/s)",
+                NumElements = 1,
+            });
+
         }
-
         private float mDirection;
         private float mSpeed;
         private float mSpeedZ;
@@ -15718,34 +18230,31 @@ namespace MavLinkNet
             this.mData[15] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Data packet, size 16"
+            };
 
-            sb.Append("Data16 \n");
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.AppendFormat("    Len: {0}\n", mLen);
-            sb.Append("    Data\n");
-            sb.AppendFormat("        [0]: {0}\n", mData[0]);
-            sb.AppendFormat("        [1]: {0}\n", mData[1]);
-            sb.AppendFormat("        [2]: {0}\n", mData[2]);
-            sb.AppendFormat("        [3]: {0}\n", mData[3]);
-            sb.AppendFormat("        [4]: {0}\n", mData[4]);
-            sb.AppendFormat("        [5]: {0}\n", mData[5]);
-            sb.AppendFormat("        [6]: {0}\n", mData[6]);
-            sb.AppendFormat("        [7]: {0}\n", mData[7]);
-            sb.AppendFormat("        [8]: {0}\n", mData[8]);
-            sb.AppendFormat("        [9]: {0}\n", mData[9]);
-            sb.AppendFormat("        [10]: {0}\n", mData[10]);
-            sb.AppendFormat("        [11]: {0}\n", mData[11]);
-            sb.AppendFormat("        [12]: {0}\n", mData[12]);
-            sb.AppendFormat("        [13]: {0}\n", mData[13]);
-            sb.AppendFormat("        [14]: {0}\n", mData[14]);
-            sb.AppendFormat("        [15]: {0}\n", mData[15]);
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "data type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Len", new UasFieldMetadata() {
+                Name = "Len",
+                Description = "data length",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Data", new UasFieldMetadata() {
+                Name = "Data",
+                Description = "raw data",
+                NumElements = 16,
+            });
+
         }
-
         private byte mType;
         private byte mLen;
         private byte[] mData = new byte[16];
@@ -15866,50 +18375,31 @@ namespace MavLinkNet
             this.mData[31] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Data packet, size 32"
+            };
 
-            sb.Append("Data32 \n");
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.AppendFormat("    Len: {0}\n", mLen);
-            sb.Append("    Data\n");
-            sb.AppendFormat("        [0]: {0}\n", mData[0]);
-            sb.AppendFormat("        [1]: {0}\n", mData[1]);
-            sb.AppendFormat("        [2]: {0}\n", mData[2]);
-            sb.AppendFormat("        [3]: {0}\n", mData[3]);
-            sb.AppendFormat("        [4]: {0}\n", mData[4]);
-            sb.AppendFormat("        [5]: {0}\n", mData[5]);
-            sb.AppendFormat("        [6]: {0}\n", mData[6]);
-            sb.AppendFormat("        [7]: {0}\n", mData[7]);
-            sb.AppendFormat("        [8]: {0}\n", mData[8]);
-            sb.AppendFormat("        [9]: {0}\n", mData[9]);
-            sb.AppendFormat("        [10]: {0}\n", mData[10]);
-            sb.AppendFormat("        [11]: {0}\n", mData[11]);
-            sb.AppendFormat("        [12]: {0}\n", mData[12]);
-            sb.AppendFormat("        [13]: {0}\n", mData[13]);
-            sb.AppendFormat("        [14]: {0}\n", mData[14]);
-            sb.AppendFormat("        [15]: {0}\n", mData[15]);
-            sb.AppendFormat("        [16]: {0}\n", mData[16]);
-            sb.AppendFormat("        [17]: {0}\n", mData[17]);
-            sb.AppendFormat("        [18]: {0}\n", mData[18]);
-            sb.AppendFormat("        [19]: {0}\n", mData[19]);
-            sb.AppendFormat("        [20]: {0}\n", mData[20]);
-            sb.AppendFormat("        [21]: {0}\n", mData[21]);
-            sb.AppendFormat("        [22]: {0}\n", mData[22]);
-            sb.AppendFormat("        [23]: {0}\n", mData[23]);
-            sb.AppendFormat("        [24]: {0}\n", mData[24]);
-            sb.AppendFormat("        [25]: {0}\n", mData[25]);
-            sb.AppendFormat("        [26]: {0}\n", mData[26]);
-            sb.AppendFormat("        [27]: {0}\n", mData[27]);
-            sb.AppendFormat("        [28]: {0}\n", mData[28]);
-            sb.AppendFormat("        [29]: {0}\n", mData[29]);
-            sb.AppendFormat("        [30]: {0}\n", mData[30]);
-            sb.AppendFormat("        [31]: {0}\n", mData[31]);
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "data type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Len", new UasFieldMetadata() {
+                Name = "Len",
+                Description = "data length",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Data", new UasFieldMetadata() {
+                Name = "Data",
+                Description = "raw data",
+                NumElements = 32,
+            });
+
         }
-
         private byte mType;
         private byte mLen;
         private byte[] mData = new byte[32];
@@ -16094,82 +18584,31 @@ namespace MavLinkNet
             this.mData[63] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Data packet, size 64"
+            };
 
-            sb.Append("Data64 \n");
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.AppendFormat("    Len: {0}\n", mLen);
-            sb.Append("    Data\n");
-            sb.AppendFormat("        [0]: {0}\n", mData[0]);
-            sb.AppendFormat("        [1]: {0}\n", mData[1]);
-            sb.AppendFormat("        [2]: {0}\n", mData[2]);
-            sb.AppendFormat("        [3]: {0}\n", mData[3]);
-            sb.AppendFormat("        [4]: {0}\n", mData[4]);
-            sb.AppendFormat("        [5]: {0}\n", mData[5]);
-            sb.AppendFormat("        [6]: {0}\n", mData[6]);
-            sb.AppendFormat("        [7]: {0}\n", mData[7]);
-            sb.AppendFormat("        [8]: {0}\n", mData[8]);
-            sb.AppendFormat("        [9]: {0}\n", mData[9]);
-            sb.AppendFormat("        [10]: {0}\n", mData[10]);
-            sb.AppendFormat("        [11]: {0}\n", mData[11]);
-            sb.AppendFormat("        [12]: {0}\n", mData[12]);
-            sb.AppendFormat("        [13]: {0}\n", mData[13]);
-            sb.AppendFormat("        [14]: {0}\n", mData[14]);
-            sb.AppendFormat("        [15]: {0}\n", mData[15]);
-            sb.AppendFormat("        [16]: {0}\n", mData[16]);
-            sb.AppendFormat("        [17]: {0}\n", mData[17]);
-            sb.AppendFormat("        [18]: {0}\n", mData[18]);
-            sb.AppendFormat("        [19]: {0}\n", mData[19]);
-            sb.AppendFormat("        [20]: {0}\n", mData[20]);
-            sb.AppendFormat("        [21]: {0}\n", mData[21]);
-            sb.AppendFormat("        [22]: {0}\n", mData[22]);
-            sb.AppendFormat("        [23]: {0}\n", mData[23]);
-            sb.AppendFormat("        [24]: {0}\n", mData[24]);
-            sb.AppendFormat("        [25]: {0}\n", mData[25]);
-            sb.AppendFormat("        [26]: {0}\n", mData[26]);
-            sb.AppendFormat("        [27]: {0}\n", mData[27]);
-            sb.AppendFormat("        [28]: {0}\n", mData[28]);
-            sb.AppendFormat("        [29]: {0}\n", mData[29]);
-            sb.AppendFormat("        [30]: {0}\n", mData[30]);
-            sb.AppendFormat("        [31]: {0}\n", mData[31]);
-            sb.AppendFormat("        [32]: {0}\n", mData[32]);
-            sb.AppendFormat("        [33]: {0}\n", mData[33]);
-            sb.AppendFormat("        [34]: {0}\n", mData[34]);
-            sb.AppendFormat("        [35]: {0}\n", mData[35]);
-            sb.AppendFormat("        [36]: {0}\n", mData[36]);
-            sb.AppendFormat("        [37]: {0}\n", mData[37]);
-            sb.AppendFormat("        [38]: {0}\n", mData[38]);
-            sb.AppendFormat("        [39]: {0}\n", mData[39]);
-            sb.AppendFormat("        [40]: {0}\n", mData[40]);
-            sb.AppendFormat("        [41]: {0}\n", mData[41]);
-            sb.AppendFormat("        [42]: {0}\n", mData[42]);
-            sb.AppendFormat("        [43]: {0}\n", mData[43]);
-            sb.AppendFormat("        [44]: {0}\n", mData[44]);
-            sb.AppendFormat("        [45]: {0}\n", mData[45]);
-            sb.AppendFormat("        [46]: {0}\n", mData[46]);
-            sb.AppendFormat("        [47]: {0}\n", mData[47]);
-            sb.AppendFormat("        [48]: {0}\n", mData[48]);
-            sb.AppendFormat("        [49]: {0}\n", mData[49]);
-            sb.AppendFormat("        [50]: {0}\n", mData[50]);
-            sb.AppendFormat("        [51]: {0}\n", mData[51]);
-            sb.AppendFormat("        [52]: {0}\n", mData[52]);
-            sb.AppendFormat("        [53]: {0}\n", mData[53]);
-            sb.AppendFormat("        [54]: {0}\n", mData[54]);
-            sb.AppendFormat("        [55]: {0}\n", mData[55]);
-            sb.AppendFormat("        [56]: {0}\n", mData[56]);
-            sb.AppendFormat("        [57]: {0}\n", mData[57]);
-            sb.AppendFormat("        [58]: {0}\n", mData[58]);
-            sb.AppendFormat("        [59]: {0}\n", mData[59]);
-            sb.AppendFormat("        [60]: {0}\n", mData[60]);
-            sb.AppendFormat("        [61]: {0}\n", mData[61]);
-            sb.AppendFormat("        [62]: {0}\n", mData[62]);
-            sb.AppendFormat("        [63]: {0}\n", mData[63]);
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "data type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Len", new UasFieldMetadata() {
+                Name = "Len",
+                Description = "data length",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Data", new UasFieldMetadata() {
+                Name = "Data",
+                Description = "raw data",
+                NumElements = 64,
+            });
+
         }
-
         private byte mType;
         private byte mLen;
         private byte[] mData = new byte[64];
@@ -16418,114 +18857,31 @@ namespace MavLinkNet
             this.mData[95] = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Data packet, size 96"
+            };
 
-            sb.Append("Data96 \n");
-            sb.AppendFormat("    Type: {0}\n", mType);
-            sb.AppendFormat("    Len: {0}\n", mLen);
-            sb.Append("    Data\n");
-            sb.AppendFormat("        [0]: {0}\n", mData[0]);
-            sb.AppendFormat("        [1]: {0}\n", mData[1]);
-            sb.AppendFormat("        [2]: {0}\n", mData[2]);
-            sb.AppendFormat("        [3]: {0}\n", mData[3]);
-            sb.AppendFormat("        [4]: {0}\n", mData[4]);
-            sb.AppendFormat("        [5]: {0}\n", mData[5]);
-            sb.AppendFormat("        [6]: {0}\n", mData[6]);
-            sb.AppendFormat("        [7]: {0}\n", mData[7]);
-            sb.AppendFormat("        [8]: {0}\n", mData[8]);
-            sb.AppendFormat("        [9]: {0}\n", mData[9]);
-            sb.AppendFormat("        [10]: {0}\n", mData[10]);
-            sb.AppendFormat("        [11]: {0}\n", mData[11]);
-            sb.AppendFormat("        [12]: {0}\n", mData[12]);
-            sb.AppendFormat("        [13]: {0}\n", mData[13]);
-            sb.AppendFormat("        [14]: {0}\n", mData[14]);
-            sb.AppendFormat("        [15]: {0}\n", mData[15]);
-            sb.AppendFormat("        [16]: {0}\n", mData[16]);
-            sb.AppendFormat("        [17]: {0}\n", mData[17]);
-            sb.AppendFormat("        [18]: {0}\n", mData[18]);
-            sb.AppendFormat("        [19]: {0}\n", mData[19]);
-            sb.AppendFormat("        [20]: {0}\n", mData[20]);
-            sb.AppendFormat("        [21]: {0}\n", mData[21]);
-            sb.AppendFormat("        [22]: {0}\n", mData[22]);
-            sb.AppendFormat("        [23]: {0}\n", mData[23]);
-            sb.AppendFormat("        [24]: {0}\n", mData[24]);
-            sb.AppendFormat("        [25]: {0}\n", mData[25]);
-            sb.AppendFormat("        [26]: {0}\n", mData[26]);
-            sb.AppendFormat("        [27]: {0}\n", mData[27]);
-            sb.AppendFormat("        [28]: {0}\n", mData[28]);
-            sb.AppendFormat("        [29]: {0}\n", mData[29]);
-            sb.AppendFormat("        [30]: {0}\n", mData[30]);
-            sb.AppendFormat("        [31]: {0}\n", mData[31]);
-            sb.AppendFormat("        [32]: {0}\n", mData[32]);
-            sb.AppendFormat("        [33]: {0}\n", mData[33]);
-            sb.AppendFormat("        [34]: {0}\n", mData[34]);
-            sb.AppendFormat("        [35]: {0}\n", mData[35]);
-            sb.AppendFormat("        [36]: {0}\n", mData[36]);
-            sb.AppendFormat("        [37]: {0}\n", mData[37]);
-            sb.AppendFormat("        [38]: {0}\n", mData[38]);
-            sb.AppendFormat("        [39]: {0}\n", mData[39]);
-            sb.AppendFormat("        [40]: {0}\n", mData[40]);
-            sb.AppendFormat("        [41]: {0}\n", mData[41]);
-            sb.AppendFormat("        [42]: {0}\n", mData[42]);
-            sb.AppendFormat("        [43]: {0}\n", mData[43]);
-            sb.AppendFormat("        [44]: {0}\n", mData[44]);
-            sb.AppendFormat("        [45]: {0}\n", mData[45]);
-            sb.AppendFormat("        [46]: {0}\n", mData[46]);
-            sb.AppendFormat("        [47]: {0}\n", mData[47]);
-            sb.AppendFormat("        [48]: {0}\n", mData[48]);
-            sb.AppendFormat("        [49]: {0}\n", mData[49]);
-            sb.AppendFormat("        [50]: {0}\n", mData[50]);
-            sb.AppendFormat("        [51]: {0}\n", mData[51]);
-            sb.AppendFormat("        [52]: {0}\n", mData[52]);
-            sb.AppendFormat("        [53]: {0}\n", mData[53]);
-            sb.AppendFormat("        [54]: {0}\n", mData[54]);
-            sb.AppendFormat("        [55]: {0}\n", mData[55]);
-            sb.AppendFormat("        [56]: {0}\n", mData[56]);
-            sb.AppendFormat("        [57]: {0}\n", mData[57]);
-            sb.AppendFormat("        [58]: {0}\n", mData[58]);
-            sb.AppendFormat("        [59]: {0}\n", mData[59]);
-            sb.AppendFormat("        [60]: {0}\n", mData[60]);
-            sb.AppendFormat("        [61]: {0}\n", mData[61]);
-            sb.AppendFormat("        [62]: {0}\n", mData[62]);
-            sb.AppendFormat("        [63]: {0}\n", mData[63]);
-            sb.AppendFormat("        [64]: {0}\n", mData[64]);
-            sb.AppendFormat("        [65]: {0}\n", mData[65]);
-            sb.AppendFormat("        [66]: {0}\n", mData[66]);
-            sb.AppendFormat("        [67]: {0}\n", mData[67]);
-            sb.AppendFormat("        [68]: {0}\n", mData[68]);
-            sb.AppendFormat("        [69]: {0}\n", mData[69]);
-            sb.AppendFormat("        [70]: {0}\n", mData[70]);
-            sb.AppendFormat("        [71]: {0}\n", mData[71]);
-            sb.AppendFormat("        [72]: {0}\n", mData[72]);
-            sb.AppendFormat("        [73]: {0}\n", mData[73]);
-            sb.AppendFormat("        [74]: {0}\n", mData[74]);
-            sb.AppendFormat("        [75]: {0}\n", mData[75]);
-            sb.AppendFormat("        [76]: {0}\n", mData[76]);
-            sb.AppendFormat("        [77]: {0}\n", mData[77]);
-            sb.AppendFormat("        [78]: {0}\n", mData[78]);
-            sb.AppendFormat("        [79]: {0}\n", mData[79]);
-            sb.AppendFormat("        [80]: {0}\n", mData[80]);
-            sb.AppendFormat("        [81]: {0}\n", mData[81]);
-            sb.AppendFormat("        [82]: {0}\n", mData[82]);
-            sb.AppendFormat("        [83]: {0}\n", mData[83]);
-            sb.AppendFormat("        [84]: {0}\n", mData[84]);
-            sb.AppendFormat("        [85]: {0}\n", mData[85]);
-            sb.AppendFormat("        [86]: {0}\n", mData[86]);
-            sb.AppendFormat("        [87]: {0}\n", mData[87]);
-            sb.AppendFormat("        [88]: {0}\n", mData[88]);
-            sb.AppendFormat("        [89]: {0}\n", mData[89]);
-            sb.AppendFormat("        [90]: {0}\n", mData[90]);
-            sb.AppendFormat("        [91]: {0}\n", mData[91]);
-            sb.AppendFormat("        [92]: {0}\n", mData[92]);
-            sb.AppendFormat("        [93]: {0}\n", mData[93]);
-            sb.AppendFormat("        [94]: {0}\n", mData[94]);
-            sb.AppendFormat("        [95]: {0}\n", mData[95]);
+            mMetadata.Fields.Add("Type", new UasFieldMetadata() {
+                Name = "Type",
+                Description = "data type",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Len", new UasFieldMetadata() {
+                Name = "Len",
+                Description = "data length",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Data", new UasFieldMetadata() {
+                Name = "Data",
+                Description = "raw data",
+                NumElements = 96,
+            });
+
         }
-
         private byte mType;
         private byte mLen;
         private byte[] mData = new byte[96];
@@ -16574,17 +18930,25 @@ namespace MavLinkNet
             this.mVoltage = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Rangefinder reporting"
+            };
 
-            sb.Append("Rangefinder \n");
-            sb.AppendFormat("    Distance: {0}\n", mDistance);
-            sb.AppendFormat("    Voltage: {0}\n", mVoltage);
+            mMetadata.Fields.Add("Distance", new UasFieldMetadata() {
+                Name = "Distance",
+                Description = "distance in meters",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Voltage", new UasFieldMetadata() {
+                Name = "Voltage",
+                Description = "raw voltage if available, zero otherwise",
+                NumElements = 1,
+            });
+
         }
-
         private float mDistance;
         private float mVoltage;
     }
@@ -16732,27 +19096,85 @@ namespace MavLinkNet
             this.mPcz = s.ReadSingle();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Airspeed auto-calibration"
+            };
 
-            sb.Append("AirspeedAutocal \n");
-            sb.AppendFormat("    Vx: {0}\n", mVx);
-            sb.AppendFormat("    Vy: {0}\n", mVy);
-            sb.AppendFormat("    Vz: {0}\n", mVz);
-            sb.AppendFormat("    DiffPressure: {0}\n", mDiffPressure);
-            sb.AppendFormat("    Eas2tas: {0}\n", mEas2tas);
-            sb.AppendFormat("    Ratio: {0}\n", mRatio);
-            sb.AppendFormat("    StateX: {0}\n", mStateX);
-            sb.AppendFormat("    StateY: {0}\n", mStateY);
-            sb.AppendFormat("    StateZ: {0}\n", mStateZ);
-            sb.AppendFormat("    Pax: {0}\n", mPax);
-            sb.AppendFormat("    Pby: {0}\n", mPby);
-            sb.AppendFormat("    Pcz: {0}\n", mPcz);
+            mMetadata.Fields.Add("Vx", new UasFieldMetadata() {
+                Name = "Vx",
+                Description = "GPS velocity north m/s",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Vy", new UasFieldMetadata() {
+                Name = "Vy",
+                Description = "GPS velocity east m/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Vz", new UasFieldMetadata() {
+                Name = "Vz",
+                Description = "GPS velocity down m/s",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("DiffPressure", new UasFieldMetadata() {
+                Name = "DiffPressure",
+                Description = "Differential pressure pascals",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Eas2tas", new UasFieldMetadata() {
+                Name = "Eas2tas",
+                Description = "Estimated to true airspeed ratio",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Ratio", new UasFieldMetadata() {
+                Name = "Ratio",
+                Description = "Airspeed ratio",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StateX", new UasFieldMetadata() {
+                Name = "StateX",
+                Description = "EKF state x",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StateY", new UasFieldMetadata() {
+                Name = "StateY",
+                Description = "EKF state y",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("StateZ", new UasFieldMetadata() {
+                Name = "StateZ",
+                Description = "EKF state z",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pax", new UasFieldMetadata() {
+                Name = "Pax",
+                Description = "EKF Pax",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pby", new UasFieldMetadata() {
+                Name = "Pby",
+                Description = "EKF Pby",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Pcz", new UasFieldMetadata() {
+                Name = "Pcz",
+                Description = "EKF Pcz",
+                NumElements = 1,
+            });
+
         }
-
         private float mVx;
         private float mVy;
         private float mVz;
@@ -16890,25 +19312,74 @@ namespace MavLinkNet
             this.mFlags = (RallyFlags)s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "A rally point. Used to set a point when from GCS -> MAV. Also used to return a point from MAV -> GCS"
+            };
 
-            sb.Append("RallyPoint \n");
-            sb.AppendFormat("    Lat: {0}\n", mLat);
-            sb.AppendFormat("    Lng: {0}\n", mLng);
-            sb.AppendFormat("    Alt: {0}\n", mAlt);
-            sb.AppendFormat("    BreakAlt: {0}\n", mBreakAlt);
-            sb.AppendFormat("    LandDir: {0}\n", mLandDir);
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Idx: {0}\n", mIdx);
-            sb.AppendFormat("    Count: {0}\n", mCount);
-            sb.AppendFormat("    Flags: {0}\n", mFlags);
+            mMetadata.Fields.Add("Lat", new UasFieldMetadata() {
+                Name = "Lat",
+                Description = "Latitude of point in degrees * 1E7",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("Lng", new UasFieldMetadata() {
+                Name = "Lng",
+                Description = "Longitude of point in degrees * 1E7",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Alt", new UasFieldMetadata() {
+                Name = "Alt",
+                Description = "Transit / loiter altitude in meters relative to home",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("BreakAlt", new UasFieldMetadata() {
+                Name = "BreakAlt",
+                Description = "Break altitude in meters relative to home",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("LandDir", new UasFieldMetadata() {
+                Name = "LandDir",
+                Description = "Heading to aim for when landing. In centi-degrees.",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Idx", new UasFieldMetadata() {
+                Name = "Idx",
+                Description = "point index (first point is 0)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Count", new UasFieldMetadata() {
+                Name = "Count",
+                Description = "total number of points (for sanity checking)",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Flags", new UasFieldMetadata() {
+                Name = "Flags",
+                Description = "See RALLY_FLAGS enum for definition of the bitmask.",
+                NumElements = 1,
+                EnumMetadata = UasSummary.GetEnumMetadata("RallyFlags"),
+            });
+
         }
-
         private Int32 mLat;
         private Int32 mLng;
         private Int16 mAlt;
@@ -16974,18 +19445,31 @@ namespace MavLinkNet
             this.mIdx = s.ReadByte();
         }
 
-        public override string ToString()
+        protected override void InitMetadata()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            mMetadata = new UasMessageMetadata() {
+                Description = "Request a current rally point from MAV. MAV should respond with a RALLY_POINT message. MAV should not respond if the request is invalid."
+            };
 
-            sb.Append("RallyFetchPoint \n");
-            sb.AppendFormat("    TargetSystem: {0}\n", mTargetSystem);
-            sb.AppendFormat("    TargetComponent: {0}\n", mTargetComponent);
-            sb.AppendFormat("    Idx: {0}\n", mIdx);
+            mMetadata.Fields.Add("TargetSystem", new UasFieldMetadata() {
+                Name = "TargetSystem",
+                Description = "System ID",
+                NumElements = 1,
+            });
 
-            return sb.ToString();
+            mMetadata.Fields.Add("TargetComponent", new UasFieldMetadata() {
+                Name = "TargetComponent",
+                Description = "Component ID",
+                NumElements = 1,
+            });
+
+            mMetadata.Fields.Add("Idx", new UasFieldMetadata() {
+                Name = "Idx",
+                Description = "point index (first point is 0)",
+                NumElements = 1,
+            });
+
         }
-
         private byte mTargetSystem;
         private byte mTargetComponent;
         private byte mIdx;
@@ -17245,6 +19729,1994 @@ namespace MavLinkNet
                case 176: return 234;
                default: return 0;
             }
+        }
+        private static Dictionary<string, UasEnumMetadata> mEnums;
+
+        public static UasEnumMetadata GetEnumMetadata(string enumName)
+        {
+            if (mEnums == null) InitEnumMetadata();
+
+            return mEnums[enumName];
+        }
+
+        private static void InitEnumMetadata()
+        {
+            UasEnumMetadata en = null;
+            UasEnumEntryMetadata ent = null;
+            mEnums = new Dictionary<string, UasEnumMetadata>();
+
+            en = new UasEnumMetadata() {
+                Name = "MavAutopilot",
+                Description = "Micro air vehicle / autopilot classes. This identifies the individual model.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Generic",
+                Description = "Generic autopilot, full support for everything",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Pixhawk",
+                Description = "PIXHAWK autopilot, http://pixhawk.ethz.ch",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Slugs",
+                Description = "SLUGS autopilot, http://slugsuav.soe.ucsc.edu",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Ardupilotmega",
+                Description = "ArduPilotMega / ArduCopter, http://diydrones.com",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Openpilot",
+                Description = "OpenPilot, http://openpilot.org",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GenericWaypointsOnly",
+                Description = "Generic autopilot only supporting simple waypoints",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GenericWaypointsAndSimpleNavigationOnly",
+                Description = "Generic autopilot supporting waypoints and other simple navigation commands",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GenericMissionFull",
+                Description = "Generic autopilot supporting the full mission command set",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Invalid",
+                Description = "No valid autopilot, e.g. a GCS or other MAVLink component",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Ppz",
+                Description = "PPZ UAV - http://nongnu.org/paparazzi",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Udb",
+                Description = "UAV Dev Board",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Fp",
+                Description = "FlexiPilot",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Px4",
+                Description = "PX4 Autopilot - http://pixhawk.ethz.ch/px4/",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Smaccmpilot",
+                Description = "SMACCMPilot - http://smaccmpilot.org",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Autoquad",
+                Description = "AutoQuad -- http://autoquad.org",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Armazila",
+                Description = "Armazila -- http://armazila.com",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Aerob",
+                Description = "Aerob -- http://aerob.ru",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavType",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Generic",
+                Description = "Generic micro air vehicle.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "FixedWing",
+                Description = "Fixed wing aircraft.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Quadrotor",
+                Description = "Quadrotor",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Coaxial",
+                Description = "Coaxial helicopter",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Helicopter",
+                Description = "Normal helicopter with tail rotor.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AntennaTracker",
+                Description = "Ground installation",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Gcs",
+                Description = "Operator control unit / ground control station",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Airship",
+                Description = "Airship, controlled",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "FreeBalloon",
+                Description = "Free balloon, uncontrolled",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Rocket",
+                Description = "Rocket",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GroundRover",
+                Description = "Ground rover",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "SurfaceBoat",
+                Description = "Surface vessel, boat, ship",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Submarine",
+                Description = "Submarine",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Hexarotor",
+                Description = "Hexarotor",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Octorotor",
+                Description = "Octorotor",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Tricopter",
+                Description = "Octorotor",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "FlappingWing",
+                Description = "Flapping wing",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Kite",
+                Description = "Flapping wing",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavModeFlag",
+                Description = "These flags encode the MAV mode.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "SafetyArmed",
+                Description = "0b10000000 MAV safety set to armed. Motors are enabled / running / can start. Ready to fly.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ManualInputEnabled",
+                Description = "0b01000000 remote control input is enabled.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "HilEnabled",
+                Description = "0b00100000 hardware in the loop simulation. All motors / actuators are blocked, but internal software is full operational.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "StabilizeEnabled",
+                Description = "0b00010000 system stabilizes electronically its attitude (and optionally position). It needs however further control inputs to move around.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GuidedEnabled",
+                Description = "0b00001000 guided mode enabled, system flies MISSIONs / mission items.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AutoEnabled",
+                Description = "0b00000100 autonomous mode enabled, system finds its own goal positions. Guided flag can be set or not, depends on the actual implementation.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "TestEnabled",
+                Description = "0b00000010 system has a test mode enabled. This flag is intended for temporary system tests and should not be used for stable implementations.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "CustomModeEnabled",
+                Description = "0b00000001 Reserved for future use.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavModeFlagDecodePosition",
+                Description = "These values encode the bit positions of the decode position. These values can be used to read the value of a flag bit by combining the base_mode variable with AND with the flag position value. The result will be either 0 or 1, depending on if the flag is set or not.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Safety",
+                Description = "First bit:  10000000",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Manual",
+                Description = "Second bit: 01000000",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Hil",
+                Description = "Third bit:  00100000",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Stabilize",
+                Description = "Fourth bit: 00010000",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Guided",
+                Description = "Fifth bit:  00001000",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Auto",
+                Description = "Sixt bit:   00000100",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Test",
+                Description = "Seventh bit: 00000010",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "CustomMode",
+                Description = "Eighth bit: 00000001",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavGoto",
+                Description = "Override command, pauses current mission execution and moves immediately to a position",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoHold",
+                Description = "Hold at the current position.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoContinue",
+                Description = "Continue with the next item in mission execution.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "HoldAtCurrentPosition",
+                Description = "Hold at the current position of the system",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "HoldAtSpecifiedPosition",
+                Description = "Hold at the position specified in the parameters of the DO_HOLD action",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavMode",
+                Description = "These defines are predefined OR-combined mode flags. There is no need to use values from this enum, but it                 simplifies the use of the mode flags. Note that manual input is enabled in all modes as a safety override.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Preflight",
+                Description = "System is not ready to fly, booting, calibrating, etc. No flag is set.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "StabilizeDisarmed",
+                Description = "System is allowed to be active, under assisted RC control.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "StabilizeArmed",
+                Description = "System is allowed to be active, under assisted RC control.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ManualDisarmed",
+                Description = "System is allowed to be active, under manual (RC) control, no stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ManualArmed",
+                Description = "System is allowed to be active, under manual (RC) control, no stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GuidedDisarmed",
+                Description = "System is allowed to be active, under autonomous control, manual setpoint",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GuidedArmed",
+                Description = "System is allowed to be active, under autonomous control, manual setpoint",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AutoDisarmed",
+                Description = "System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs)",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AutoArmed",
+                Description = "System is allowed to be active, under autonomous control and navigation (the trajectory is decided onboard and not pre-programmed by MISSIONs)",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "TestDisarmed",
+                Description = "UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "TestArmed",
+                Description = "UNDEFINED mode. This solely depends on the autopilot - use with caution, intended for developers only.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavState",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Uninit",
+                Description = "Uninitialized system, state is unknown.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Boot",
+                Description = "System is booting up.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Calibrating",
+                Description = "System is calibrating and not flight-ready.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Standby",
+                Description = "System is grounded and on standby. It can be launched any time.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Active",
+                Description = "System is active and might be already airborne. Motors are engaged.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Critical",
+                Description = "System is in a non-normal flight mode. It can however still navigate.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Emergency",
+                Description = "System is in a non-normal flight mode. It lost control over parts or over the whole airframe. It is in mayday and going down.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Poweroff",
+                Description = "System just initialized its power-down sequence, will shut down now.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavComponent",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdAll",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdGps",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdMissionplanner",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdPathplanner",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdMapper",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdCamera",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdImu",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdImu2",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdImu3",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdUdpBridge",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdUartBridge",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdSystemControl",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo1",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo2",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo3",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo4",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo5",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo6",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo7",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo8",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo9",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo10",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo11",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo12",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo13",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavCompIdServo14",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavSysStatusSensor",
+                Description = "These encode the sensors whose status is sent as part of the SYS_STATUS message.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "_3dGyro",
+                Description = "0x01 3D gyro",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "_3dAccel",
+                Description = "0x02 3D accelerometer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "_3dMag",
+                Description = "0x04 3D magnetometer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AbsolutePressure",
+                Description = "0x08 absolute pressure",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DifferentialPressure",
+                Description = "0x10 differential pressure",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Gps",
+                Description = "0x20 GPS",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "OpticalFlow",
+                Description = "0x40 optical flow",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "VisionPosition",
+                Description = "0x80 computer vision position",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LaserPosition",
+                Description = "0x100 laser based position",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ExternalGroundTruth",
+                Description = "0x200 external ground truth (Vicon or Leica)",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AngularRateControl",
+                Description = "0x400 3D angular rate control",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "AttitudeStabilization",
+                Description = "0x800 attitude stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "YawPosition",
+                Description = "0x1000 yaw position",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ZAltitudeControl",
+                Description = "0x2000 z/altitude control",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "XyPositionControl",
+                Description = "0x4000 x/y position control",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MotorOutputs",
+                Description = "0x8000 motor outputs / control",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "RcReceiver",
+                Description = "0x10000 rc receiver",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavFrame",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Global",
+                Description = "Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL)",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LocalNed",
+                Description = "Local coordinate frame, Z-up (x: north, y: east, z: down).",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Mission",
+                Description = "NOT a coordinate frame, indicates a mission command.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GlobalRelativeAlt",
+                Description = "Global coordinate frame, WGS84 coordinate system, relative altitude over ground with respect to the home position. First value / x: latitude, second value / y: longitude, third value / z: positive altitude with 0 being at the altitude of the home location.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LocalEnu",
+                Description = "Local coordinate frame, Z-down (x: east, y: north, z: up)",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavlinkDataStreamType",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgJpeg",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgBmp",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgRaw8u",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgRaw32u",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgPgm",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkDataStreamImgPng",
+                Description = "",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavCmd",
+                Description = "Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavWaypoint",
+                Description = "Navigate to MISSION.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Hold time in decimal seconds. (ignored by fixed wing, time to stay at MISSION for rotary wing)");
+            ent.Params.Add("Acceptance radius in meters (if the sphere with this radius is hit, the MISSION counts as reached)");
+            ent.Params.Add("0 to pass through the WP, if > 0 radius in meters to pass by WP. Positive value for clockwise orbit, negative value for counter-clockwise orbit. Allows trajectory control.");
+            ent.Params.Add("Desired yaw angle at MISSION (rotary wing)");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavLoiterUnlim",
+                Description = "Loiter around this MISSION an unlimited amount of time",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise");
+            ent.Params.Add("Desired yaw angle.");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavLoiterTurns",
+                Description = "Loiter around this MISSION for X turns",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Turns");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise");
+            ent.Params.Add("Desired yaw angle.");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavLoiterTime",
+                Description = "Loiter around this MISSION for X seconds",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Seconds (decimal)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Radius around MISSION, in meters. If positive loiter clockwise, else counter-clockwise");
+            ent.Params.Add("Desired yaw angle.");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavReturnToLaunch",
+                Description = "Return to launch location",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavLand",
+                Description = "Land at location",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Desired yaw angle.");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavTakeoff",
+                Description = "Takeoff from ground / hand",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Minimum pitch (if airspeed sensor present), desired pitch without sensor");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Yaw angle (if magnetometer present), ignored without magnetometer");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavRoi",
+                Description = "Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Region of intereset mode. (see MAV_ROI enum)");
+            ent.Params.Add("MISSION index/ target ID. (see MAV_ROI enum)");
+            ent.Params.Add("ROI index (allows a vehicle to manage multiple ROI's)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("x the location of the fixed ROI (see MAV_FRAME)");
+            ent.Params.Add("y");
+            ent.Params.Add("z");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavPathplanning",
+                Description = "Control autonomous path planning on the MAV.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("0: Disable local obstacle avoidance / local path planning (without resetting map), 1: Enable local path planning, 2: Enable and reset local path planning");
+            ent.Params.Add("0: Disable full path planning (without resetting map), 1: Enable, 2: Enable and reset map/occupancy grid, 3: Enable and reset planned route, but not occupancy grid");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Yaw angle at goal, in compass degrees, [0..360]");
+            ent.Params.Add("Latitude/X of goal");
+            ent.Params.Add("Longitude/Y of goal");
+            ent.Params.Add("Altitude/Z of goal");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "NavLast",
+                Description = "NOP - This command is only used to mark the upper limit of the NAV/ACTION commands in the enumeration",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ConditionDelay",
+                Description = "Delay mission state machine.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Delay in seconds (decimal)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ConditionChangeAlt",
+                Description = "Ascend/descend at rate.  Delay mission state machine until desired altitude reached.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Descent / Ascend rate (m/s)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Finish Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ConditionDistance",
+                Description = "Delay mission state machine until within desired distance of next NAV point.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Distance (meters)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ConditionYaw",
+                Description = "Reach a certain target angle.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("target angle: [0-360], 0 is north");
+            ent.Params.Add("speed during yaw change:[deg per second]");
+            ent.Params.Add("direction: negative: counter clockwise, positive: clockwise [-1,1]");
+            ent.Params.Add("relative offset or absolute angle: [ 1,0]");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ConditionLast",
+                Description = "NOP - This command is only used to mark the upper limit of the CONDITION commands in the enumeration",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetMode",
+                Description = "Set system mode.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Mode, as defined by ENUM MAV_MODE");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoJump",
+                Description = "Jump to the desired command in the mission list.  Repeat this action only the specified number of times",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Sequence number");
+            ent.Params.Add("Repeat count");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoChangeSpeed",
+                Description = "Change speed and/or throttle set points.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Speed type (0=Airspeed, 1=Ground Speed)");
+            ent.Params.Add("Speed  (m/s, -1 indicates no change)");
+            ent.Params.Add("Throttle  ( Percent, -1 indicates no change)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetHome",
+                Description = "Changes the home location either to the current location or a specified location.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Use current (1=use current location, 0=use specified location)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Latitude");
+            ent.Params.Add("Longitude");
+            ent.Params.Add("Altitude");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetParameter",
+                Description = "Set a system parameter.  Caution!  Use of this command requires knowledge of the numeric enumeration value of the parameter.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Parameter number");
+            ent.Params.Add("Parameter value");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetRelay",
+                Description = "Set a relay to a condition.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Relay number");
+            ent.Params.Add("Setting (1=on, 0=off, others possible depending on system hardware)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoRepeatRelay",
+                Description = "Cycle a relay on and off for a desired number of cyles with a desired period.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Relay number");
+            ent.Params.Add("Cycle count");
+            ent.Params.Add("Cycle time (seconds, decimal)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetServo",
+                Description = "Set a servo to a desired PWM value.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Servo number");
+            ent.Params.Add("PWM (microseconds, 1000 to 2000 typical)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoRepeatServo",
+                Description = "Cycle a between its nominal setting and a desired PWM for a desired number of cycles with a desired period.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Servo number");
+            ent.Params.Add("PWM (microseconds, 1000 to 2000 typical)");
+            ent.Params.Add("Cycle count");
+            ent.Params.Add("Cycle time (seconds)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoControlVideo",
+                Description = "Control onboard camera system.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Camera ID (-1 for all)");
+            ent.Params.Add("Transmission: 0: disabled, 1: enabled compressed, 2: enabled raw");
+            ent.Params.Add("Transmission mode: 0: video stream, >0: single images every n seconds (decimal)");
+            ent.Params.Add("Recording: 0: disabled, 1: enabled compressed, 2: enabled raw");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetRoi",
+                Description = "Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Region of intereset mode. (see MAV_ROI enum)");
+            ent.Params.Add("MISSION index/ target ID. (see MAV_ROI enum)");
+            ent.Params.Add("ROI index (allows a vehicle to manage multiple ROI's)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("x the location of the fixed ROI (see MAV_FRAME)");
+            ent.Params.Add("y");
+            ent.Params.Add("z");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoLast",
+                Description = "NOP - This command is only used to mark the upper limit of the DO commands in the enumeration",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "PreflightCalibration",
+                Description = "Trigger calibration. This command will be only accepted if in pre-flight mode.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Gyro calibration: 0: no, 1: yes");
+            ent.Params.Add("Magnetometer calibration: 0: no, 1: yes");
+            ent.Params.Add("Ground pressure: 0: no, 1: yes");
+            ent.Params.Add("Radio calibration: 0: no, 1: yes");
+            ent.Params.Add("Accelerometer calibration: 0: no, 1: yes");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "PreflightSetSensorOffsets",
+                Description = "Set sensor offsets. This command will be only accepted if in pre-flight mode.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Sensor to adjust the offsets for: 0: gyros, 1: accelerometer, 2: magnetometer, 3: barometer, 4: optical flow");
+            ent.Params.Add("X axis offset (or generic dimension 1), in the sensor's raw units");
+            ent.Params.Add("Y axis offset (or generic dimension 2), in the sensor's raw units");
+            ent.Params.Add("Z axis offset (or generic dimension 3), in the sensor's raw units");
+            ent.Params.Add("Generic dimension 4, in the sensor's raw units");
+            ent.Params.Add("Generic dimension 5, in the sensor's raw units");
+            ent.Params.Add("Generic dimension 6, in the sensor's raw units");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "PreflightStorage",
+                Description = "Request storage of different parameter values and logs. This command will be only accepted if in pre-flight mode.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Parameter storage: 0: READ FROM FLASH/EEPROM, 1: WRITE CURRENT TO FLASH/EEPROM");
+            ent.Params.Add("Mission storage: 0: READ FROM FLASH/EEPROM, 1: WRITE CURRENT TO FLASH/EEPROM");
+            ent.Params.Add("Reserved");
+            ent.Params.Add("Reserved");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "PreflightRebootShutdown",
+                Description = "Request the reboot or shutdown of system components.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("0: Do nothing for autopilot, 1: Reboot autopilot, 2: Shutdown autopilot.");
+            ent.Params.Add("0: Do nothing for onboard computer, 1: Reboot onboard computer, 2: Shutdown onboard computer.");
+            ent.Params.Add("Reserved");
+            ent.Params.Add("Reserved");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "OverrideGoto",
+                Description = "Hold / continue the current action",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("MAV_GOTO_DO_HOLD: hold MAV_GOTO_DO_CONTINUE: continue with next item in mission plan");
+            ent.Params.Add("MAV_GOTO_HOLD_AT_CURRENT_POSITION: Hold at current position MAV_GOTO_HOLD_AT_SPECIFIED_POSITION: hold at specified position");
+            ent.Params.Add("MAV_FRAME coordinate frame of hold point");
+            ent.Params.Add("Desired yaw angle in degrees");
+            ent.Params.Add("Latitude / X position");
+            ent.Params.Add("Longitude / Y position");
+            ent.Params.Add("Altitude / Z position");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MissionStart",
+                Description = "start running a mission",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("first_item: the first mission item to run");
+            ent.Params.Add("last_item:  the last mission item to run (after this item is run, the mission ends)");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ComponentArmDisarm",
+                Description = "Arms / Disarms a component",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("1 to arm, 0 to disarm");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "StartRxPair",
+                Description = "Starts receiver pairing",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("0:Spektrum");
+            ent.Params.Add("0:Spektrum DSM2, 1:Spektrum DSMX");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoDigicamConfigure",
+                Description = "Mission command to configure an on-board camera controller system.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Modes: P, TV, AV, M, Etc");
+            ent.Params.Add("Shutter speed: Divisor number for one second");
+            ent.Params.Add("Aperture: F stop number");
+            ent.Params.Add("ISO number e.g. 80, 100, 200, Etc");
+            ent.Params.Add("Exposure type enumerator");
+            ent.Params.Add("Command Identity");
+            ent.Params.Add("Main engine cut-off time before camera trigger in seconds/10 (0 means no cut-off)");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoDigicamControl",
+                Description = "Mission command to control an on-board camera controller system.",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Session control e.g. show/hide lens");
+            ent.Params.Add("Zoom's absolute position");
+            ent.Params.Add("Zooming step value to offset zoom from the current position");
+            ent.Params.Add("Focus Locking, Unlocking or Re-locking");
+            ent.Params.Add("Shooting Command");
+            ent.Params.Add("Command Identity");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoMountConfigure",
+                Description = "Mission command to configure a camera or antenna mount",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Mount operation mode (see MAV_MOUNT_MODE enum)");
+            ent.Params.Add("stabilize roll? (1 = yes, 0 = no)");
+            ent.Params.Add("stabilize pitch? (1 = yes, 0 = no)");
+            ent.Params.Add("stabilize yaw? (1 = yes, 0 = no)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoMountControl",
+                Description = "Mission command to control a camera or antenna mount",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("pitch(deg*100) or lat, depending on mount mode.");
+            ent.Params.Add("roll(deg*100) or lon depending on mount mode");
+            ent.Params.Add("yaw(deg*100) or alt (in cm) depending on mount mode");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "DoSetCamTriggDist",
+                Description = "Mission command to set CAM_TRIGG_DIST for this flight",
+            };
+            ent.Params = new List<String>();
+            ent.Params.Add("Camera trigger distance (meters)");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            ent.Params.Add("Empty");
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavDataStream",
+                Description = "Data stream IDs. A data stream is not a fixed set of messages, but rather a       recommendation to the autopilot software. Individual autopilots may or may not obey       the recommended messages.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "All",
+                Description = "Enable all data streams",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "RawSensors",
+                Description = "Enable IMU_RAW, GPS_RAW, GPS_STATUS packets.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ExtendedStatus",
+                Description = "Enable GPS_STATUS, CONTROL_STATUS, AUX_STATUS",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "RcChannels",
+                Description = "Enable RC_CHANNELS_SCALED, RC_CHANNELS_RAW, SERVO_OUTPUT_RAW",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "RawController",
+                Description = "Enable ATTITUDE_CONTROLLER_OUTPUT, POSITION_CONTROLLER_OUTPUT, NAV_CONTROLLER_OUTPUT.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Position",
+                Description = "Enable LOCAL_POSITION, GLOBAL_POSITION/GLOBAL_POSITION_INT messages.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Extra1",
+                Description = "Dependent on the autopilot",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Extra2",
+                Description = "Dependent on the autopilot",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Extra3",
+                Description = "Dependent on the autopilot",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavRoi",
+                Description = " The ROI (region of interest) for the vehicle. This can be                  be used by the vehicle for camera/vehicle attitude alignment (see                  MAV_CMD_NAV_ROI).",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "None",
+                Description = "No region of interest.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Wpnext",
+                Description = "Point toward next MISSION.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Wpindex",
+                Description = "Point toward given MISSION.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Location",
+                Description = "Point toward fixed location.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Target",
+                Description = "Point toward of given id.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavCmdAck",
+                Description = "ACK / NACK / ERROR values as a result of MAV_CMDs and for mission item transmission.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Ok",
+                Description = "Command / mission item is ok.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrFail",
+                Description = "Generic error message if none of the other reasons fails or if no detailed error reporting is implemented.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrAccessDenied",
+                Description = "The system is refusing to accept this command from this source / communication partner.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrNotSupported",
+                Description = "Command or mission item is not supported, other commands would be accepted.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrCoordinateFrameNotSupported",
+                Description = "The coordinate frame of this command / mission item is not supported.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrCoordinatesOutOfRange",
+                Description = "The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrXLatOutOfRange",
+                Description = "The X or latitude value is out of range.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrYLonOutOfRange",
+                Description = "The Y or longitude value is out of range.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "ErrZAltOutOfRange",
+                Description = "The Z or altitude value is out of range.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavParamType",
+                Description = "Specifies the datatype of a MAVLink parameter.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Uint8",
+                Description = "8-bit unsigned integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Int8",
+                Description = "8-bit signed integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Uint16",
+                Description = "16-bit unsigned integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Int16",
+                Description = "16-bit signed integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Uint32",
+                Description = "32-bit unsigned integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Int32",
+                Description = "32-bit signed integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Uint64",
+                Description = "64-bit unsigned integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Int64",
+                Description = "64-bit signed integer",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Real32",
+                Description = "32-bit floating-point",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Real64",
+                Description = "64-bit floating-point",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavResult",
+                Description = "result from a mavlink command",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Accepted",
+                Description = "Command ACCEPTED and EXECUTED",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "TemporarilyRejected",
+                Description = "Command TEMPORARY REJECTED/DENIED",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Denied",
+                Description = "Command PERMANENTLY DENIED",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Unsupported",
+                Description = "Command UNKNOWN/UNSUPPORTED",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Failed",
+                Description = "Command executed, but failed",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavMissionResult",
+                Description = "result in a mavlink mission ack",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionAccepted",
+                Description = "mission accepted OK",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionError",
+                Description = "generic error / not accepting mission commands at all right now",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionUnsupportedFrame",
+                Description = "coordinate frame is not supported",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionUnsupported",
+                Description = "command is not supported",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionNoSpace",
+                Description = "mission item exceeds storage space",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalid",
+                Description = "one of the parameters has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam1",
+                Description = "param1 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam2",
+                Description = "param2 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam3",
+                Description = "param3 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam4",
+                Description = "param4 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam5X",
+                Description = "x/param5 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam6Y",
+                Description = "y/param6 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidParam7",
+                Description = "param7 has an invalid value",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionInvalidSequence",
+                Description = "received waypoint out of sequence",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavMissionDenied",
+                Description = "not accepting any mission commands from this communication partner",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavSeverity",
+                Description = "Indicates the severity level, generally used for status messages to indicate their relative urgency. Based on RFC-5424 using expanded definitions at: http://www.kiwisyslog.com/kb/info:-syslog-message-levels/.",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Emergency",
+                Description = "System is unusable. This is a 'panic' condition.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Alert",
+                Description = "Action should be taken immediately. Indicates error in non-critical systems.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Critical",
+                Description = "Action must be taken immediately. Indicates failure in a primary system.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Error",
+                Description = "Indicates an error in secondary/redundant systems.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Warning",
+                Description = "Indicates about a possible future error if this is not resolved within a given timeframe. Example would be a low battery warning.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Notice",
+                Description = "An unusual event has occured, though not an error condition. This should be investigated for the root cause.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Info",
+                Description = "Normal operational messages. Useful for logging. No action is required for these messages.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Debug",
+                Description = "Useful non-operational messages that can assist in debugging. These should not occur during normal operation.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "MavMountMode",
+                Description = "Enumeration of possible mount operation modes",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Retract",
+                Description = "Load and keep safe position (Roll,Pitch,Yaw) from EEPROM and stop stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Neutral",
+                Description = "Load and keep neutral position (Roll,Pitch,Yaw) from EEPROM.",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "MavlinkTargeting",
+                Description = "Load neutral position and start MAVLink Roll,Pitch,Yaw control with stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "RcTargeting",
+                Description = "Load neutral position and start RC Roll,Pitch,Yaw control with stabilization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GpsPoint",
+                Description = "Load neutral position and start to point to Lat,Lon,Alt",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "FenceAction",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "None",
+                Description = "Disable fenced mode",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Guided",
+                Description = "Switched to guided mode to return point (fence point 0)",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Report",
+                Description = "Report fence breach, but don't take action",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "GuidedThrPass",
+                Description = "Switched to guided mode to return point (fence point 0) with manual throttle control",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "FenceBreach",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "None",
+                Description = "No last fence breach",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Minalt",
+                Description = "Breached minimum altitude",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Maxalt",
+                Description = "Breached maximum altitude",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "Boundary",
+                Description = "Breached fence boundary",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "LimitsState",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsInit",
+                Description = " pre-initialization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsDisabled",
+                Description = " disabled",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsEnabled",
+                Description = " checking limits",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsTriggered",
+                Description = " a limit has been breached",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsRecovering",
+                Description = " taking action eg. RTL",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitsRecovered",
+                Description = " we're no longer in breach of a limit",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "LimitModule",
+                Description = "",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitGpslock",
+                Description = " pre-initialization",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitGeofence",
+                Description = " disabled",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LimitAltitude",
+                Description = " checking limits",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
+            en = new UasEnumMetadata() {
+                Name = "RallyFlags",
+                Description = "Flags in RALLY_POINT message",
+            };
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "FavorableWind",
+                Description = "Flag set when requiring favorable winds for landing. ",
+            };
+            en.Entries.Add(ent);
+
+            ent = new UasEnumEntryMetadata() {
+                Name = "LandImmediately",
+                Description = "Flag set when plane is to immediately descend to break altitude and land without GCS intervention.  Flag not set when plane is to loiter at Rally point until commanded to land.",
+            };
+            en.Entries.Add(ent);
+
+            mEnums.Add(en.Name, en);
         }
     }
 

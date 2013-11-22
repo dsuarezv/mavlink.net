@@ -65,6 +65,7 @@ namespace MavLinkObjectGenerator
         {
             WL("using System;");
             WL("using System.IO;");
+            WL("using System.Collections.Generic;");
             WL();
             WL("namespace {0}", Namespace);
             WL("{");
@@ -97,7 +98,8 @@ namespace MavLinkObjectGenerator
                 WriteConstructor(m);
                 WriteSerialize(m);
                 WriteDeserialize(m);
-                WriteToString(m);
+                //WriteToString(m);
+                WriteInitMetadata(m);
                 WritePrivateFields(m);
                 WriteClassFooter(m);
             }
@@ -111,6 +113,19 @@ namespace MavLinkObjectGenerator
             WL();
             WL("    public class UasSummary");
             WL("    {");
+
+            WriteSummaryCreateFromId();
+
+            WriteSummaryGetCrc();
+
+            WriteSummaryGetEnumMetadata();
+
+            WL("    }");
+            WL();
+        }
+
+        private void WriteSummaryCreateFromId()
+        {
             WL("        public static UasMessage CreateFromId(byte id)");
             WL("        {");
             WL("            switch (id)");
@@ -120,16 +135,19 @@ namespace MavLinkObjectGenerator
             {
                 WL("               case {0}: return new {1}();", m.Id, GetClassName(m));
             }
-            
             WL("               default: return null;");
             WL("            }");
             WL("        }");
             WL();
+        }
+
+        private void WriteSummaryGetCrc()
+        {
             WL("        public static byte GetCrcExtraForId(byte id)");
             WL("        {");
             WL("            switch (id)");
             WL("            {");
-            
+
             foreach (MessageData m in mProtocolData.Messages.Values)
             {
                 WL("               case {0}: return {1};", m.Id, GetMessageExtraCrc(m));
@@ -137,13 +155,64 @@ namespace MavLinkObjectGenerator
             WL("               default: return 0;");
             WL("            }");
             WL("        }");
-            WL("    }");
-            WL();
         }
+
+        private void WriteSummaryGetEnumMetadata()
+        {
+            WL("        private static Dictionary<string, UasEnumMetadata> mEnums;");
+            WL();
+            WL("        public static UasEnumMetadata GetEnumMetadata(string enumName)");
+            WL("        {");
+            WL("            if (mEnums == null) InitEnumMetadata();");
+            WL();
+            WL("            return mEnums[enumName];");
+            WL("        }");
+            WL();
+            WL("        private static void InitEnumMetadata()");
+            WL("        {");
+            WL("            UasEnumMetadata en = null;");
+            WL("            UasEnumEntryMetadata ent = null;");
+            WL("            mEnums = new Dictionary<string, UasEnumMetadata>();");
+            WL();
+
+            foreach (EnumData en in mProtocolData.Enumerations.Values)
+            {
+                WL("            en = new UasEnumMetadata() {");
+                WL("                Name = \"{0}\",", GetEnumName(en.Name));
+                WL("                Description = \"{0}\",", GetSanitizedComment(en.Description));
+                WL("            };");
+                WL();
+
+                foreach (EnumEntry entry in en.Entries)
+                {
+                    WL("            ent = new UasEnumEntryMetadata() {");
+                    WL("                Name = \"{0}\",", GetEnumEntryName(en, entry));
+                    WL("                Description = \"{0}\",", GetSanitizedComment(entry.Description));
+                    WL("            };");
+
+                    if (entry.Parameters != null && entry.Parameters.Count > 0)
+                    {
+                        WL("            ent.Params = new List<String>();");
+                    }
+
+                    foreach (EnumEntryParameter param in entry.Parameters)
+                    {
+                        WL("            ent.Params.Add(\"{0}\");", param.Description);
+                    }
+
+                    WL("            en.Entries.Add(ent);");
+                    WL();
+                }
+
+                    WL("            mEnums.Add(en.Name, en);");
+            }
+            WL("        }");
+        }
+
 
         private void WriteFooter()
         {
-            WL("}");
+            WL("}");  // Namespace
         }
 
 
@@ -280,6 +349,39 @@ namespace MavLinkObjectGenerator
             WL();
         }
 
+        private void WriteInitMetadata(MessageData m)
+        {
+            WL("        protected override void InitMetadata()");
+            WL("        {");
+            WL("            mMetadata = new UasMessageMetadata() {");
+            WL("                Description = \"{0}\"", GetSanitizedComment(m.Description));
+            WL("            };");
+            WL();
+
+            foreach (FieldData f in m.Fields)
+            {
+                WL("            mMetadata.Fields.Add(\"{0}\", new UasFieldMetadata() {{", GetFieldName(f));
+                WL("                Name = \"{0}\",", GetFieldName(f));
+                WL("                Description = \"{0}\",", GetSanitizedComment(f.Description));
+                WL("                NumElements = {0},", f.NumElements);
+                
+                if (f.IsEnum)
+                {
+                    EnumData en = mProtocolData.Enumerations[f.EnumType];
+
+                    if (en == null) continue;
+
+                    WL("                EnumMetadata = UasSummary.GetEnumMetadata(\"{0}\"),", GetEnumName(en.Name));
+                }
+                
+                WL("            });");
+                WL();
+            }
+
+            WL("        }");
+        }
+
+        
         private void WritePrivateFields(MessageData m)
         {
             foreach (FieldData f in m.Fields)
@@ -318,11 +420,16 @@ namespace MavLinkObjectGenerator
             {
                 escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1} = {2}",
                     GetSanitizedComment(entry.Description),
-                    Utils.GetPascalStyleString(GetStrippedEnumName(en.Name, entry.Name)),
+                    GetEnumEntryName(en, entry),
                     entry.Value));
             }
 
             return GetCommaSeparatedValues(escapedEnum, "");
+        }
+
+        private static string GetEnumEntryName(EnumData en, EnumEntry entry)
+        {
+            return Utils.GetPascalStyleString(GetStrippedEnumName(en.Name, entry.Name));
         }
 
         private static string GetStrippedEnumName(string enumName, string entryName)
@@ -456,7 +563,9 @@ namespace MavLinkObjectGenerator
 
         private static string GetSanitizedComment(string comment)
         {
-            return comment.Replace('\n', ' ').Replace('\r', ' ');
+            if (comment == null) return "";
+            
+            return comment.Replace('\n', ' ').Replace('\r', ' ').Replace('"', '\'');
         }
 
         // __ Output __________________________________________________________

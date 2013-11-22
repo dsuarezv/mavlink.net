@@ -52,12 +52,8 @@ namespace MavLinkNet
             return mMetadata;
         }
 
-        protected virtual void InitMetadata()
-        { 
-            
-        }
 
-        protected virtual void NotifyUpdated()
+        protected void NotifyUpdated()
         { 
             
         }
@@ -72,6 +68,12 @@ namespace MavLinkNet
         
         }
 
+        protected virtual void InitMetadata()
+        {
+
+        }
+
+
         protected byte mMessageId;
         protected UasMessageMetadata mMetadata;
     }
@@ -80,8 +82,9 @@ namespace MavLinkNet
     public class UasMessageMetadata
     {
         public string Description;
-        public Dictionary<string, UasFieldMetadata> Fields = new Dictionary<string, UasFieldMetadata>();
+        public List<UasFieldMetadata> Fields = new List<UasFieldMetadata>();
     }
+
 
     public class UasFieldMetadata
     {
@@ -91,6 +94,7 @@ namespace MavLinkNet
         public UasEnumMetadata EnumMetadata;
     }
 
+
     public class UasEnumMetadata
     {
         public string Name;
@@ -98,8 +102,10 @@ namespace MavLinkNet
         public List<UasEnumEntryMetadata> Entries = new List<UasEnumEntryMetadata>();
     }
 
+
     public class UasEnumEntryMetadata
     {
+        public int Value;
         public string Name;
         public string Description;
         public List<string> Params;

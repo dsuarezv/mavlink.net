@@ -30,7 +30,7 @@ using System.Collections.Concurrent;
 
 namespace MavLinkNet
 {
-    public class MavLinkUdpTransport
+    public class MavLinkUdpTransport: IDisposable
     {
         public int UdpListeningPort = 14551;
         public int UdpTargetPort = 14550;
@@ -48,6 +48,7 @@ namespace MavLinkNet
         private AutoResetEvent mSendSignal = new AutoResetEvent(true);
         private MavLinkWalker mMavLink = new MavLinkWalker();
         private UdpClient mUdpClient;
+        private bool mIsActive = true;
 
 
         public void Initialize()
@@ -55,6 +56,14 @@ namespace MavLinkNet
             InitializeMavLink();
             InitializeUdpListener(UdpListeningPort);
             InitializeUdpSender(TargetIpAddress, UdpTargetPort);
+        }
+
+        public void Dispose()
+        {
+            mIsActive = false;
+            mUdpClient.Close();
+            mReceiveSignal.Set();
+            mSendSignal.Set();
         }
 
         private void InitializeMavLink()
@@ -109,6 +118,8 @@ namespace MavLinkNet
                 {
                     // Empty queue, sleep until signalled
                     mReceiveSignal.WaitOne();
+
+                    if (!mIsActive) break;
                 }
             }
         }
@@ -131,6 +142,8 @@ namespace MavLinkNet
                 {
                     // Queue is empty, sleep until signalled
                     mSendSignal.WaitOne();
+
+                    if (!mIsActive) break;
                 }
             }
         }
@@ -139,8 +152,6 @@ namespace MavLinkNet
         {
             byte[] buffer = mMavLink.SerializeMessage(msg, MavlinkSystemId, MavlinkComponentId, true);
             
-            
-
             mUdpClient.Send(buffer, buffer.Length, ep);
         }
 

@@ -40,7 +40,8 @@ namespace System.IO
         private int mReadPosition;
         private int mCapacity;
         private AutoResetEvent mBlockSignal = new AutoResetEvent(false);
-        private bool mIsAborted = false;
+        private bool mReadIsAborted = false;
+        private object mAccessLock = new object();
 
 
         public BlockingCircularStream(int bufferCapacity)
@@ -82,7 +83,7 @@ namespace System.IO
         {
             get
             {
-                lock (this)
+                lock (mAccessLock)
                 {
                     if (mWritePosition >= mReadPosition)
                     {
@@ -126,16 +127,16 @@ namespace System.IO
             if (count > mCapacity)
                 throw new IndexOutOfRangeException("Tried to read more bytes than the capacity of the circular buffer.");
 
-            mIsAborted = false;
+            mReadIsAborted = false;
 
             // wait until the buffer has enough bytes available
             while (Length < count)
             {
                 mBlockSignal.WaitOne();
-                if (mIsAborted) return -1;
+                if (mReadIsAborted) return -1;
             }
 
-            lock (this)
+            lock (mAccessLock)
             {
                 if (mReadPosition + count <= mCapacity)
                 {
@@ -166,7 +167,7 @@ namespace System.IO
         /// this method does nothing. In any case, this method returns inmediately.</remarks>
         public void AbortRead()
         {
-            mIsAborted = true;
+            mReadIsAborted = true;
             mBlockSignal.Set();
         }
 
@@ -177,7 +178,7 @@ namespace System.IO
                 mBlockSignal.WaitOne();
             }
 
-            lock (this)
+            lock (mAccessLock)
             {
                 if (mReadPosition == mCapacity) mReadPosition = 0;
 
@@ -200,7 +201,7 @@ namespace System.IO
             if (count > mCapacity)
                 throw new IndexOutOfRangeException("Tried to write more bytes than the capacity of the circular buffer.");
 
-            lock (this)
+            lock (mAccessLock)
             {
                 if (mWritePosition + count <= mCapacity)
                 {
@@ -215,7 +216,9 @@ namespace System.IO
                     int len2 = count - len1;
 
                     if (len2 > mReadPosition)
-                        throw new Exception("Data is being overwritten without being read. May need to increase capacity.");
+                    {
+                        throw new InternalBufferOverflowException("Data is being overwritten without being read. May need to increase capacity.");
+                    }
 
                     CopyBytes(buffer, mBuffer, offset, mWritePosition, len1);
                     CopyBytes(buffer, mBuffer, offset + len1, 0, len2);

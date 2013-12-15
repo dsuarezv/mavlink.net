@@ -35,9 +35,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockingCircularStream.cs" />
+    <Compile Include="MavLinkGenericPacketWalker.cs" />
+    <Compile Include="MavLinkGenericTransport.cs" />
+    <Compile Include="MavLinkLogFileTransport.cs" />
     <Compile Include="MavLinkPacket.cs" />
     <Compile Include="MavLinkUdpTransport.cs" />
-    <Compile Include="MavLinkWalker.cs" />
+    <Compile Include="MavLinkAsyncWalker.cs" />
     <Compile Include="GeneratedMessages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UasMessage.cs" />

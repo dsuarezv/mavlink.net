@@ -30,35 +30,30 @@ using System.Collections.Concurrent;
 
 namespace MavLinkNet
 {
-    public class MavLinkUdpTransport: IDisposable
+    public class MavLinkUdpTransport: MavLinkGenericTransport
     {
-        public int UdpListeningPort = 14551;
+        public int UdpListeningPort = 0;  // Any available port
         public int UdpTargetPort = 14550;
-        public byte MavlinkSystemId = 200;
-        public byte MavlinkComponentId = 1;
         public IPAddress TargetIpAddress = new IPAddress(new byte[] { 127, 0, 0, 1 });
         public int HeartBeatUpdateRateMs = 1000;
-        public MavLinkState UavState = new MavLinkState();
-
-        public event PacketReceivedDelegate OnPacketReceived;
-
+        
         private ConcurrentQueue<byte[]> mReceiveQueue = new ConcurrentQueue<byte[]>();
         private ConcurrentQueue<UasMessage> mSendQueue = new ConcurrentQueue<UasMessage>();
         private AutoResetEvent mReceiveSignal = new AutoResetEvent(true);
         private AutoResetEvent mSendSignal = new AutoResetEvent(true);
-        private MavLinkWalker mMavLink = new MavLinkWalker();
+        private MavLinkAsyncWalker mMavLink = new MavLinkAsyncWalker();
         private UdpClient mUdpClient;
         private bool mIsActive = true;
 
 
-        public void Initialize()
+        public override void Initialize()
         {
             InitializeMavLink();
             InitializeUdpListener(UdpListeningPort);
             InitializeUdpSender(TargetIpAddress, UdpTargetPort);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             mIsActive = false;
             mUdpClient.Close();
@@ -178,19 +173,10 @@ namespace MavLinkNet
         }
 
 
-        // __ MavLink events __________________________________________________
-
-
-        private void HandlePacketReceived(object sender, MavLinkPacket e)
-        {
-            if (OnPacketReceived != null) OnPacketReceived(sender, e);
-        }
-
-
         // __ API _____________________________________________________________
 
 
-        public void SendMessage(UasMessage msg)
+        public override void SendMessage(UasMessage msg)
         {
             mSendQueue.Enqueue(msg);
 

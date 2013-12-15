@@ -27,8 +27,6 @@ using System.Threading;
 
 namespace MavLinkNet
 {
-    public delegate void PacketReceivedDelegate(object sender, MavLinkPacket packet);
-
     /// <summary>
     /// Process incoming packets and prepare outgoing messages for sending.
     /// </summary>
@@ -37,29 +35,14 @@ namespace MavLinkNet
     /// and a background thread that processes the circular buffer as soon as data 
     /// is received.
     /// </remarks>
-    public class MavLinkWalker
+    public class MavLinkAsyncWalker: MavLinkGenericPacketWalker
     {
         public const int DefaultCircularBufferSize = 4096;
-        public const byte PacketSignalByte = 0xFE;
-        
-        private const int MaxPacketSize = 270;
 
         private BlockingCircularStream mProcessStream;
 
-        /// <summary>
-        /// Event raised everytime a packet is received. This event is synchronous, 
-        /// no further packet processing occurs until the event handler returns.
-        /// </summary>
-        public event PacketReceivedDelegate PacketReceived;
 
-        /// <summary>
-        /// Event raised everytime a stream of data fails a CRC check. 
-        /// This event is synchronous, no further packet processing occurs until 
-        /// the event handler returns.
-        /// </summary>
-        public event PacketReceivedDelegate PacketDiscarded;
-
-        public MavLinkWalker()
+        public MavLinkAsyncWalker()
         {
             mProcessStream = new BlockingCircularStream(DefaultCircularBufferSize);
 
@@ -70,28 +53,9 @@ namespace MavLinkNet
         /// Add bytes to the processing queue.
         /// </summary>
         /// <param name="buffer">The buffer to process</param>
-        public void ProcessReceivedBytes(byte[] buffer)
+        public override void ProcessReceivedBytes(byte[] buffer)
         {
             mProcessStream.Write(buffer, 0, buffer.Length);
-        }
-
-        /// <summary>
-        /// Generates the buffer bytes to be sent on the wire for given message.
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <param name="systemId"></param>
-        /// <param name="componentId"></param>
-        /// <param name="includeSignalMark">Whether to include the Packet signal in the buffer or not.</param>
-        /// <param name="sequenceNumber">A sequence number for the message, if needed.</param>
-        /// <returns></returns>
-        public byte[] SerializeMessage(
-            UasMessage msg, byte systemId, byte componentId, 
-            bool includeSignalMark, byte sequenceNumber = 1)
-        {
-            byte mark = includeSignalMark ? PacketSignalByte : (byte)0;
-
-            return MavLinkPacket.GetBytesForMessage(
-                      msg, systemId, componentId, sequenceNumber, mark);
         }
 
 
@@ -125,20 +89,6 @@ namespace MavLinkNet
             {
                 // Skip bytes until a packet start is found
             }
-        }
-
-        private void NotifyPacketReceived(MavLinkPacket packet)
-        {
-            if (packet == null || PacketReceived == null) return;
-
-            PacketReceived(this, packet);
-        }
-
-        private void NotifyPacketDiscarded(MavLinkPacket packet)
-        {
-            if (packet == null || PacketDiscarded == null) return;
-
-            PacketDiscarded(this, packet);            
         }
     }
 }

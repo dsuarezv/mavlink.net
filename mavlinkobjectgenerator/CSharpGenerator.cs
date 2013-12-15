@@ -36,6 +36,9 @@ namespace MavLinkObjectGenerator
 
         public const string Namespace = "MavLinkNet";
 
+        public string DefaultMessageClassPrefix = "Uas";
+
+
         private ProtocolData mProtocolData;
         private TextWriter mWriter;
 
@@ -113,7 +116,7 @@ namespace MavLinkObjectGenerator
             WL("    // ___________________________________________________________________________________");
             WL();
             WL();
-            WL("    public class UasSummary");
+            WL("    public class {0}Summary", DefaultMessageClassPrefix);
             WL("    {");
 
             WriteSummaryCreateFromId();
@@ -406,9 +409,9 @@ namespace MavLinkObjectGenerator
         // __ Helpers _____________________________________________________________
 
 
-        private static string GetClassName(MessageData m)
+        private string GetClassName(MessageData m)
         {
-            return string.Format("Uas{0}", Utils.GetPascalStyleString(m.Name));
+            return string.Format("{0}{1}", DefaultMessageClassPrefix, Utils.GetPascalStyleString(m.Name));
         }
 
         private static string GetEnumName(string enumName)

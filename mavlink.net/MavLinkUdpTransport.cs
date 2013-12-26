@@ -91,12 +91,26 @@ namespace MavLinkNet
 
         private void ReceiveCallback(IAsyncResult ar)
         {
-            IPEndPoint ep = ar.AsyncState as IPEndPoint;
-            mReceiveQueue.Enqueue(mUdpClient.EndReceive(ar, ref ep));
-            mUdpClient.BeginReceive(new AsyncCallback(ReceiveCallback), ar);
+            try
+            {
+                IPEndPoint ep = ar.AsyncState as IPEndPoint;
+                mReceiveQueue.Enqueue(mUdpClient.EndReceive(ar, ref ep));
 
-            // Signal processReceive thread
-            mReceiveSignal.Set();
+                if (!mIsActive)
+                {
+                    mReceiveSignal.Set();
+                    return;
+                }
+
+                mUdpClient.BeginReceive(new AsyncCallback(ReceiveCallback), ar);
+
+                // Signal processReceive thread
+                mReceiveSignal.Set();
+            }
+            catch (SocketException)
+            {
+                mIsActive = false;
+            }
         }
 
         private void ProcessReceiveQueue(object state)
@@ -107,7 +121,7 @@ namespace MavLinkNet
 
                 if (mReceiveQueue.TryDequeue(out buffer))
                 {
-                    mMavLink.ProcessReceivedBytes(buffer);
+                    mMavLink.ProcessReceivedBytes(buffer, 0, buffer.Length);
                 }
                 else
                 {
@@ -117,6 +131,8 @@ namespace MavLinkNet
                     if (!mIsActive) break;
                 }
             }
+
+            HandleReceptionEnded(this);
         }
 
 

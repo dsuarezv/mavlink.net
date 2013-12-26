@@ -44,7 +44,7 @@ namespace MavLinkNet
                         while (true)
                         {
                             SyncStream(reader);
-                            MavLinkPacket packet = MavLinkPacket.Deserialize(reader);
+                            MavLinkPacket packet = MavLinkPacket.Deserialize(reader, 0);
 
                             if (packet.IsValid)
                             {
@@ -58,6 +58,8 @@ namespace MavLinkNet
             { 
                 
             }
+
+            HandleReceptionEnded(this);
         }
 
         private void SyncStream(BinaryReader s)

@@ -59,11 +59,11 @@ namespace MavLinkNet
          * (n+7) to (n+8)	 Checksum (high byte, low byte) for v0.9, lowbyte, highbyte for 1.0
          *
          */
-        public static MavLinkPacket Deserialize(BinaryReader s)
+        public static MavLinkPacket Deserialize(BinaryReader s, byte payloadLength)
         {
             MavLinkPacket result = new MavLinkPacket()
             {
-                PayLoadLength = s.ReadByte(),
+                PayLoadLength = (payloadLength == 0) ? s.ReadByte() : payloadLength,
                 PacketSequenceNumber = s.ReadByte(),
                 SystemId = s.ReadByte(),
                 ComponentId = s.ReadByte(),

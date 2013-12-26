@@ -53,7 +53,7 @@ namespace MavLinkNet
         /// Add bytes to the processing queue.
         /// </summary>
         /// <param name="buffer">The buffer to process</param>
-        public override void ProcessReceivedBytes(byte[] buffer)
+        public override void ProcessReceivedBytes(byte[] buffer, int start, int length)
         {
             mProcessStream.Write(buffer, 0, buffer.Length);
         }
@@ -69,7 +69,7 @@ namespace MavLinkNet
                 while (true)
                 {
                     SyncStream(reader);
-                    MavLinkPacket packet = MavLinkPacket.Deserialize(reader);
+                    MavLinkPacket packet = MavLinkPacket.Deserialize(reader, 0);
 
                     if (packet.IsValid)
                     {

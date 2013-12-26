@@ -30,7 +30,7 @@ namespace MavLinkNet
         /// event is raised.
         /// </summary>
         /// <param name="buffer"></param>
-        public abstract void ProcessReceivedBytes(byte[] buffer);
+        public abstract void ProcessReceivedBytes(byte[] buffer, int start, int length);
 
 
         /// <summary>

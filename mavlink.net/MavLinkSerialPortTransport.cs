@@ -28,7 +28,7 @@ using System.Collections.Concurrent;
 
 namespace MavLinkNet
 {
-    class MavLinkSerialPortTransport : MavLinkGenericTransport
+    public class MavLinkSerialPortTransport : MavLinkGenericTransport
     {
         public string SerialPortName = "COM1";
         public int HeartBeatUpdateRateMs = 1000;

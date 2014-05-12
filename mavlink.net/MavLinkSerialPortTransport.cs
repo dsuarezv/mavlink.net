@@ -31,6 +31,7 @@ namespace MavLinkNet
     public class MavLinkSerialPortTransport : MavLinkGenericTransport
     {
         public string SerialPortName = "COM1";
+        public int BaudRate = 115200;
         public int HeartBeatUpdateRateMs = 1000;
 
         private ConcurrentQueue<byte[]> mReceiveQueue = new ConcurrentQueue<byte[]>();
@@ -64,7 +65,7 @@ namespace MavLinkNet
 
         private void InitializeSerialPort(string serialPortName)
         {
-            mSerialPort = new SerialPort(serialPortName) { BaudRate = 115200 };
+            mSerialPort = new SerialPort(serialPortName) { BaudRate = BaudRate };
             mSerialPort.Open();
             mSerialPort.DataReceived += DataReceived;
 

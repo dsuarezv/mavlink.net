@@ -39,6 +39,7 @@
     <Compile Include="MavLinkGenericTransport.cs" />
     <Compile Include="MavLinkLogFileTransport.cs" />
     <Compile Include="MavLinkPacket.cs" />
+    <Compile Include="MavLinkSerialPortTransport.cs" />
     <Compile Include="MavLinkUdpTransport.cs" />
     <Compile Include="MavLinkAsyncWalker.cs" />
     <Compile Include="GeneratedMessages.cs" />

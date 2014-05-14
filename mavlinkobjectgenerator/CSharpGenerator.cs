@@ -89,7 +89,7 @@ namespace MavLinkObjectGenerator
                 }
 
                 WL("    public enum {0} {{ {1} }};", GetEnumName(e.Name), GetEnumItems(e));
-                WL();                
+                WL();
             }
 
         }
@@ -425,10 +425,12 @@ namespace MavLinkObjectGenerator
 
             foreach (EnumEntry entry in en.Entries)
             {
-                escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1} = {2}",
+                string val = (entry.Value == -1) ? "" : " = " + entry.Value;
+
+                escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1}{2}",
                     GetSanitizedComment(entry.Description),
                     GetEnumEntryName(en, entry),
-                    entry.Value));
+                    val));
             }
 
             return GetCommaSeparatedValues(escapedEnum, "");

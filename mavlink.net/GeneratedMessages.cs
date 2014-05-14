@@ -238,25 +238,25 @@ namespace MavLinkNet
         Uninit = 0, 
 
         /// <summary> System is booting up. </summary>
-        Boot = 0, 
+        Boot = 1, 
 
         /// <summary> System is calibrating and not flight-ready. </summary>
-        Calibrating = 0, 
+        Calibrating = 2, 
 
         /// <summary> System is grounded and on standby. It can be launched any time. </summary>
-        Standby = 0, 
+        Standby = 3, 
 
         /// <summary> System is active and might be already airborne. Motors are engaged. </summary>
-        Active = 0, 
+        Active = 4, 
 
         /// <summary> System is in a non-normal flight mode. It can however still navigate. </summary>
-        Critical = 0, 
+        Critical = 5, 
 
         /// <summary> System is in a non-normal flight mode. It lost control over parts or over the whole airframe. It is in mayday and going down. </summary>
-        Emergency = 0, 
+        Emergency = 6, 
 
         /// <summary> System just initialized its power-down sequence, will shut down now. </summary>
-        Poweroff = 0 };
+        Poweroff = 7 };
 
     public enum MavComponent { 
 
@@ -414,22 +414,22 @@ namespace MavLinkNet
     public enum MavlinkDataStreamType { 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgJpeg = 0, 
+        MavlinkDataStreamImgJpeg = 1, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgBmp = 0, 
+        MavlinkDataStreamImgBmp = 2, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgRaw8u = 0, 
+        MavlinkDataStreamImgRaw8u = 3, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgRaw32u = 0, 
+        MavlinkDataStreamImgRaw32u = 4, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgPgm = 0, 
+        MavlinkDataStreamImgPgm = 5, 
 
         /// <summary>  </summary>
-        MavlinkDataStreamImgPng = 0 };
+        MavlinkDataStreamImgPng = 6 };
 
     /// <summary>
     /// Commands to be executed by the MAV. They can be executed on user request, or as part of a mission script. If the action is used in a mission, the parameter mapping to the waypoint/mission message is as follows: Param 1, Param 2, Param 3, Param 4, X: Param 5, Y:Param 6, Z:Param 7. This command list is similar what ARINC 424 is for commercial aircraft: A data format how to interpret waypoint/mission data.
@@ -614,31 +614,31 @@ namespace MavLinkNet
     public enum MavCmdAck { 
 
         /// <summary> Command / mission item is ok. </summary>
-        Ok = 0, 
+        Ok = 1, 
 
         /// <summary> Generic error message if none of the other reasons fails or if no detailed error reporting is implemented. </summary>
-        ErrFail = 0, 
+        ErrFail = 2, 
 
         /// <summary> The system is refusing to accept this command from this source / communication partner. </summary>
-        ErrAccessDenied = 0, 
+        ErrAccessDenied = 3, 
 
         /// <summary> Command or mission item is not supported, other commands would be accepted. </summary>
-        ErrNotSupported = 0, 
+        ErrNotSupported = 4, 
 
         /// <summary> The coordinate frame of this command / mission item is not supported. </summary>
-        ErrCoordinateFrameNotSupported = 0, 
+        ErrCoordinateFrameNotSupported = 5, 
 
         /// <summary> The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible. </summary>
-        ErrCoordinatesOutOfRange = 0, 
+        ErrCoordinatesOutOfRange = 6, 
 
         /// <summary> The X or latitude value is out of range. </summary>
-        ErrXLatOutOfRange = 0, 
+        ErrXLatOutOfRange = 7, 
 
         /// <summary> The Y or longitude value is out of range. </summary>
-        ErrYLonOutOfRange = 0, 
+        ErrYLonOutOfRange = 8, 
 
         /// <summary> The Z or altitude value is out of range. </summary>
-        ErrZAltOutOfRange = 0 };
+        ErrZAltOutOfRange = 9 };
 
     /// <summary>
     /// Specifies the datatype of a MAVLink parameter.
@@ -20377,49 +20377,49 @@ namespace MavLinkNet
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 1,
                 Name = "Boot",
                 Description = "System is booting up.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 2,
                 Name = "Calibrating",
                 Description = "System is calibrating and not flight-ready.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 3,
                 Name = "Standby",
                 Description = "System is grounded and on standby. It can be launched any time.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 4,
                 Name = "Active",
                 Description = "System is active and might be already airborne. Motors are engaged.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 5,
                 Name = "Critical",
                 Description = "System is in a non-normal flight mode. It can however still navigate.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 6,
                 Name = "Emergency",
                 Description = "System is in a non-normal flight mode. It lost control over parts or over the whole airframe. It is in mayday and going down.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 7,
                 Name = "Poweroff",
                 Description = "System just initialized its power-down sequence, will shut down now.",
             };
@@ -20786,42 +20786,42 @@ namespace MavLinkNet
             };
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 1,
                 Name = "MavlinkDataStreamImgJpeg",
                 Description = "",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 2,
                 Name = "MavlinkDataStreamImgBmp",
                 Description = "",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 3,
                 Name = "MavlinkDataStreamImgRaw8u",
                 Description = "",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 4,
                 Name = "MavlinkDataStreamImgRaw32u",
                 Description = "",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 5,
                 Name = "MavlinkDataStreamImgPgm",
                 Description = "",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 6,
                 Name = "MavlinkDataStreamImgPng",
                 Description = "",
             };
@@ -21534,63 +21534,63 @@ namespace MavLinkNet
             };
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 1,
                 Name = "Ok",
                 Description = "Command / mission item is ok.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 2,
                 Name = "ErrFail",
                 Description = "Generic error message if none of the other reasons fails or if no detailed error reporting is implemented.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 3,
                 Name = "ErrAccessDenied",
                 Description = "The system is refusing to accept this command from this source / communication partner.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 4,
                 Name = "ErrNotSupported",
                 Description = "Command or mission item is not supported, other commands would be accepted.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 5,
                 Name = "ErrCoordinateFrameNotSupported",
                 Description = "The coordinate frame of this command / mission item is not supported.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 6,
                 Name = "ErrCoordinatesOutOfRange",
                 Description = "The coordinate frame of this command is ok, but he coordinate values exceed the safety limits of this system. This is a generic error, please use the more specific error messages below if possible.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 7,
                 Name = "ErrXLatOutOfRange",
                 Description = "The X or latitude value is out of range.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 8,
                 Name = "ErrYLonOutOfRange",
                 Description = "The Y or longitude value is out of range.",
             };
             en.Entries.Add(ent);
 
             ent = new UasEnumEntryMetadata() {
-                Value = 0,
+                Value = 9,
                 Name = "ErrZAltOutOfRange",
                 Description = "The Z or altitude value is out of range.",
             };

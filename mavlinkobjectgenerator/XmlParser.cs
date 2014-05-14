@@ -65,6 +65,7 @@ namespace MavLinkObjectGenerator
             EnumData currentEnum = null;
             EnumEntry currentEntry = null;
             EnumEntryParameter currentParam = null;
+            int currentEnumValue = 0;
 
             while (reader.Read())
             {
@@ -103,12 +104,14 @@ namespace MavLinkObjectGenerator
                             currentEnum = GetEnumDataForName(result, reader.GetAttribute("name"));
                             currentObject = currentEnum;
                             result.Enumerations[currentEnum.Name] = currentEnum;
+                            currentEnumValue = 0;
                             break;
                         case "entry":
                             currentEntry = new EnumEntry();
                             currentObject = currentEntry;
                             currentEntry.Name = reader.GetAttribute("name");
-                            currentEntry.Value = GetIntFromString(reader.GetAttribute("value"));
+                            currentEntry.Value = GetIntFromString(reader.GetAttribute("value"), ++currentEnumValue);
+                            currentEnumValue = currentEntry.Value;
                             currentEnum.Entries.Add(currentEntry);
                             break;
                         case "param":
@@ -148,13 +151,12 @@ namespace MavLinkObjectGenerator
             return result;
         }
 
-        private static int GetIntFromString(string intString)
+        private static int GetIntFromString(string intString, int defaultValue = -1)
         {
-            int result = -1;
+            int result;
+            if (int.TryParse(intString, out result)) return result;
 
-            int.TryParse(intString, out result);
-
-            return result;
+            return defaultValue;
         }
 
         public static FieldDataType GetFieldTypeFromString(string t)

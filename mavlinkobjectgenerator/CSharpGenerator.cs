@@ -512,6 +512,7 @@ namespace MavLinkObjectGenerator
                 case FieldDataType.INT64: return "Int64";
                 case FieldDataType.UINT64: return "UInt64";
                 case FieldDataType.CHAR: return "char";
+                case FieldDataType.DOUBLE: return "double";
                 default:
                     return "!!!!";
             }
@@ -558,6 +559,7 @@ namespace MavLinkObjectGenerator
                 case FieldDataType.INT64: return "ReadInt64";
                 case FieldDataType.UINT64: return "ReadUInt64";
                 case FieldDataType.CHAR: return "ReadChar";
+                case FieldDataType.DOUBLE: return "ReadDouble";
 
                 default:
                     Console.WriteLine("ERROR: Unknown uavType: " + t);

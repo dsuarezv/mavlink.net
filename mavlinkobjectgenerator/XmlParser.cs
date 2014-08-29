@@ -177,6 +177,7 @@ namespace MavLinkObjectGenerator
                 case "int64_t": return FieldDataType.INT64;
                 case "uint64_t": return FieldDataType.UINT64;
                 case "char": return FieldDataType.CHAR;
+                case "double": return FieldDataType.DOUBLE;
                 default:
                     Console.Error.WriteLine("Unknown type: " + t);
                     return FieldDataType.NONE;
@@ -231,6 +232,7 @@ namespace MavLinkObjectGenerator
                         break;
                     case FieldDataType.INT64:
                     case FieldDataType.UINT64:
+                    case FieldDataType.DOUBLE:
                         L8.Add(f);
                         break;
                     default: 

@@ -132,6 +132,10 @@ namespace MavLinkObjectGenerator
                 includeFileName : 
                 Path.Combine(basePath, includeFileName);
 
+            if (mProcessedIncludes.Contains(targetFileName)) return;
+
+            mProcessedIncludes.Add(targetFileName);
+
             using (XmlTextReader reader = new XmlTextReader(targetFileName))
             {
                 Parse(reader, result);
@@ -263,6 +267,7 @@ namespace MavLinkObjectGenerator
 
         
         private string mSourceFileName;
+        private List<string> mProcessedIncludes = new List<string>();
     }
 }
 

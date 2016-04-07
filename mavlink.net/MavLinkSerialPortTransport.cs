@@ -87,9 +87,10 @@ namespace MavLinkNet
             try
             {
                 var serialPort = (SerialPort)sender;
-                var buffer = new byte[serialPort.BytesToRead];
+                var bytesToRead = serialPort.BytesToRead;
+                var buffer = new byte[bytesToRead];
                 
-                serialPort.Read(buffer, 0, serialPort.BytesToRead);
+                serialPort.Read(buffer, 0, bytesToRead);
                 mReceiveQueue.Enqueue(buffer);
                 
                 // Signal processReceive thread

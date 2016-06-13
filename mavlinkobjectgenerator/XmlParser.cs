@@ -85,7 +85,8 @@ namespace MavLinkObjectGenerator
                             currentObject = currentMsg;
                             currentMsg.Name = reader.GetAttribute("name");
                             currentMsg.Id = GetIntFromString(reader.GetAttribute("id"));
-                            result.Messages.Add(currentMsg.Name, currentMsg);
+                            if (currentMsg.Id < 256)    // Msg id field is a byte, discard anything beyond 255
+                                result.Messages.Add(currentMsg.Name, currentMsg);
                             break;
                         case "description": 
                             currentObject.Description = reader.ReadString();

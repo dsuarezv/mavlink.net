@@ -80,7 +80,7 @@ namespace MavLinkObjectGenerator
                             result.Version = reader.ReadElementContentAsInt();
                             break;
                         case "message":
-                            if (currentMsg != null) SortFields(currentMsg);
+                             // if (currentMsg != null) SortFields(currentMsg);   //<--- if condition deleted 
                             currentMsg = new MessageData();
                             currentObject = currentMsg;
                             currentMsg.Name = reader.GetAttribute("name");
@@ -123,6 +123,17 @@ namespace MavLinkObjectGenerator
                             break;
                     }
                 }
+                 else    //<----- Else condition added to control closing of the current node; *** BEGIN **** 
+                { 
+                    if (reader.Name == "message") 
+                    { 
+                        if (currentMsg != null) 
+                        { 
+                            SortFields(currentMsg); 
+                        } 
+                    } 
+
+                } //<----- *** END *** 
             }
         }
 

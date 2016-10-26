@@ -28,6 +28,7 @@ using System.Text;
 
 namespace MavLinkNet
 {
+    [Serializable]
     public class UasMessage
     {
         public byte CrcExtra 
@@ -78,14 +79,14 @@ namespace MavLinkNet
         protected UasMessageMetadata mMetadata;
     }
 
-    
+    [Serializable]
     public class UasMessageMetadata
     {
         public string Description;
         public List<UasFieldMetadata> Fields = new List<UasFieldMetadata>();
     }
 
-
+    [Serializable]
     public class UasFieldMetadata
     {
         public string Name;
@@ -94,7 +95,7 @@ namespace MavLinkNet
         public UasEnumMetadata EnumMetadata;
     }
 
-
+    [Serializable]
     public class UasEnumMetadata
     {
         public string Name;
@@ -102,7 +103,7 @@ namespace MavLinkNet
         public List<UasEnumEntryMetadata> Entries = new List<UasEnumEntryMetadata>();
     }
 
-
+    [Serializable]
     public class UasEnumEntryMetadata
     {
         public int Value;

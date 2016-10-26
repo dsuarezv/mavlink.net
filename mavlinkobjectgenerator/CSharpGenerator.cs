@@ -263,7 +263,7 @@ namespace MavLinkObjectGenerator
                 WL("    /// {0}", GetSanitizedComment(m.Description));
                 WL("    /// </summary>");
             }
-
+            WL("    [Serializable]");
             WL("    public class {0}: UasMessage", GetClassName(m));
             WL("    {");
         }

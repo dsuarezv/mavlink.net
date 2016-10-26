@@ -55,6 +55,7 @@ namespace MavLinkObjectGenerator
 
             WriteHeader();
             WriteEnums();
+            WriteMsgIds();
             WriteClasses();
             WriteSummary();
             WriteFooter();
@@ -92,6 +93,30 @@ namespace MavLinkObjectGenerator
                 WL();
             }
 
+        }
+
+        private void WriteMsgIds()
+        {
+            List<string> escapedEnum = new List<string>();
+
+            foreach (MessageData m in mProtocolData.Messages.Values)
+            {
+                if (m.Description != null)
+                {
+                    escapedEnum.Add(string.Format("\r\n\r\n        /// <summary> {0} </summary>\r\n        {1} = {2}",
+                    GetSanitizedComment(m.Description),
+                    GetClassName(m),
+                    m.Id));
+                }
+                else
+                {
+                    escapedEnum.Add(string.Format("\r\n\r\n        {0} = {1}",
+                    GetClassName(m),
+                    m.Id));
+                }
+            }
+            WL("    public enum MavMsgIds{{ {0} }};", GetCommaSeparatedValues(escapedEnum, ""));
+            WL();
         }
 
         private void WriteClasses()

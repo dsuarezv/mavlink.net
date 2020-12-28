@@ -8,25 +8,68 @@ namespace MavLinkNet
     public class MavLinkLogFileTransport: MavLinkGenericTransport
     {
         private string mLogFileName;
+        private bool mWrite;
+        private BinaryWriter binWriter;
+        private FileStream logFile;
+        private MavLinkAsyncWalker walker;
 
-        public MavLinkLogFileTransport(string logFileName)
+        public MavLinkLogFileTransport(string logFileName, bool write=false)
         {
             mLogFileName = logFileName;
+            mWrite = write; // Are we writing to the file? Reading is the default.
+
+            walker = new MavLinkAsyncWalker();
         }
 
         public override void Initialize()
         {
-            Parse();
+            if (!mWrite) {
+                Parse(); // If we're reading the file, parse it and be done.
+                return;
+            }
+
+            // Ok, lets open up a file for writing.
+            logFile = File.Open(mLogFileName, File.Exists(mLogFileName) ? FileMode.Append : FileMode.Create);
+            // And create a binary writer we can throw bytes at.
+            binWriter = new BinaryWriter(logFile);
+
         }
 
         public override void Dispose()
         {
-            
+            if (mWrite)
+            {
+                if (binWriter != null)
+                {
+                    binWriter.Flush();
+                    binWriter.Close();
+                    binWriter.Dispose();
+                }
+
+                if (logFile != null)
+                {
+                    logFile.Close();
+                    logFile.Dispose();
+                }
+            }
+            binWriter = null;
+            logFile = null;
+        }
+
+        public byte MavlinkSequenceNumber
+        {
+            get;
+            set;
         }
 
         public override void SendMessage(UasMessage msg)
         {
-            // No messages are sent on this transport (only read from the logfile)
+            if (mWrite)
+            {
+                // Serialize the message and write it to the log file
+                byte[] packet_bytes = walker.SerializeMessage(msg, MavlinkSystemId, MavlinkComponentId, true, MavlinkSequenceNumber);
+                binWriter.Write(packet_bytes);
+            }
         }
 
 
